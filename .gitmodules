@@ -1,0 +1,3 @@
+[submodule "thirdparty/diligent"]
+	path = thirdparty/diligent
+	url = https://github.com/carlcc/DiligentEngine.git
