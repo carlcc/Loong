@@ -12,5 +12,7 @@ target_link_libraries(PlayGround PRIVATE
         )
 
 set_common_target_properties(PlayGround)
-copy_required_dlls(PlayGround)
-append_loong_app_base_win32_source(PlayGround)
+if (WIN32)
+    copy_required_dlls(PlayGround)
+    append_loong_app_base_win32_source(PlayGround)
+endif()

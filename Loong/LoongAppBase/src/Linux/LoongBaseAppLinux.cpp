@@ -21,7 +21,7 @@
 *  of the possibility of such damages.
 */
 
-#include "SampleApp.hpp"
+#include "LoongBaseApp.hpp"
 #if VULKAN_SUPPORTED
 #include "ImGuiImplLinuxXCB.hpp"
 #endif
@@ -29,7 +29,7 @@
 
 namespace Diligent {
 
-class LoongBaseAppLinux final : public SampleApp {
+class LoongBaseAppLinux final : public LoongBaseApp {
 public:
     LoongBaseAppLinux()
     {
