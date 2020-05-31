@@ -3,4 +3,5 @@ if (WIN32)
 endif()
 
 add_subdirectory(LoongAppBase)
+add_subdirectory(LoongFileSystem)
 add_subdirectory(PlayGround)

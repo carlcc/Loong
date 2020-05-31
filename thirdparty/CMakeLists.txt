@@ -1,2 +1,3 @@
 add_subdirectory(diligent EXCLUDE_FROM_ALL)
 add_subdirectory(gainput EXCLUDE_FROM_ALL)
+add_subdirectory(physfs EXCLUDE_FROM_ALL)
