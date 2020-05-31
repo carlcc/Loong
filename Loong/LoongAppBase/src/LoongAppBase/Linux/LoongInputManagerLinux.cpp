@@ -163,69 +163,7 @@ int LoongInputManagerLinux::HandleKeyEvevnt(unsigned int keysym, bool IsKeyPress
 int LoongInputManagerLinux::HandleXEvent(void* xevent)
 {
     auto* event = reinterpret_cast<XEvent*>(xevent);
-    switch (event->type) {
-    case KeyPress:
-    case KeyRelease: {
-        KeySym keysym;
-        int num_char = XLookupString((XKeyEvent*)event, nullptr, 0, &keysym, 0);
-        return HandleKeyEvevnt(keysym, event->type == KeyPress);
-    }
-
-    case ButtonPress: {
-        auto* xbe = reinterpret_cast<XButtonEvent*>(event);
-        switch (xbe->button) {
-        case Button1:
-            m_MouseState.ButtonFlags |= MouseState::BUTTON_FLAG_LEFT;
-            break;
-
-        case Button2:
-            m_MouseState.ButtonFlags |= MouseState::BUTTON_FLAG_MIDDLE;
-            break;
-
-        case Button3:
-            m_MouseState.ButtonFlags |= MouseState::BUTTON_FLAG_RIGHT;
-            break;
-
-        case Button4:
-            m_MouseState.WheelDelta += 1;
-            break;
-
-        case Button5:
-            m_MouseState.WheelDelta -= 1;
-            break;
-        }
-        return 1;
-    }
-
-    case ButtonRelease: {
-        auto* xbe = reinterpret_cast<XButtonEvent*>(event);
-        switch (xbe->button) {
-        case Button1:
-            m_MouseState.ButtonFlags &= ~MouseState::BUTTON_FLAG_LEFT;
-            break;
-
-        case Button2:
-            m_MouseState.ButtonFlags &= ~MouseState::BUTTON_FLAG_MIDDLE;
-            break;
-
-        case Button3:
-            m_MouseState.ButtonFlags &= ~MouseState::BUTTON_FLAG_RIGHT;
-            break;
-        }
-        return 1;
-    }
-
-    case MotionNotify: {
-        auto* xme = (XMotionEvent*)event;
-
-        m_MouseState.PosX = static_cast<float>(xme->x);
-        m_MouseState.PosY = static_cast<float>(xme->y);
-        return 1;
-    }
-
-    default:
-        break;
-    }
+    inputManager_.HandleEvent(*event);
 
     return 0;
 }
