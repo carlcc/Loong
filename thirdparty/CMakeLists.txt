@@ -1,1 +1,2 @@
-add_subdirectory(diligent)
+add_subdirectory(diligent EXCLUDE_FROM_ALL)
+add_subdirectory(gainput EXCLUDE_FROM_ALL)

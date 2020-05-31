@@ -631,8 +631,8 @@ void LoongBaseApp::Update(double CurrTime, double ElapsedTime)
         }
     }
     if (m_pDevice) {
+        m_TheSample->GetInputController().BeginFrame();
         m_TheSample->Update(CurrTime, ElapsedTime);
-        m_TheSample->GetInputController().ClearState();
     }
 }
 

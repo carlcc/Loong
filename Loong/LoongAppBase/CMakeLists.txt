@@ -52,12 +52,10 @@ elseif(PLATFORM_MACOS)
 endif()
 
 list(APPEND SOURCE
-    src/FirstPersonCamera.cpp
     src/LoongApplication.cpp
 )
 
 list(APPEND INCLUDE
-    include/FirstPersonCamera.hpp
     include/InputController.hpp
     include/LoongApplication.hpp
 )
@@ -88,6 +86,7 @@ PUBLIC
     Diligent-Imgui
     ${ENGINE_LIBRARIES}
     Diligent-NativeAppBase
+    gainput
 )
 
 if(PLATFORM_UNIVERSAL_WINDOWS)

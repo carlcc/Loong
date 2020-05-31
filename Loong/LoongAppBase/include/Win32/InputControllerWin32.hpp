@@ -35,10 +35,7 @@ public:
 
     bool HandleNativeMessage(const void* MsgData);
 
-    const MouseState& GetMouseState();
-
 private:
-    void UpdateMousePos();
 };
 
 } // namespace Diligent

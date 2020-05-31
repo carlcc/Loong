@@ -1,3 +1,6 @@
 [submodule "thirdparty/diligent"]
 	path = thirdparty/diligent
 	url = https://github.com/carlcc/DiligentEngine.git
+[submodule "thirdparty/gainput"]
+	path = thirdparty/gainput
+	url = git@github.com:carlcc/gainput.git

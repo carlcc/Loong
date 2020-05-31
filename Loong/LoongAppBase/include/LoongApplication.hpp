@@ -37,6 +37,8 @@
 #include "RenderDevice.h"
 #include "SwapChain.h"
 
+#include <gainput/gainput.h>
+
 namespace Diligent {
 
 class ImGuiImplDiligent;
