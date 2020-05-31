@@ -33,7 +33,7 @@
 #include "Errors.hpp"
 #include "FileWrapper.hpp"
 #include "Image.h"
-#include "LoongBaseApp.hpp"
+#include "LoongAppBase/LoongBaseApp.hpp"
 #include "MapHelper.hpp"
 #include "PlatformDefinitions.h"
 #include "StringTools.hpp"
@@ -312,7 +312,7 @@ void LoongBaseApp::InitializeDiligentEngine(const NativeWindow* pWindow)
     }
 
     switch (m_DeviceType) {
-    // clang-format off
+        // clang-format off
         case RENDER_DEVICE_TYPE_D3D11:  m_AppTitle.append(" (D3D11)");    break;
         case RENDER_DEVICE_TYPE_D3D12:  m_AppTitle.append(" (D3D12)");    break;
         case RENDER_DEVICE_TYPE_GL:     m_AppTitle.append(" (OpenGL)");   break;
@@ -631,7 +631,7 @@ void LoongBaseApp::Update(double CurrTime, double ElapsedTime)
         }
     }
     if (m_pDevice) {
-        m_TheSample->GetInputController().BeginFrame();
+        m_TheSample->GetInputManager().BeginFrame();
         m_TheSample->Update(CurrTime, ElapsedTime);
     }
 }

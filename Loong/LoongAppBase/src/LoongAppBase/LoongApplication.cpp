@@ -25,7 +25,7 @@
  *  of the possibility of such damages.
  */
 
-#include "LoongApplication.hpp"
+#include "LoongAppBase/LoongApplication.hpp"
 #include "Errors.hpp"
 #include "PlatformDefinitions.h"
 

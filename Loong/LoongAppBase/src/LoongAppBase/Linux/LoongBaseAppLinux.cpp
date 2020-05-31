@@ -21,7 +21,7 @@
 *  of the possibility of such damages.
 */
 
-#include "LoongBaseApp.hpp"
+#include "LoongAppBase/LoongBaseApp.hpp"
 #if VULKAN_SUPPORTED
 #include "ImGuiImplLinuxXCB.hpp"
 #endif

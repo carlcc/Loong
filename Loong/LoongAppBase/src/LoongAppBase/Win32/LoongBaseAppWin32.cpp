@@ -25,7 +25,7 @@
 *  of the possibility of such damages.
 */
 
-#include "LoongBaseApp.hpp"
+#include "LoongAppBase/LoongBaseApp.hpp"
 #include "resources/Win32AppResource.h"
 #include <limits>
 
@@ -161,7 +161,7 @@ public:
             WPARAM wParam;
             LPARAM lParam;
         } MsgData = { hWnd, message, wParam, lParam };
-        m_TheSample->GetInputController().HandleNativeMessage(&MsgData);
+        m_TheSample->GetInputManager().HandleNativeMessage(&MsgData);
         return m_TheSample->HandleNativeMessage(&MsgData);
     }
 

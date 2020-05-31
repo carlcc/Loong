@@ -17,11 +17,11 @@
 
 #include <algorithm>
 
-#include "InputController.hpp"
+#include "LoongAppBase/LoongInputManager.hpp"
 
 namespace Diligent {
 
-void InputControllerMacOS::OnMouseButtonEvent(MouseButtonEvent Event)
+void LoongInputManagerMacOS::OnMouseButtonEvent(MouseButtonEvent Event)
 {
     switch (Event) {
     case MouseButtonEvent::LMB_Pressed:
@@ -45,17 +45,17 @@ void InputControllerMacOS::OnMouseButtonEvent(MouseButtonEvent Event)
     }
 }
 
-void InputControllerMacOS::OnKeyPressed(int key)
+void LoongInputManagerMacOS::OnKeyPressed(int key)
 {
     ProcessKeyEvent(key, true);
 }
 
-void InputControllerMacOS::OnKeyReleased(int key)
+void LoongInputManagerMacOS::OnKeyReleased(int key)
 {
     ProcessKeyEvent(key, false);
 }
 
-void InputControllerMacOS::ProcessKeyEvent(int key, bool IsKeyPressed)
+void LoongInputManagerMacOS::ProcessKeyEvent(int key, bool IsKeyPressed)
 {
     auto UpdateKeyState = [&](InputKeys Key) //
     {
@@ -122,7 +122,7 @@ void InputControllerMacOS::ProcessKeyEvent(int key, bool IsKeyPressed)
     }
 }
 
-void InputControllerMacOS::OnFlagsChanged(bool ShiftPressed, bool CtrlPressed, bool AltPressed)
+void LoongInputManagerMacOS::OnFlagsChanged(bool ShiftPressed, bool CtrlPressed, bool AltPressed)
 {
     auto UpdateKey = [&](InputKeys Key, bool IsPressed) //
     {

@@ -32,7 +32,7 @@
 #include "BasicMath.hpp"
 #include "DeviceContext.h"
 #include "EngineFactory.h"
-#include "InputController.hpp"
+#include "LoongAppBase/LoongInputManager.hpp"
 #include "RefCntAutoPtr.hpp"
 #include "RenderDevice.h"
 #include "SwapChain.h"
@@ -68,9 +68,9 @@ public:
     virtual const Char* GetSampleName() const { return "Diligent Engine Sample"; }
     virtual void ProcessCommandLine(const char* CmdLine) {}
 
-    InputController& GetInputController()
+    LoongInputManager& GetInputManager()
     {
-        return m_InputController;
+        return inputManager_;
     }
 
     void ResetSwapChain(ISwapChain* pNewSwapChain)
@@ -97,7 +97,7 @@ protected:
     Uint32 m_NumFramesRendered = 0;
     Uint32 m_CurrentFrameNumber = 0;
 
-    InputController m_InputController;
+    LoongInputManager inputManager_;
 };
 
 inline void LoongApplication::Update(double CurrTime, double ElapsedTime)

@@ -32,11 +32,11 @@
 #include <xcb/xcb.h>
 
 #include "DebugUtilities.hpp"
-#include "InputController.hpp"
+#include "LoongAppBase/LoongInputManager.hpp"
 
 namespace Diligent {
 
-int InputControllerLinux::HandleKeyEvevnt(unsigned int keysym, bool IsKeyPressed)
+int LoongInputManagerLinux::HandleKeyEvevnt(unsigned int keysym, bool IsKeyPressed)
 {
     int handled = 0;
     auto UpdateKeyState = [&](InputKeys Key) //
@@ -159,7 +159,7 @@ int InputControllerLinux::HandleKeyEvevnt(unsigned int keysym, bool IsKeyPressed
     return handled;
 }
 
-int InputControllerLinux::HandleXEvent(void* xevent)
+int LoongInputManagerLinux::HandleXEvent(void* xevent)
 {
     auto* event = reinterpret_cast<XEvent*>(xevent);
     switch (event->type) {
@@ -229,20 +229,20 @@ int InputControllerLinux::HandleXEvent(void* xevent)
     return 0;
 }
 
-void InputControllerLinux::InitXCBKeysms(void* connection)
+void LoongInputManagerLinux::InitXCBKeysms(void* connection)
 {
     VERIFY_EXPR(m_XCBKeySymbols == nullptr);
     m_XCBKeySymbols = xcb_key_symbols_alloc(reinterpret_cast<xcb_connection_t*>(connection));
 }
 
-InputControllerLinux::~InputControllerLinux()
+LoongInputManagerLinux::~LoongInputManagerLinux()
 {
     if (m_XCBKeySymbols != nullptr) {
         xcb_key_symbols_free(reinterpret_cast<xcb_key_symbols_t*>(m_XCBKeySymbols));
     }
 }
 
-int InputControllerLinux::HandleXCBEvent(void* xcb_event)
+int LoongInputManagerLinux::HandleXCBEvent(void* xcb_event)
 {
     auto* event = reinterpret_cast<xcb_generic_event_t*>(xcb_event);
 

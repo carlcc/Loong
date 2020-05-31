@@ -25,26 +25,17 @@
  *  of the possibility of such damages.
  */
 
-#include "InputController.hpp"
-#include <algorithm>
-
-#ifndef NOMINMAX
-#define NOMINMAX
-#endif
-#include "Windows.h"
+#pragma once
 
 namespace Diligent {
 
-InputControllerWin32::InputControllerWin32()
-{
-}
+class LoongInputManagerWin32 : public LoongInputManagerBase {
+public:
+    LoongInputManagerWin32();
 
-bool InputControllerWin32::HandleNativeMessage(const void* MsgData)
-{
-    inputManager_.HandleMessage(*reinterpret_cast<const MSG*>(MsgData));
+    bool HandleNativeMessage(const void* MsgData);
 
-    return false;
-}
-
+private:
+};
 
 } // namespace Diligent

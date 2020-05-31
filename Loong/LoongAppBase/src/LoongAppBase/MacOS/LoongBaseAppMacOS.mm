@@ -24,13 +24,13 @@
 #include <queue>
 #include <mutex>
 #import <Cocoa/Cocoa.h>
-#include "SampleApp.hpp"
+#include "LoongAppBase/LoongBaseApp.hpp"
 #include "ImGuiImplMacOS.hpp"
 
 namespace Diligent
 {
 
-class LoongBaseAppMacOS final : public SampleApp
+class LoongBaseAppMacOS final : public LoongBaseApp
 {
 public:
     LoongBaseAppMacOS()

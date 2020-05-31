@@ -36,9 +36,9 @@ namespace Diligent {
 
 using namespace gainput;
 
-class InputControllerBase {
+class LoongInputManagerBase {
 public:
-    InputControllerBase()
+    LoongInputManagerBase()
     {
         auto mouseId = inputManager_.CreateDevice<gainput::InputDeviceMouse>();
         auto keyboardId = inputManager_.CreateDevice<gainput::InputDeviceKeyboard>();
@@ -79,22 +79,22 @@ protected:
 
 // clang-format off
 #if PLATFORM_WIN32
-    #include "Win32/InputControllerWin32.hpp"
+    #include "LoongAppBase/Win32/LoongInputManagerWin32.hpp"
     namespace Diligent
     {
-        using InputController = InputControllerWin32;
+        using LoongInputManager = LoongInputManagerWin32;
     }
 #elif PLATFORM_MACOS
-    #include "MacOS/InputControllerMacOS.hpp"
+    #include "LoongAppBase/MacOS/LoongInputManagerMacOS.hpp"
     namespace Diligent
     {
-        using InputController = InputControllerMacOS;
+        using LoongInputManager = LoongInputManagerMacOS;
     }
 #elif PLATFORM_LINUX
-    #include "Linux/InputControllerLinux.hpp"
+    #include "LoongAppBase/Linux/LoongInputManagerLinux.hpp"
     namespace Diligent
     {
-        using InputController = InputControllerLinux;
+        using LoongInputManager = LoongInputManagerLinux;
     }
 #else
     static_assert(false, "Unsupported platform");

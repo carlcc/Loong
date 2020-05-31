@@ -19,19 +19,33 @@
 
 namespace Diligent {
 
-class InputControllerLinux : public InputControllerBase {
+class LoongInputManagerMacOS : public LoongInputManagerBase {
 public:
-    ~InputControllerLinux();
+    enum class MouseButtonEvent {
+        LMB_Pressed,
+        LMB_Released,
+        RMB_Pressed,
+        RMB_Released
+    };
+    void OnMouseButtonEvent(MouseButtonEvent Event);
 
-    int HandleXEvent(void* xevent);
-    int HandleXCBEvent(void* xcb_event);
+    void OnMouseMove(int MouseX, int MouseY)
+    {
+        m_MouseState.PosX = static_cast<float>(MouseX);
+        m_MouseState.PosY = static_cast<float>(MouseY);
+    }
 
-    void InitXCBKeysms(void* connection);
+    void OnMouseWheel(float WheelDelta)
+    {
+        m_MouseState.WheelDelta = WheelDelta;
+    }
+
+    void OnKeyPressed(int key);
+    void OnKeyReleased(int key);
+    void OnFlagsChanged(bool ShiftPressed, bool CtrlPressed, bool AltPressed);
 
 private:
-    int HandleKeyEvevnt(unsigned int keysym, bool IsKeyPressed);
-
-    void* m_XCBKeySymbols = nullptr;
+    void ProcessKeyEvent(int key, bool IsKeyPressed);
 };
 
 } // namespace Diligent

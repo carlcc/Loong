@@ -34,10 +34,10 @@
 #include "DeviceContext.h"
 #include "EngineFactory.h"
 #include "Image.h"
+#include "LoongAppBase/LoongApplication.hpp"
 #include "NativeAppBase.hpp"
 #include "RefCntAutoPtr.hpp"
 #include "RenderDevice.h"
-#include "LoongApplication.hpp"
 #include "ScreenCapture.hpp"
 #include "SwapChain.h"
 
