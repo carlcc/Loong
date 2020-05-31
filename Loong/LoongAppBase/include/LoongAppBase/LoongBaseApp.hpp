@@ -42,10 +42,12 @@
 #include "SwapChain.h"
 
 namespace Diligent {
-
 class ImGuiImplDiligent;
+}
 
-class LoongBaseApp : public NativeAppBase {
+namespace Loong {
+
+class LoongBaseApp : public Diligent::NativeAppBase {
 public:
     LoongBaseApp();
     ~LoongBaseApp();
@@ -74,11 +76,11 @@ public:
     }
 
 protected:
-    void InitializeDiligentEngine(const NativeWindow* pWindow);
+    void InitializeDiligentEngine(const Diligent::NativeWindow* pWindow);
     void InitializeSample();
     void UpdateAdaptersDialog();
 
-    virtual void SetFullscreenMode(const DisplayModeAttribs& DisplayMode)
+    virtual void SetFullscreenMode(const Diligent::DisplayModeAttribs& DisplayMode)
     {
         isFullScreenMode_ = true;
         m_pSwapChain->SetFullscreenMode(DisplayMode);
@@ -89,17 +91,17 @@ protected:
         m_pSwapChain->SetWindowedMode();
     }
 
-    void CompareGoldenImage(const std::string& FileName, ScreenCapture::CaptureInfo& Capture);
-    void SaveScreenCapture(const std::string& FileName, ScreenCapture::CaptureInfo& Capture);
+    void CompareGoldenImage(const std::string& FileName, Diligent::ScreenCapture::CaptureInfo& Capture);
+    void SaveScreenCapture(const std::string& FileName, Diligent::ScreenCapture::CaptureInfo& Capture);
 
-    RENDER_DEVICE_TYPE m_DeviceType = RENDER_DEVICE_TYPE_UNDEFINED;
-    RefCntAutoPtr<IEngineFactory> m_pEngineFactory;
-    RefCntAutoPtr<IRenderDevice> m_pDevice;
-    RefCntAutoPtr<IDeviceContext> m_pImmediateContext;
-    std::vector<RefCntAutoPtr<IDeviceContext>> m_pDeferredContexts;
-    RefCntAutoPtr<ISwapChain> m_pSwapChain;
-    AdapterAttribs m_AdapterAttribs;
-    std::vector<DisplayModeAttribs> m_DisplayModes;
+    Diligent::RENDER_DEVICE_TYPE m_DeviceType = Diligent::RENDER_DEVICE_TYPE_UNDEFINED;
+    Diligent::RefCntAutoPtr<Diligent::IEngineFactory> m_pEngineFactory;
+    Diligent::RefCntAutoPtr<Diligent::IRenderDevice> m_pDevice;
+    Diligent::RefCntAutoPtr<Diligent::IDeviceContext> m_pImmediateContext;
+    std::vector<Diligent::RefCntAutoPtr<Diligent::IDeviceContext>> m_pDeferredContexts;
+    Diligent::RefCntAutoPtr<Diligent::ISwapChain> m_pSwapChain;
+    Diligent::AdapterAttribs m_AdapterAttribs;
+    std::vector<Diligent::DisplayModeAttribs> m_DisplayModes;
 
     std::unique_ptr<LoongApplication> m_TheSample;
 
@@ -107,8 +109,8 @@ protected:
     int initialWindowHeight_ = 0;
     int m_ValidationLevel = -1;
     std::string m_AppTitle;
-    Uint32 m_AdapterId = 0;
-    ADAPTER_TYPE m_AdapterType = ADAPTER_TYPE_UNKNOWN;
+    Diligent::Uint32 m_AdapterId = 0;
+    Diligent::ADAPTER_TYPE m_AdapterType = Diligent::ADAPTER_TYPE_UNKNOWN;
     std::string m_AdapterDetailsString;
     int m_SelectedDisplayMode = 0;
     bool m_bVSync = false;
@@ -116,10 +118,10 @@ protected:
     bool m_bShowAdaptersDialog = true;
     bool m_bShowUI = true;
     double m_CurrentTime = 0;
-    Uint32 m_MaxFrameLatency = SwapChainDesc {}.BufferCount;
+    Diligent::Uint32 m_MaxFrameLatency = Diligent::SwapChainDesc {}.BufferCount;
 
     // We will need this when we have to recreate the swap chain (on Android)
-    SwapChainDesc m_SwapChainInitDesc;
+    Diligent::SwapChainDesc m_SwapChainInitDesc;
 
     struct ScreenCaptureInfo {
         bool AllowCapture = false;
@@ -127,20 +129,20 @@ protected:
         std::string FileName = "frame";
         double CaptureFPS = 30;
         double LastCaptureTime = -1e+10;
-        Uint32 FramesToCapture = 0;
-        Uint32 CurrentFrame = 0;
-        IMAGE_FILE_FORMAT FileFormat = IMAGE_FILE_FORMAT_PNG;
+        Diligent::Uint32 FramesToCapture = 0;
+        Diligent::Uint32 CurrentFrame = 0;
+        Diligent::IMAGE_FILE_FORMAT FileFormat = Diligent::IMAGE_FILE_FORMAT_PNG;
         int JpegQuality = 95;
         bool KeepAlpha = false;
 
     } m_ScreenCaptureInfo;
-    std::unique_ptr<ScreenCapture> m_pScreenCapture;
+    std::unique_ptr<Diligent::ScreenCapture> m_pScreenCapture;
 
-    std::unique_ptr<ImGuiImplDiligent> m_pImGui;
+    std::unique_ptr<Diligent::ImGuiImplDiligent> m_pImGui;
 
     GoldenImageMode goldenImgMode_ = GoldenImageMode::None;
     int m_GoldenImgPixelTolerance = 0;
     int exitCode_ = 0;
 };
 
-} // namespace Diligent
+} // namespace Loong

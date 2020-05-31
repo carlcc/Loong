@@ -27,7 +27,7 @@
 
 #include <LoongAppBase/LoongApplication.hpp>
 
-namespace Diligent {
+namespace Loong {
 
 class PlayGround final : public LoongApplication {
 public:
@@ -36,10 +36,10 @@ public:
     virtual void Render() override final;
     virtual void Update(double CurrTime, double ElapsedTime) override final;
 
-    virtual const Char* GetSampleName() const override final { return "Tutorial01: Hello Triangle"; }
+    virtual const Diligent::Char* GetSampleName() const override final { return "Tutorial01: Hello Triangle"; }
 
 private:
-    RefCntAutoPtr<IPipelineState> m_pPSO;
+    Diligent::RefCntAutoPtr<Diligent::IPipelineState> m_pPSO;
 };
 
 LoongApplication* CreateLoongApplication()
@@ -104,8 +104,8 @@ void PlayGround::Initialize(const SampleInitInfo& InitInfo)
 
     // Pipeline state object encompasses configuration of all GPU stages
 
-    PipelineStateCreateInfo PSOCreateInfo;
-    PipelineStateDesc& PSODesc = PSOCreateInfo.PSODesc;
+    Diligent::PipelineStateCreateInfo PSOCreateInfo;
+    Diligent::PipelineStateDesc& PSODesc = PSOCreateInfo.PSODesc;
 
     // Pipeline state name is used by the engine to report issues.
     // It is always a good idea to give objects descriptive names.
@@ -122,23 +122,23 @@ void PlayGround::Initialize(const SampleInitInfo& InitInfo)
     // Use the depth buffer format from the swap chain
     PSODesc.GraphicsPipeline.DSVFormat                    = m_pSwapChain->GetDesc().DepthBufferFormat;
     // Primitive topology defines what kind of primitives will be rendered by this pipeline state
-    PSODesc.GraphicsPipeline.PrimitiveTopology            = PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
+    PSODesc.GraphicsPipeline.PrimitiveTopology            = Diligent::PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
     // No back face culling for this tutorial
-    PSODesc.GraphicsPipeline.RasterizerDesc.CullMode      = CULL_MODE_NONE;
+    PSODesc.GraphicsPipeline.RasterizerDesc.CullMode      = Diligent::CULL_MODE_NONE;
     // Disable depth testing
-    PSODesc.GraphicsPipeline.DepthStencilDesc.DepthEnable = False;
+    PSODesc.GraphicsPipeline.DepthStencilDesc.DepthEnable = Diligent::False;
     // clang-format on
 
-    ShaderCreateInfo ShaderCI;
+    Diligent::ShaderCreateInfo ShaderCI;
     // Tell the system that the shader source code is in HLSL.
     // For OpenGL, the engine will convert this into GLSL under the hood.
-    ShaderCI.SourceLanguage = SHADER_SOURCE_LANGUAGE_HLSL;
+    ShaderCI.SourceLanguage = Diligent::SHADER_SOURCE_LANGUAGE_HLSL;
     // OpenGL backend requires emulated combined HLSL texture samplers (g_Texture + g_Texture_sampler combination)
     ShaderCI.UseCombinedTextureSamplers = true;
     // Create a vertex shader
-    RefCntAutoPtr<IShader> pVS;
+    Diligent::RefCntAutoPtr<Diligent::IShader> pVS;
     {
-        ShaderCI.Desc.ShaderType = SHADER_TYPE_VERTEX;
+        ShaderCI.Desc.ShaderType = Diligent::SHADER_TYPE_VERTEX;
         ShaderCI.EntryPoint = "main";
         ShaderCI.Desc.Name = "Triangle vertex shader";
         ShaderCI.Source = VSSource;
@@ -146,9 +146,9 @@ void PlayGround::Initialize(const SampleInitInfo& InitInfo)
     }
 
     // Create a pixel shader
-    RefCntAutoPtr<IShader> pPS;
+    Diligent::RefCntAutoPtr<Diligent::IShader> pPS;
     {
-        ShaderCI.Desc.ShaderType = SHADER_TYPE_PIXEL;
+        ShaderCI.Desc.ShaderType = Diligent::SHADER_TYPE_PIXEL;
         ShaderCI.EntryPoint = "main";
         ShaderCI.Desc.Name = "Triangle pixel shader";
         ShaderCI.Source = PSSource;
@@ -169,15 +169,15 @@ void PlayGround::Render()
     // Let the engine perform required state transitions
     auto* pRTV = m_pSwapChain->GetCurrentBackBufferRTV();
     auto* pDSV = m_pSwapChain->GetDepthBufferDSV();
-    m_pImmediateContext->ClearRenderTarget(pRTV, ClearColor, RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
-    m_pImmediateContext->ClearDepthStencil(pDSV, CLEAR_DEPTH_FLAG, 1.f, 0, RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
+    m_pImmediateContext->ClearRenderTarget(pRTV, ClearColor, Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
+    m_pImmediateContext->ClearDepthStencil(pDSV, Diligent::CLEAR_DEPTH_FLAG, 1.f, 0, Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
 
     // Set the pipeline state in the immediate context
     m_pImmediateContext->SetPipelineState(m_pPSO);
     // Commit shader resources. Even though in this example we don't really
     // have any resources, this call also sets the shaders in OpenGL backend.
-    m_pImmediateContext->CommitShaderResources(nullptr, RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
-    DrawAttribs drawAttrs;
+    m_pImmediateContext->CommitShaderResources(nullptr, Diligent::RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
+    Diligent::DrawAttribs drawAttrs;
     drawAttrs.NumVertices = 3; // We will render 3 vertices
     m_pImmediateContext->Draw(drawAttrs);
 }

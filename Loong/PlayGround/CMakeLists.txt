@@ -20,3 +20,7 @@ if (WIN32)
         "\"$<TARGET_FILE_DIR:PlayGround>\"")
     append_loong_app_base_win32_source(PlayGround)
 endif()
+
+set_target_properties(LoonAppBase PROPERTIES
+        FOLDER Loong
+        )

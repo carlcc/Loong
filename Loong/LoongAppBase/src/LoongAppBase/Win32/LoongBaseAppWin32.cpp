@@ -108,8 +108,8 @@ INT_PTR CALLBACK SelectDeviceTypeDialogProc(HWND hwndDlg,
 
 } // namespace
 
-namespace Diligent {
-
+namespace Loong {
+using namespace Diligent;
 class LoongBaseAppWin32 final : public LoongBaseApp {
 public:
     virtual LRESULT HandleWin32Message(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) override final
@@ -266,9 +266,13 @@ private:
     LONG m_WindowStyle = 0;
 };
 
+} // namespace Loong
+
+namespace Diligent {
+    
 NativeAppBase* CreateApplication()
 {
-    return new LoongBaseAppWin32;
+    return new Loong::LoongBaseAppWin32;
 }
 
-} // namespace Diligent
+}

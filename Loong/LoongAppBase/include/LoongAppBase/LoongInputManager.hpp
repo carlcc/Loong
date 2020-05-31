@@ -27,12 +27,9 @@
 
 #pragma once
 
-#include "BasicTypes.h"
-#include "FlagEnum.h"
-
 #include <gainput/gainput.h>
 
-namespace Diligent {
+namespace Loong {
 
 using namespace gainput;
 
@@ -75,24 +72,24 @@ protected:
     gainput::InputDevice* padDevice_;
 };
 
-} // namespace Diligent
+} // namespace Loong
 
 // clang-format off
 #if PLATFORM_WIN32
     #include "LoongAppBase/Win32/LoongInputManagerWin32.hpp"
-    namespace Diligent
+    namespace Loong
     {
         using LoongInputManager = LoongInputManagerWin32;
     }
 #elif PLATFORM_MACOS
     #include "LoongAppBase/MacOS/LoongInputManagerMacOS.hpp"
-    namespace Diligent
+    namespace Loong
     {
         using LoongInputManager = LoongInputManagerMacOS;
     }
 #elif PLATFORM_LINUX
     #include "LoongAppBase/Linux/LoongInputManagerLinux.hpp"
-    namespace Diligent
+    namespace Loong
     {
         using LoongInputManager = LoongInputManagerLinux;
     }

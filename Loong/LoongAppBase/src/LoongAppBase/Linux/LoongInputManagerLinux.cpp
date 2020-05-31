@@ -34,7 +34,8 @@
 #include "DebugUtilities.hpp"
 #include "LoongAppBase/LoongInputManager.hpp"
 
-namespace Diligent {
+namespace Loong {
+using namespace Diligent;
 
 int LoongInputManagerLinux::HandleKeyEvevnt(unsigned int keysym, bool IsKeyPressed)
 {
@@ -315,4 +316,4 @@ int LoongInputManagerLinux::HandleXCBEvent(void* xcb_event)
     return 0;
 }
 
-} // namespace Diligent
+} // namespace Loong

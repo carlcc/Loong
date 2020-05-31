@@ -27,7 +27,8 @@
 #endif
 #include "ImGuiImplLinuxX11.hpp"
 
-namespace Diligent {
+namespace Loong {
+using namespace Diligent;
 
 class LoongBaseAppLinux final : public LoongBaseApp {
 public:
@@ -95,4 +96,4 @@ NativeAppBase* CreateApplication()
     return new LoongBaseAppLinux;
 }
 
-} // namespace Diligent
+} // namespace Loong

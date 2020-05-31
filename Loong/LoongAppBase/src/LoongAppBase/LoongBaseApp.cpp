@@ -62,7 +62,9 @@
 #include "ImGuiUtils.hpp"
 #include "imgui.h"
 
-namespace Diligent {
+namespace Loong {
+
+using namespace Diligent;
 
 LoongBaseApp::LoongBaseApp()
     : m_TheSample { CreateLoongApplication() }
@@ -792,4 +794,4 @@ void LoongBaseApp::Present()
     }
 }
 
-} // namespace Diligent
+} // namespace Loong

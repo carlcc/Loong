@@ -17,7 +17,7 @@
 
 #pragma once
 
-namespace Diligent {
+namespace Loong {
 
 class LoongInputManagerMacOS : public LoongInputManagerBase {
 public:
@@ -48,4 +48,4 @@ private:
     void ProcessKeyEvent(int key, bool IsKeyPressed);
 };
 
-} // namespace Diligent
+} // namespace Loong

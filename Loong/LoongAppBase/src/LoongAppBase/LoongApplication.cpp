@@ -29,7 +29,9 @@
 #include "Errors.hpp"
 #include "PlatformDefinitions.h"
 
-namespace Diligent {
+namespace Loong {
+
+using namespace Diligent;
 
 void LoongApplication::GetEngineInitializationAttribs(RENDER_DEVICE_TYPE DeviceType, EngineCreateInfo& EngineCI, SwapChainDesc& /*SCDesc*/)
 {
@@ -136,4 +138,4 @@ float4x4 LoongApplication::GetSurfacePretransformMatrix(const float3& f3CameraVi
     }
 }
 
-} // namespace Diligent
+} // namespace Loong

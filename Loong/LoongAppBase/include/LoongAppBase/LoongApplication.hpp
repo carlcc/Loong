@@ -40,32 +40,37 @@
 #include <gainput/gainput.h>
 
 namespace Diligent {
-
+    
 class ImGuiImplDiligent;
 
+}
+
+namespace Loong {
+
+
 struct SampleInitInfo {
-    IEngineFactory* pEngineFactory = nullptr;
-    IRenderDevice* pDevice = nullptr;
-    IDeviceContext** ppContexts = nullptr;
-    Uint32 NumDeferredCtx = 0;
-    ISwapChain* pSwapChain = nullptr;
-    ImGuiImplDiligent* pImGui = nullptr;
+    Diligent::IEngineFactory* pEngineFactory = nullptr;
+    Diligent::IRenderDevice* pDevice = nullptr;
+    Diligent::IDeviceContext** ppContexts = nullptr;
+    Diligent::Uint32 NumDeferredCtx = 0;
+    Diligent::ISwapChain* pSwapChain = nullptr;
+    Diligent::ImGuiImplDiligent* pImGui = nullptr;
 };
 
 class LoongApplication {
 public:
     virtual ~LoongApplication() {}
 
-    virtual void GetEngineInitializationAttribs(RENDER_DEVICE_TYPE DeviceType, EngineCreateInfo& EngineCI, SwapChainDesc& SCDesc);
+    virtual void GetEngineInitializationAttribs(Diligent::RENDER_DEVICE_TYPE DeviceType, Diligent::EngineCreateInfo& EngineCI, Diligent::SwapChainDesc& SCDesc);
 
     virtual void Initialize(const SampleInitInfo& InitInfo) = 0;
 
     virtual void Render() = 0;
     virtual void Update(double CurrTime, double ElapsedTime) = 0;
-    virtual void WindowResize(Uint32 Width, Uint32 Height) {}
+    virtual void WindowResize(Diligent::Uint32 Width, Diligent::Uint32 Height) {}
     virtual bool HandleNativeMessage(const void* pNativeMsgData) { return false; }
 
-    virtual const Char* GetSampleName() const { return "Diligent Engine Sample"; }
+    virtual const Diligent::Char* GetSampleName() const { return "Diligent Engine Sample"; }
     virtual void ProcessCommandLine(const char* CmdLine) {}
 
     LoongInputManager& GetInputManager()
@@ -73,29 +78,29 @@ public:
         return inputManager_;
     }
 
-    void ResetSwapChain(ISwapChain* pNewSwapChain)
+    void ResetSwapChain(Diligent::ISwapChain* pNewSwapChain)
     {
         m_pSwapChain = pNewSwapChain;
     }
 
 protected:
     // Returns projection matrix adjusted to the current screen orientation
-    float4x4 GetAdjustedProjectionMatrix(float FOV, float NearPlane, float FarPlane) const;
+    Diligent::float4x4 GetAdjustedProjectionMatrix(float FOV, float NearPlane, float FarPlane) const;
 
     // Returns pretransform matrix that matches the current screen rotation
-    float4x4 GetSurfacePretransformMatrix(const float3& f3CameraViewAxis) const;
+    Diligent::float4x4 GetSurfacePretransformMatrix(const Diligent::float3& f3CameraViewAxis) const;
 
-    RefCntAutoPtr<IEngineFactory> m_pEngineFactory;
-    RefCntAutoPtr<IRenderDevice> m_pDevice;
-    RefCntAutoPtr<IDeviceContext> m_pImmediateContext;
-    std::vector<RefCntAutoPtr<IDeviceContext>> m_pDeferredContexts;
-    RefCntAutoPtr<ISwapChain> m_pSwapChain;
-    ImGuiImplDiligent* m_pImGui = nullptr;
+    Diligent::RefCntAutoPtr<Diligent::IEngineFactory> m_pEngineFactory;
+    Diligent::RefCntAutoPtr<Diligent::IRenderDevice> m_pDevice;
+    Diligent::RefCntAutoPtr<Diligent::IDeviceContext> m_pImmediateContext;
+    std::vector<Diligent::RefCntAutoPtr<Diligent::IDeviceContext>> m_pDeferredContexts;
+    Diligent::RefCntAutoPtr<Diligent::ISwapChain> m_pSwapChain;
+    Diligent::ImGuiImplDiligent* m_pImGui = nullptr;
 
     float m_fSmoothFPS = 0;
     double m_LastFPSTime = 0;
-    Uint32 m_NumFramesRendered = 0;
-    Uint32 m_CurrentFrameNumber = 0;
+    Diligent::Uint32 m_NumFramesRendered = 0;
+    Diligent::Uint32 m_CurrentFrameNumber = 0;
 
     LoongInputManager inputManager_;
 };
@@ -119,11 +124,11 @@ inline void LoongApplication::Initialize(const SampleInitInfo& InitInfo)
     m_pSwapChain = InitInfo.pSwapChain;
     m_pImmediateContext = InitInfo.ppContexts[0];
     m_pDeferredContexts.resize(InitInfo.NumDeferredCtx);
-    for (Uint32 ctx = 0; ctx < InitInfo.NumDeferredCtx; ++ctx)
+    for (Diligent::Uint32 ctx = 0; ctx < InitInfo.NumDeferredCtx; ++ctx)
         m_pDeferredContexts[ctx] = InitInfo.ppContexts[1 + ctx];
     m_pImGui = InitInfo.pImGui;
 }
 
 extern LoongApplication* CreateLoongApplication();
 
-} // namespace Diligent
+} // namespace Loong

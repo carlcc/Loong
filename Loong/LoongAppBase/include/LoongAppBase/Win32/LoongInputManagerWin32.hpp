@@ -27,7 +27,7 @@
 
 #pragma once
 
-namespace Diligent {
+namespace Loong {
 
 class LoongInputManagerWin32 : public LoongInputManagerBase {
 public:
@@ -38,4 +38,4 @@ public:
 private:
 };
 
-} // namespace Diligent
+} // namespace Loong

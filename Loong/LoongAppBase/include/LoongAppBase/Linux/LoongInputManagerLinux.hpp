@@ -17,7 +17,7 @@
 
 #pragma once
 
-namespace Diligent {
+namespace Loong {
 
 class LoongInputManagerLinux : public LoongInputManagerBase {
 public:
@@ -34,4 +34,4 @@ private:
     void* m_XCBKeySymbols = nullptr;
 };
 
-} // namespace Diligent
+} // namespace Loong

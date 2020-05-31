@@ -33,7 +33,7 @@
 #endif
 #include "Windows.h"
 
-namespace Diligent {
+namespace Loong {
 
 LoongInputManagerWin32::LoongInputManagerWin32()
 {
@@ -46,4 +46,4 @@ bool LoongInputManagerWin32::HandleNativeMessage(const void* MsgData)
     return false;
 }
 
-} // namespace Diligent
+} // namespace Loong

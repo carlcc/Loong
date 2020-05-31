@@ -27,8 +27,9 @@
 #include "LoongAppBase/LoongBaseApp.hpp"
 #include "ImGuiImplMacOS.hpp"
 
-namespace Diligent
+namespace Loong
 {
+using namespace Diligent;
 
 class LoongBaseAppMacOS final : public LoongBaseApp
 {

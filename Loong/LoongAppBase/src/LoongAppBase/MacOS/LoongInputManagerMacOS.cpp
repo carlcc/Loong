@@ -19,7 +19,8 @@
 
 #include "LoongAppBase/LoongInputManager.hpp"
 
-namespace Diligent {
+namespace Loong {
+using namespace Diligent;
 
 void LoongInputManagerMacOS::OnMouseButtonEvent(MouseButtonEvent Event)
 {
@@ -140,4 +141,4 @@ void LoongInputManagerMacOS::OnFlagsChanged(bool ShiftPressed, bool CtrlPressed,
     UpdateKey(InputKeys::ControlDown, CtrlPressed);
 }
 
-} // namespace Diligent
+} // namespace Loong
