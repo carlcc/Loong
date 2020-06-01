@@ -26,6 +26,8 @@
  */
 
 #include <LoongAppBase/LoongApplication.hpp>
+#include <imgui.h>
+#include <map>
 
 namespace Loong {
 
@@ -186,14 +188,38 @@ void PlayGround::Update(double CurrTime, double ElapsedTime)
 {
     LoongApplication::Update(CurrTime, ElapsedTime);
 
-    if (GetInputManager().GetKeyboard().GetBool(Key::KeyA)) {
-        std::cout << "A is pressed" << std::endl;
-    }
-    if (GetInputManager().GetMouse().GetBool(MouseButton::MouseButtonLeft)) {
-        std::cout << "LMB is pressed" << std::endl;
-    }
+    if (ImGui::Begin("Win")) {
+        auto mouseX = GetInputManager().GetMouse().GetFloat(MouseButton::MouseAxisX);
+        auto mouseY = GetInputManager().GetMouse().GetFloat(MouseButton::MouseAxisY);
+        ImGui::Text("Mouse Pos: (%f, %f)", mouseX, mouseY);
+        const std::map<MouseButton, const char*> kMouseNames = {
+            { MouseButton::MouseButtonLeft, "MouseButtonLeft" },
+            { MouseButton::MouseButtonMiddle, "MouseButtonMiddle" },
+            { MouseButton::MouseButtonRight, "MouseButtonRight" },
+            { MouseButton::MouseButtonWheelUp, "MouseButtonWheelUp" },
+            { MouseButton::MouseButtonWheelDown, "MouseButtonWheelDown" },
+        };
+        for (int i = 0; i < 5; ++i) {
+            int button = MouseButton::MouseButtonLeft + i;
+            bool pressed = GetInputManager().GetMouse().GetBool(button);
+            if (pressed) {
+                auto it = kMouseNames.find(MouseButton(button));
+                if (it != kMouseNames.end()) {
+                    ImGui::Text("MouseButton %s pressed", it->second);
+                } else {
+                    ImGui::Text("MouseButton %d pressed", button);
+                }
+            }
+        }
+        for (int i = 0; i < 26; ++i) {
+            auto key = Key::KeyA + i;
+            if (GetInputManager().GetKeyboard().GetBool(Key(key))) {
+                ImGui::Text("Key %c pressed", key);
+            }
+        }
 
-    std::cout << "MouseX " << GetInputManager().GetMouse().GetFloat(MouseButton::MouseAxisX) << ", MouseY " << GetInputManager().GetMouse().GetFloat(MouseButton::MouseAxisY) << std::endl;
+        ImGui::End();
+    }
 }
 
 } // namespace Diligent

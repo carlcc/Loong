@@ -65,6 +65,11 @@ public:
         return *padDevice_;
     }
 
+    gainput::InputManager& GetManager()
+    {
+        return inputManager_;
+    }
+
 protected:
     gainput::InputManager inputManager_;
     gainput::InputDevice* mouseDevice_;

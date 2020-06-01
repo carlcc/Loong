@@ -137,5 +137,9 @@ float4x4 LoongApplication::GetSurfacePretransformMatrix(const float3& f3CameraVi
         return float4x4::Identity();
     }
 }
+void LoongApplication::WindowResize(Diligent::Uint32 Width, Diligent::Uint32 Height)
+{
+    inputManager_.GetManager().SetDisplaySize(Width, Height);
+}
 
 } // namespace Loong
