@@ -56,7 +56,7 @@ public:
         auto handled = static_cast<ImGuiImplLinuxX11*>(m_pImGui.get())->HandleXEvent(xev);
         // Always handle mouse move, button release and key release events
         if (!handled || xev->type == ButtonRelease || xev->type == MotionNotify || xev->type == KeyRelease) {
-            handled = m_TheSample->GetInputController().HandleXEvent(xev);
+            handled = m_TheSample->GetInputManager().HandleXEvent(xev);
         }
         return handled;
     }
@@ -72,7 +72,7 @@ public:
             InitializeDiligentEngine(&LinuxWindow);
             const auto& SCDesc = m_pSwapChain->GetDesc();
             m_pImGui.reset(new ImGuiImplLinuxXCB(connection, m_pDevice, SCDesc.ColorBufferFormat, SCDesc.DepthBufferFormat, SCDesc.Width, SCDesc.Height));
-            m_TheSample->GetInputController().InitXCBKeysms(connection);
+            m_TheSample->GetInputManager().InitXCBKeysms(connection);
             InitializeSample();
             return true;
         } catch (...) {
@@ -85,15 +85,19 @@ public:
         auto EventType = event->response_type & 0x7f;
         // Always handle mouse move, button release and key release events
         if (!handled || EventType == XCB_MOTION_NOTIFY || EventType == XCB_BUTTON_RELEASE || EventType == XCB_KEY_RELEASE) {
-            handled = m_TheSample->GetInputController().HandleXCBEvent(event);
+            handled = m_TheSample->GetInputManager().HandleXCBEvent(event);
         }
     }
 #endif
 };
 
+} // namespace Loong
+
+namespace Diligent {
+
 NativeAppBase* CreateApplication()
 {
-    return new LoongBaseAppLinux;
+    return new Loong::LoongBaseAppLinux;
 }
 
-} // namespace Loong
+}
