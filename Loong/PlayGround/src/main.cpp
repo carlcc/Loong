@@ -185,6 +185,15 @@ void PlayGround::Render()
 void PlayGround::Update(double CurrTime, double ElapsedTime)
 {
     LoongApplication::Update(CurrTime, ElapsedTime);
+
+    if (GetInputManager().GetKeyboard().GetBool(Key::KeyA)) {
+        std::cout << "A is pressed" << std::endl;
+    }
+    if (GetInputManager().GetMouse().GetBool(MouseButton::MouseButtonLeft)) {
+        std::cout << "LMB is pressed" << std::endl;
+    }
+
+    std::cout << "MouseX " << GetInputManager().GetMouse().GetFloat(MouseButton::MouseAxisX) << ", MouseY " << GetInputManager().GetMouse().GetFloat(MouseButton::MouseAxisY) << std::endl;
 }
 
 } // namespace Diligent

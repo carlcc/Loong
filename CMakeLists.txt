@@ -68,4 +68,72 @@ function(set_loong_common_target_properties TARGET)
 
 endfunction()
 
+
+function(add_loong_app APP_NAME IDE_FOLDER SOURCE INCLUDE ASSETS)
+
+    set(ALL_ASSETS ${ASSETS})
+    add_target_platform_app(${APP_NAME} "${SOURCE}" "${INCLUDE}" "${ALL_ASSETS}")
+
+    set_source_files_properties(${ALL_ASSETS} PROPERTIES
+            VS_DEPLOYMENT_LOCATION "."
+            MACOSX_PACKAGE_LOCATION "Resources"
+            )
+
+    if(PLATFORM_WIN32)
+        set_target_properties(${APP_NAME} PROPERTIES
+                VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/assets"
+                )
+
+        copy_required_dlls(${APP_NAME})
+        add_custom_command(TARGET PlayGround POST_BUILD
+                COMMAND ${CMAKE_COMMAND} -E copy_if_different
+                "\"$<TARGET_FILE:gainput>\""
+                "\"$<TARGET_FILE_DIR:${APP_NAME}>\"")
+
+        append_loong_app_base_win32_source(PlayGround)
+    endif()
+
+    target_include_directories(${APP_NAME}
+            PRIVATE
+            src
+            )
+
+    target_link_libraries(${APP_NAME}
+            PRIVATE
+            # On Linux we must have Diligent-NativeAppBase go first, otherwise the linker
+            # will fail to resolve Diligent::CreateApplication() function.
+            Diligent-NativeAppBase
+            Diligent-BuildSettings
+            LoonAppBase
+            )
+    set_common_target_properties(${APP_NAME})
+
+    if(MSVC)
+        # Disable MSVC-specific warnings
+        # - w4201: nonstandard extension used: nameless struct/union
+        target_compile_options(${APP_NAME} PRIVATE /wd4201)
+    endif()
+
+    set_target_properties(${APP_NAME} PROPERTIES
+            FOLDER ${IDE_FOLDER}
+            )
+
+    source_group("src" FILES ${SOURCE} ${INCLUDE})
+    source_group("assets" FILES ${ALL_ASSETS})
+
+    target_sources(${APP_NAME} PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/readme.md")
+    set_source_files_properties(
+            "${CMAKE_CURRENT_SOURCE_DIR}/readme.md" PROPERTIES HEADER_FILE_ONLY TRUE
+    )
+
+    if(PLATFORM_WIN32 OR PLATFORM_LINUX)
+        # Copy assets to target folder
+        add_custom_command(TARGET ${APP_NAME} POST_BUILD
+                COMMAND ${CMAKE_COMMAND} -E copy_directory
+                "${CMAKE_CURRENT_SOURCE_DIR}/assets"
+                "\"$<TARGET_FILE_DIR:${APP_NAME}>\"")
+    endif()
+
+endfunction()
+
 add_subdirectory(Loong)
