@@ -11,7 +11,7 @@ set(INCLUDE
 )
 
 add_library(LoongFileSystem STATIC ${SOURCE} ${INCLUDE})
-set_common_target_properties(LoongFileSystem)
+set_loong_common_target_properties(LoongFileSystem)
 
 target_include_directories(LoongFileSystem
 PUBLIC

@@ -164,6 +164,7 @@ if(PHYSFS_BUILD_STATIC)
         set_target_properties(physfs-static PROPERTIES STATIC_LIBRARY_FLAGS "/ignore:4264")
     endif()
     target_include_directories(physfs-static PUBLIC src)
+    target_link_libraries(physfs-static PUBLIC ${OPTIONAL_LIBRARY_LIBS} ${OTHER_LDFLAGS})
 
     set(PHYSFS_LIB_TARGET physfs-static)
     set(PHYSFS_INSTALL_TARGETS ${PHYSFS_INSTALL_TARGETS} ";physfs-static")

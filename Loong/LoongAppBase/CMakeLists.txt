@@ -62,7 +62,7 @@ list(APPEND INCLUDE
 
 
 add_library(LoonAppBase STATIC ${SOURCE} ${INCLUDE})
-set_common_target_properties(LoonAppBase)
+set_loong_common_target_properties(LoonAppBase)
 
 target_include_directories(LoonAppBase
 PUBLIC
