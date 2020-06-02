@@ -4,5 +4,6 @@ endif()
 
 add_subdirectory(LoongFoundation)
 add_subdirectory(LoongAppBase)
+add_subdirectory(LoongGui)
 add_subdirectory(LoongFileSystem)
 add_subdirectory(PlayGround)

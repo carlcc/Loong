@@ -8,9 +8,9 @@
 #include <utility>
 
 #define LOONG_DEFER_COMBINE1(X, Y) X##Y
-#define LOONG_DEFER_COMBINE(X, Y) SPARKLE_DEFER_COMBINE1(X, Y)
+#define LOONG_DEFER_COMBINE(X, Y) LOONG_DEFER_COMBINE1(X, Y)
 
-#define OnScopeExit ::Loong::LoongDefer LOONG_DEFER_COMBINE(_defer_, __LINE__) = [&]() -> void
+#define OnScopeExit ::Loong::Foundation::LoongDefer LOONG_DEFER_COMBINE(_defer_, __LINE__) = [&]() -> void
 
 namespace Loong::Foundation {
 
@@ -18,7 +18,7 @@ class LoongDefer {
 public:
     template <typename Callable>
     LoongDefer(Callable&& defer) // NOLINT(google-explicit-constructor,hicpp-explicit-conversions)
-        : defered_(std::forward<LoongDefer>(defer))
+        : defered_(std::forward<Callable>(defer))
     {
     }
 

@@ -67,31 +67,31 @@ struct CallableToSignalListener<Ret (Cls::*)(Args...) const>
 
 }
 
-#define LOONG_DECLARE_SIGNAL(sigName, ...)                                                \
-protected:                                                                                \
-    sigslot::signal<__VA_ARGS__> sigName##Signal_;                                        \
-                                                                                          \
-public:                                                                                   \
-    template <class ReceiverType, class... Args>                                          \
-    void Subscribe##sigName(ReceiverType* pclass, void (ReceiverType::*pmemfun)(Args...)) \
-    {                                                                                     \
-        sigName##Signal_.connect(pclass, pmemfun);                                        \
-    }                                                                                     \
-    template <class Callable>                                                             \
-    auto Subscribe##sigName(Callable&& callable)                                          \
-    {                                                                                     \
-        using Listener = typename CallableToSignalListener<Callable>::Listener;           \
-        auto listener = std::make_unique<Listener>(std::forward<Callable>(callable));     \
-        sigName##Signal_.connect(listener.get(), &Listener::Invoke);                      \
-        return std::move(listener);                                                       \
-    }                                                                                     \
-    template <class ReceiverType, class... Args>                                          \
-    void Subscribe##sigName(ReceiverType& pclass, void (ReceiverType::*pmemfun)(Args...)) \
-    {                                                                                     \
-        sigName##Signal_.connect(&pclass, pmemfun);                                       \
-    }                                                                                     \
-    void Unsubscribe##sigName(sigslot::has_slots_interface* pclass)                       \
-    {                                                                                     \
-        sigName##Signal_.disconnect(pclass);                                              \
-    }                                                                                     \
+#define LOONG_DECLARE_SIGNAL(sigName, ...)                                                           \
+protected:                                                                                           \
+    sigslot::signal<__VA_ARGS__> sigName##Signal_;                                                   \
+                                                                                                     \
+public:                                                                                              \
+    template <class ReceiverType, class... Args>                                                     \
+    void Subscribe##sigName(ReceiverType* pclass, void (ReceiverType::*pmemfun)(Args...))            \
+    {                                                                                                \
+        sigName##Signal_.connect(pclass, pmemfun);                                                   \
+    }                                                                                                \
+    template <class Callable>                                                                        \
+    auto Subscribe##sigName(Callable&& callable)                                                     \
+    {                                                                                                \
+        using Listener = typename ::Loong::Foundation::CallableToSignalListener<Callable>::Listener; \
+        auto listener = std::make_unique<Listener>(std::forward<Callable>(callable));                \
+        sigName##Signal_.connect(listener.get(), &Listener::Invoke);                                 \
+        return std::move(listener);                                                                  \
+    }                                                                                                \
+    template <class ReceiverType, class... Args>                                                     \
+    void Subscribe##sigName(ReceiverType& pclass, void (ReceiverType::*pmemfun)(Args...))            \
+    {                                                                                                \
+        sigName##Signal_.connect(&pclass, pmemfun);                                                  \
+    }                                                                                                \
+    void Unsubscribe##sigName(sigslot::has_slots_interface* pclass)                                  \
+    {                                                                                                \
+        sigName##Signal_.disconnect(pclass);                                                         \
+    }                                                                                                \
     void Unsubscribe##sigName() { sigName##Signal_.disconnect_all(); }
