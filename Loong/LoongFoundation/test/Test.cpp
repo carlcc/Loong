@@ -34,7 +34,7 @@ public:
     }
     void OnLog(const LogItem& logItem)
     {
-        std::cout << fmt::format("[{}][{}] {}", GetLogLevelName(logItem.level), logItem.location, logItem.message);
+        std::cout << fmt::format("[{}][{}] {}", GetLogLevelName(logItem.level), logItem.location, logItem.message) << std::endl;
     }
 };
 
@@ -46,7 +46,15 @@ int main(int argc, const char* argv[])
     SigEmmiter emmiter;
 
     emmiter.SubscribeMySig(receiver, &SigReceiver::foo);
+    auto listenerId = emmiter.SubscribeMySig([](int a) {
+        std::cout << "Hello_" << a << std::endl;
+           });
 
+    emmiter.DoSomething();
+
+    std::cout << "======" << std::endl;
+
+    listenerId.reset();
     emmiter.DoSomething();
 
     return 0;
