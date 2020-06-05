@@ -7,11 +7,11 @@ file(GLOB_RECURSE INCLUDE include/*)
 
 
 add_library(LoongFoundation STATIC ${SOURCE} ${INCLUDE})
-set_loong_common_target_properties(LoongFoundation)
 
 target_include_directories(LoongFoundation
 PUBLIC
     include
+    ${GLM_INCLUDE_DIR}
 )
 
 

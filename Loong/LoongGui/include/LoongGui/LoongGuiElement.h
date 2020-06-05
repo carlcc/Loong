@@ -4,13 +4,13 @@
 
 #pragma once
 
+#include "LoongFoundation/LoongMath.h"
 #include "LoongFoundation/LoongSigslotHelper.h"
-#include <BasicMath.hpp>
 #include <string>
 
 namespace Loong::Gui {
 
-using float2 = Diligent::float2;
+using float2 = Loong::Math::Vector2;
 
 #define LOONG_GUI_DEFINE_FLAG_GETTER_SETTER(funcName, flagVar, flagName) \
     bool Is##funcName() const { return flagVar & flagName; }             \
@@ -58,10 +58,15 @@ public:
         }
     }
 
+    const float2& GetSize() const { return size_; }
+
+    void SetSize(const float2& size) { size_ = size; }
+
     LOONG_DECLARE_SIGNAL(OnVisibilityChange, bool); // The parameter is new state
 
 protected:
     std::string label_ {};
+    float2 size_ { 100.0F, 100.0F };
     bool isVisible_ { true };
 };
 

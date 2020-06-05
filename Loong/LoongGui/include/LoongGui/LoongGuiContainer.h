@@ -28,7 +28,7 @@ public:
     template <class T>
     T* CreateChild(const std::string& label = "")
     {
-        static_assert(std::is_base_of_v<T, LoongGuiElement>, "The created child must be a instance of LoongGuiElement");
+        static_assert(std::is_base_of_v<LoongGuiElement, T>, "The created child must be a instance of LoongGuiElement");
         auto* c = new T(label);
         AddChild(c);
         return c;

@@ -15,7 +15,8 @@ class LoongGuiWindow : public LoongGuiContainer {
         kTitleless = 0x02u,
         kResizable = 0x04u,
         kHasMenuBar = 0x08u,
-        kBringToFrontOnFocus = 0x10u
+        kBringToFrontOnFocus = 0x10u,
+        kDockable = 0x20u,
     };
 
 public:
@@ -28,10 +29,6 @@ public:
 
     void SetPosition(const float2& p) { position_ = p; }
 
-    const float2& GetSize() const { return size_; }
-
-    void SetSize(const float2& size) { size_ = size; }
-
     bool IsFocused();
 
     void SetFocused();
@@ -41,10 +38,10 @@ public:
     LOONG_GUI_DEFINE_FLAG_GETTER_SETTER(Resizable, windowFlags_, kResizable)
     LOONG_GUI_DEFINE_FLAG_GETTER_SETTER_HAS(MenuBar, windowFlags_, kHasMenuBar)
     LOONG_GUI_DEFINE_FLAG_GETTER_SETTER(BringToFrontOnFocus, windowFlags_, kBringToFrontOnFocus)
+    LOONG_GUI_DEFINE_FLAG_GETTER_SETTER(Dockable, windowFlags_, kDockable)
 
 protected:
     float2 position_ { 0.0F, 0.0F };
-    float2 size_ { 100.0F, 100.0F };
     uint32_t windowFlags_ { 0 };
 };
 

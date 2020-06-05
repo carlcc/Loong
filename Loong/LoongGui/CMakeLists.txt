@@ -7,7 +7,6 @@ file(GLOB_RECURSE INCLUDE include/*)
 
 
 add_library(LoongGui STATIC ${SOURCE} ${INCLUDE})
-set_loong_common_target_properties(LoongGui)
 
 target_include_directories(LoongGui
 PUBLIC
@@ -15,8 +14,7 @@ PUBLIC
     )
 target_link_libraries(LoongGui
 PUBLIC
-    Diligent-Imgui
-    Diligent-Common
+    imgui
     LoongFoundation
 )
 
