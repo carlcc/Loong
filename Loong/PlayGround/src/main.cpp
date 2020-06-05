@@ -23,11 +23,13 @@ public:
     void OnUpdate()
     {
         clock_.Update();
-        glClearColor(0.3F, 0.4F, 0.5F, 1.0F);
+        glClearColor(clearColor_[0],clearColor_[1],clearColor_[2],clearColor_[3]);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         auto& input = gApp->GetInputManager();
         loongWindow_.ClearChildren();
+
+        loongWindow_.CreateChild<Gui::LoongGuiButton>("PushMe")->SubscribeOnClick(this, &MyApplication::OnPressButton);
 
         for (int i = 0; i < 6; ++i) {
             int btn = int(App::LoongMouseButton::kButton1) + i;
@@ -45,6 +47,15 @@ public:
 
         loongWindow_.Draw();
     }
+
+    void OnPressButton(Gui::LoongGuiButton* button)
+    {
+        for (auto& c : clearColor_) {
+            c = 1.0F * rand() / RAND_MAX;
+        }
+    }
+
+    float clearColor_[4] { 0.3F, 0.4F, 0.5F, 1.0F };
 
     Foundation::LoongClock clock_;
     Gui::LoongGuiWindow loongWindow_ { "MainWindow" };

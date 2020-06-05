@@ -267,4 +267,11 @@ inline T RadToDegree(T rad) { return glm::degrees(rad); }
 template <class T>
 inline T DegreeToRad(T degree) { return glm::radians(degree); }
 
+
+class AABB {
+public:
+    Vector3 min {};
+    Vector3 max {};
+};
+
 } // namespace Loong::Math

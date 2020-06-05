@@ -6,6 +6,7 @@
 
 #include "LoongFoundation/sigslot.h"
 #include <functional>
+#include <memory>
 
 namespace Loong::Foundation {
 

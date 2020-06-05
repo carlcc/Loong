@@ -16,7 +16,7 @@ void LoongGuiButton::Draw()
 
     ScopedId scopedId(this);
     if (ImGui::Button(label_.c_str(), ToImVec(size_))) {
-        OnClickSignal_.emit();
+        OnClickSignal_.emit(this);
     }
 }
 

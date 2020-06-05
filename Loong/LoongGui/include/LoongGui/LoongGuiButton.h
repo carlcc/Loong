@@ -10,6 +10,7 @@
 namespace Loong::Gui {
 
 class LoongGuiButton : public LoongGuiWidget {
+public:
     explicit LoongGuiButton(const std::string& label)
         : LoongGuiWidget(label)
     {
@@ -17,7 +18,7 @@ class LoongGuiButton : public LoongGuiWidget {
 
     void Draw() override;
 
-    LOONG_DECLARE_SIGNAL(OnClick);
+    LOONG_DECLARE_SIGNAL(OnClick, LoongGuiButton*);
 };
 
 }
