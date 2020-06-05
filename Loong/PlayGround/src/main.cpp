@@ -25,6 +25,7 @@
  *  of the possibility of such damages.
  */
 
+#include "LoongGui/LoongGuiWindow.h"
 #include <LoongAppBase/LoongApplication.hpp>
 #include <imgui.h>
 #include <map>
@@ -42,6 +43,7 @@ public:
 
 private:
     Diligent::RefCntAutoPtr<Diligent::IPipelineState> m_pPSO;
+    Gui::LoongGuiWindow loongWindow_;
 };
 
 LoongApplication* CreateLoongApplication()
@@ -188,6 +190,7 @@ void PlayGround::Update(double CurrTime, double ElapsedTime)
 {
     LoongApplication::Update(CurrTime, ElapsedTime);
 
+    loongWindow_.Draw();
     if (ImGui::Begin("Win")) {
         auto mouseX = GetInputManager().GetMouse().GetFloat(MouseButton::MouseAxisX);
         auto mouseY = GetInputManager().GetMouse().GetFloat(MouseButton::MouseAxisY);

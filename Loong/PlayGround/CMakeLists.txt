@@ -15,3 +15,8 @@ set(ASSETS
         )
 
 add_loong_app(PlayGround "Loong"  "${SOURCE}" "${INCLUDE}" "${ASSETS}")
+set_loong_common_target_properties(PlayGround)
+target_link_libraries(PlayGround
+PRIVATE
+        LoongGui
+        )

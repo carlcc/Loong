@@ -10,7 +10,7 @@
 namespace Loong::Gui {
 
 class LoongGuiWindow : public LoongGuiContainer {
-    enum WindowFlag  : uint32_t {
+    enum WindowFlag : uint32_t {
         kMovable = 0x01u,
         kTitleless = 0x02u,
         kResizable = 0x04u,
@@ -19,10 +19,10 @@ class LoongGuiWindow : public LoongGuiContainer {
     };
 
 public:
-    explicit LoongGuiWindow(const std::string& label);
+    explicit LoongGuiWindow(const std::string& label = "");
     ~LoongGuiWindow() override = default;
 
-    virtual void Draw() = 0;
+    void Draw() override;
 
     const float2& GetPosition() const { return position_; }
 

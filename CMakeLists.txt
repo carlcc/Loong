@@ -51,6 +51,8 @@ function(set_loong_common_target_properties TARGET)
             C_VISIBILITY_PRESET hidden # -fvisibility=hidden
             VISIBILITY_INLINES_HIDDEN TRUE
 
+            CXX_STANDARD 17
+            CXX_STANDARD_REQUIRED ON
             # Without -fPIC option GCC fails to link static libraries into dynamic library:
             #  -fPIC
             #      If supported for the target machine, emit position-independent code, suitable for
