@@ -59,12 +59,20 @@ bool LoongFileSystem::Exists(const std::string& file)
 
 bool LoongFileSystem::IsDir(const std::string& file)
 {
-    return 0 != PHYSFS_isDirectory(file.c_str());
+    FileStat stat {};
+    if (!GetFileStat(file, stat)) {
+        return false;
+    }
+    return stat.filetype == FileType::kDirectory;
 }
 
 bool LoongFileSystem::IsSymbolLink(const std::string& file)
 {
-    return 0 != PHYSFS_isSymbolicLink(file.c_str());
+    FileStat stat {};
+    if (!GetFileStat(file, stat)) {
+        return false;
+    }
+    return stat.filetype == FileType::kSymbolLink;
 }
 
 std::optional<std::string> LoongFileSystem::GetMountPoint(const std::string& realDir)
