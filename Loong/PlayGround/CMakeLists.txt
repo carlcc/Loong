@@ -22,4 +22,5 @@ PRIVATE
         LoongApp
         LoongAsset
         LoongFileSystem
+        LoongResource
         )

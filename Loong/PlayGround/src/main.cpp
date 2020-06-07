@@ -2,15 +2,18 @@
 
 #include "LoongApp/Driver.h"
 #include "LoongApp/LoongApp.h"
+#include "LoongFileSystem/LoongFileSystem.h"
 #include "LoongFoundation/LoongClock.h"
 #include "LoongFoundation/LoongFormat.h"
+#include "LoongFoundation/LoongLogger.h"
 #include "LoongFoundation/LoongSigslotHelper.h"
 #include "LoongGui/LoongGuiButton.h"
 #include "LoongGui/LoongGuiText.h"
 #include "LoongGui/LoongGuiWindow.h"
-#include "LoongFileSystem/LoongFileSystem.h"
+#include "LoongResource/LoongResourceManager.h"
 
 #include <imgui.h>
+#include <iostream>
 
 std::shared_ptr<Loong::App::LoongApp> gApp;
 
@@ -35,6 +38,8 @@ public:
             int key = int(App::LoongKeyCode::kKeyA) + i;
             keyTexts_[i] = loongWindow_.CreateChild<Gui::LoongGuiText>(Foundation::Format("Pressed key {}", char(key)));
         }
+
+        texture_ = Resource::LoongResourceManager::GetTexture("/Loong.jpg");
     }
 
     void OnUpdate()
@@ -70,9 +75,11 @@ public:
     Foundation::LoongClock clock_;
     Gui::LoongGuiWindow loongWindow_ { "MainWindow" };
 
-    Gui::LoongGuiText* mouseTexts_[6];
-    Gui::LoongGuiText* keyTexts_[26];
-    Gui::LoongGuiButton* button_;
+    Gui::LoongGuiText* mouseTexts_[6] { nullptr };
+    Gui::LoongGuiText* keyTexts_[26] { nullptr };
+    Gui::LoongGuiButton* button_ { nullptr };
+
+    std::shared_ptr<Resource::LoongTexture> texture_ { nullptr };
 };
 
 }
@@ -91,14 +98,8 @@ const std::string GetDir(const std::string& path)
     return path.substr(0, index);
 }
 
-int main(int argc, char** argv)
+void StartApp()
 {
-    Loong::App::ScopedDriver appDriver;
-
-    Loong::LoongFileSystem::Initialize(argv[0]);
-    auto path = GetDir(__FILE__);
-    Loong::LoongFileSystem::MountSearchPath(path);
-
     Loong::App::LoongApp::WindowConfig config {};
     config.title = "Play Ground";
     gApp = std::make_shared<Loong::App::LoongApp>(config);
@@ -108,5 +109,23 @@ int main(int argc, char** argv)
     gApp->Run();
 
     gApp = nullptr;
+}
+
+int main(int argc, char** argv)
+{
+    Loong::App::ScopedDriver appDriver;
+
+    Loong::FS::ScopedDriver fsDriver(argv[0]);
+    auto path = GetDir(__FILE__);
+    Loong::FS::LoongFileSystem::MountSearchPath(path);
+
+    Loong::Resource::ScopedDriver resourceDriver;
+
+    auto listener = Loong::Foundation::Logger::Get().SubscribeLog([](const Loong::Foundation::LogItem& logItem) {
+        std::cout << "[" << logItem.level << "][" << logItem.location << "]: " << logItem.message << std::endl;
+    });
+
+    StartApp();
+
     return 0;
 }
