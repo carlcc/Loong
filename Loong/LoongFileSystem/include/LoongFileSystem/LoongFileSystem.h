@@ -9,7 +9,7 @@
 #include <string>
 #include <vector>
 
-namespace Loong {
+namespace Loong::FS {
 
 class LoongFileSystem {
 public:
@@ -111,6 +111,32 @@ public:
     static const char* GetLastError();
 
     static const char* GetErrorText(ErrorCode code);
+};
+
+struct ScopedDriver {
+    explicit ScopedDriver(const char* argv0)
+    {
+        suc_ = LoongFileSystem::Initialize(argv0);
+    }
+    ScopedDriver(const ScopedDriver&) = delete;
+    ScopedDriver(ScopedDriver&&) = delete;
+    ScopedDriver& operator=(const ScopedDriver&) = delete;
+    ScopedDriver& operator=(ScopedDriver&&) = delete;
+
+    ~ScopedDriver()
+    {
+        if (suc_) {
+            LoongFileSystem::Uninitialize();
+        }
+    }
+
+    bool operator!() const
+    {
+        return !suc_;
+    }
+
+private:
+    bool suc_ { false };
 };
 
 }

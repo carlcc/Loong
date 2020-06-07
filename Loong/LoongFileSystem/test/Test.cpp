@@ -6,7 +6,7 @@
 #include <cassert>
 #include <iostream>
 
-using namespace Loong;
+using namespace Loong::FS;
 
 #ifdef WIN32
 const char kSeparator = '\\';

@@ -3,9 +3,10 @@
 //
 
 #include "LoongFileSystem/LoongFileSystem.h"
+#include "LoongFoundation/LoongDefer.h"
 #include <physfs.h>
 
-namespace Loong {
+namespace Loong::FS {
 
 bool LoongFileSystem::Initialize(const std::string& argv0)
 {
@@ -144,6 +145,8 @@ int64_t LoongFileSystem::LoadFileContent(const std::string& path, void* bufferVo
     if (file == nullptr) {
         return -1;
     }
+    OnScopeExit { PHYSFS_close(file); };
+
     auto* buffer = static_cast<uint8_t*>(bufferVoid);
 
     int64_t totalCount = 0;
