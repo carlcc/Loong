@@ -17,7 +17,7 @@ public:
 
     static bool Uninitialize();
 
-    static bool MountSearchPath(const std::string& sysPath, const std::string mountPoint = "/", bool isAppend = true);
+    static bool MountSearchPath(const std::string& sysPath, const std::string& mountPoint = "/", bool isAppend = true);
 
     static bool UnmountSearchPath(const std::string& sysPath);
 
@@ -61,6 +61,17 @@ public:
         bool readonly; // Readonly or writable?
     };
     static bool GetFileStat(const std::string& name, FileStat& stat);
+
+    static int64_t GetFileSize(const std::string& name)
+    {
+        FileStat stat {};
+        if (!GetFileStat(name, stat)) {
+            return -1;
+        }
+        return stat.filesize;
+    }
+
+    static int64_t LoadFileContent(const std::string& path, void* buffer, uint64_t bufferSize);
 
     enum class ErrorCode {
         kOk,

@@ -17,7 +17,7 @@ bool LoongFileSystem::Uninitialize()
     return 0 != PHYSFS_deinit();
 }
 
-bool LoongFileSystem::MountSearchPath(const std::string& sysPath, const std::string mountPoint, bool isAppend)
+bool LoongFileSystem::MountSearchPath(const std::string& sysPath, const std::string& mountPoint, bool isAppend)
 {
     return 0 != PHYSFS_mount(sysPath.c_str(), mountPoint.c_str(), int(isAppend));
 }
@@ -108,7 +108,7 @@ bool LoongFileSystem::EnumerateFiles(const std::string& dir, const EnumerateCall
     CB localCb { cb };
     return 0 != PHYSFS_enumerate(
                dir.c_str(), [](void* data, const char* dir, const char* name) -> PHYSFS_EnumerateCallbackResult {
-                   (void) dir;
+                   (void)dir;
                    CB& cb = *reinterpret_cast<CB*>(data);
                    return cb.cb(name) ? PHYSFS_EnumerateCallbackResult::PHYSFS_ENUM_STOP : PHYSFS_EnumerateCallbackResult::PHYSFS_ENUM_OK;
                },
@@ -128,6 +128,31 @@ bool LoongFileSystem::GetFileStat(const std::string& name, FileStat& stat)
     stat.filetype = FileType(physfsStat.filetype);
     stat.readonly = (bool)physfsStat.readonly;
     return true;
+}
+
+int64_t LoongFileSystem::LoadFileContent(const std::string& path, void* bufferVoid, uint64_t bufferSize)
+{
+    auto* file = PHYSFS_openRead(path.c_str());
+    if (file == nullptr) {
+        return -1;
+    }
+    auto* buffer = static_cast<uint8_t*>(bufferVoid);
+
+    int64_t totalCount = 0;
+    while (bufferSize > 0) {
+        auto cnt = PHYSFS_readBytes(file, buffer, bufferSize);
+        if (cnt == -1) {
+            return -1;
+        }
+        totalCount += cnt;
+        buffer += cnt;
+        bufferSize -= cnt;
+
+        if (0 != PHYSFS_eof(file)) {
+            break;
+        }
+    }
+    return totalCount;
 }
 
 LoongFileSystem::ErrorCode LoongFileSystem::GetLastErrorCode()

@@ -18,6 +18,8 @@ PUBLIC
 )
 
 target_link_libraries(LoongFileSystem
+PUBLIC
+    LoongFoundation
 PRIVATE
     physfs-static
 )
