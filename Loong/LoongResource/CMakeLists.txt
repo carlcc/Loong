@@ -14,7 +14,7 @@ PUBLIC
 )
 
 target_link_libraries(LoongResource
-PRIVATE
+PUBLIC
     LoongFoundation
     LoongAsset
     glad

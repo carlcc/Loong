@@ -16,6 +16,7 @@ target_link_libraries(LoongGui
 PUBLIC
     imgui
     LoongFoundation
+    LoongResource
 )
 
 

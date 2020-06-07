@@ -8,6 +8,7 @@
 #include "LoongFoundation/LoongLogger.h"
 #include "LoongFoundation/LoongSigslotHelper.h"
 #include "LoongGui/LoongGuiButton.h"
+#include "LoongGui/LoongGuiImage.h"
 #include "LoongGui/LoongGuiText.h"
 #include "LoongGui/LoongGuiWindow.h"
 #include "LoongResource/LoongResourceManager.h"
@@ -23,11 +24,16 @@ class MyApplication : public Foundation::LoongHasSlots {
 public:
     MyApplication()
     {
+        texture_ = Resource::LoongResourceManager::GetTexture("/Loong.jpg");
+
         gApp->SubscribeUpdate(this, &MyApplication::OnUpdate);
         loongWindow_.ClearChildren();
 
         auto* button = loongWindow_.CreateChild<Gui::LoongGuiButton>("PushMe");
         button->SubscribeOnClick(this, &MyApplication::OnPressButton);
+
+        auto* image = loongWindow_.CreateChild<Gui::LoongGuiImage>();
+        image->SetTexture(texture_);
 
         for (int i = 0; i < 6; ++i) {
             int btn = int(App::LoongMouseButton::kButton1) + i;
@@ -38,8 +44,6 @@ public:
             int key = int(App::LoongKeyCode::kKeyA) + i;
             keyTexts_[i] = loongWindow_.CreateChild<Gui::LoongGuiText>(Foundation::Format("Pressed key {}", char(key)));
         }
-
-        texture_ = Resource::LoongResourceManager::GetTexture("/Loong.jpg");
     }
 
     void OnUpdate()

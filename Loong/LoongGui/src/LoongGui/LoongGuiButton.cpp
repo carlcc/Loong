@@ -8,6 +8,12 @@
 
 namespace Loong::Gui {
 
+LoongGuiButton::LoongGuiButton(const std::string& label)
+    : LoongGuiWidget(label)
+{
+    SetSize({0.0F, 0.0F});
+}
+
 void LoongGuiButton::Draw()
 {
     if (!IsVisible()) {

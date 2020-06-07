@@ -11,10 +11,7 @@ namespace Loong::Gui {
 
 class LoongGuiButton : public LoongGuiWidget {
 public:
-    explicit LoongGuiButton(const std::string& label)
-        : LoongGuiWidget(label)
-    {
-    }
+    explicit LoongGuiButton(const std::string& label);
 
     void Draw() override;
 
