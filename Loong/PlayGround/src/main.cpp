@@ -9,6 +9,8 @@
 #include "LoongGui/LoongGuiText.h"
 #include "LoongGui/LoongGuiWindow.h"
 
+#include <imgui.h>
+
 std::shared_ptr<Loong::App::LoongApp> gApp;
 
 namespace Loong {
@@ -18,31 +20,38 @@ public:
     MyApplication()
     {
         gApp->SubscribeUpdate(this, &MyApplication::OnUpdate);
+        loongWindow_.ClearChildren();
+
+        auto* button = loongWindow_.CreateChild<Gui::LoongGuiButton>("PushMe");
+        button->SubscribeOnClick(this, &MyApplication::OnPressButton);
+
+        for (int i = 0; i < 6; ++i) {
+            int btn = int(App::LoongMouseButton::kButton1) + i;
+            mouseTexts_[i] = loongWindow_.CreateChild<Gui::LoongGuiText>(Foundation::Format("Pressed button {}", btn));
+        }
+
+        for (int i = 0; i < 26; ++i) {
+            int key = int(App::LoongKeyCode::kKeyA) + i;
+            keyTexts_[i] = loongWindow_.CreateChild<Gui::LoongGuiText>(Foundation::Format("Pressed key {}", char(key)));
+        }
     }
 
     void OnUpdate()
     {
         clock_.Update();
-        glClearColor(clearColor_[0],clearColor_[1],clearColor_[2],clearColor_[3]);
+        glClearColor(clearColor_[0], clearColor_[1], clearColor_[2], clearColor_[3]);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         auto& input = gApp->GetInputManager();
-        loongWindow_.ClearChildren();
-
-        loongWindow_.CreateChild<Gui::LoongGuiButton>("PushMe")->SubscribeOnClick(this, &MyApplication::OnPressButton);
 
         for (int i = 0; i < 6; ++i) {
             int btn = int(App::LoongMouseButton::kButton1) + i;
-            if (input.IsMouseButtonPressed(App::LoongMouseButton(btn))) {
-                loongWindow_.CreateChild<Gui::LoongGuiText>(Foundation::Format("Pressed button {}", btn));
-            }
+            mouseTexts_[i]->SetVisible(input.IsMouseButtonPressed(App::LoongMouseButton(btn)));
         }
 
         for (int i = 0; i < 26; ++i) {
             int key = int(App::LoongKeyCode::kKeyA) + i;
-            if (input.IsKeyPressed(Loong::App::LoongKeyCode(key))) {
-                loongWindow_.CreateChild<Gui::LoongGuiText>(Foundation::Format("Pressed key {}", char(key)));
-            }
+            keyTexts_[i]->SetVisible(input.IsKeyPressed(App::LoongKeyCode(key)));
         }
 
         loongWindow_.Draw();
@@ -59,6 +68,10 @@ public:
 
     Foundation::LoongClock clock_;
     Gui::LoongGuiWindow loongWindow_ { "MainWindow" };
+
+    Gui::LoongGuiText* mouseTexts_[6];
+    Gui::LoongGuiText* keyTexts_[26];
+    Gui::LoongGuiButton* button_;
 };
 
 }

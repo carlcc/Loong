@@ -25,6 +25,10 @@ public:
 
     void ClearChildren();
 
+    bool RemoveChild(const LoongGuiElement* child);
+
+    LoongGuiElement* ReleaseChild(const LoongGuiElement* child);
+
     template <class T>
     T* CreateChild(const std::string& label = "")
     {
