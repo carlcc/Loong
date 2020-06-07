@@ -8,6 +8,7 @@
 #include "LoongGui/LoongGuiButton.h"
 #include "LoongGui/LoongGuiText.h"
 #include "LoongGui/LoongGuiWindow.h"
+#include "LoongFileSystem/LoongFileSystem.h"
 
 #include <imgui.h>
 
@@ -76,9 +77,27 @@ public:
 
 }
 
-int main()
+#ifdef WIN32
+const char kSeparator = '\\';
+#else
+const char kSeparator = '/';
+#endif
+
+const std::string GetDir(const std::string& path)
+{
+    auto index = path.rfind(kSeparator);
+    assert(index != std::string::npos);
+
+    return path.substr(0, index);
+}
+
+int main(int argc, char** argv)
 {
     Loong::App::ScopedDriver appDriver;
+
+    Loong::LoongFileSystem::Initialize(argv[0]);
+    auto path = GetDir(__FILE__);
+    Loong::LoongFileSystem::MountSearchPath(path);
 
     Loong::App::LoongApp::WindowConfig config {};
     config.title = "Play Ground";

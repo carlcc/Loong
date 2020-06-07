@@ -20,4 +20,6 @@ target_link_libraries(PlayGround
 PRIVATE
         LoongGui
         LoongApp
+        LoongAsset
+        LoongFileSystem
         )
