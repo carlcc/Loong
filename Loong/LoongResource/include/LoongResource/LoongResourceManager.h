@@ -20,6 +20,7 @@ public:
     static void Uninitialize();
 
     static std::shared_ptr<LoongTexture> GetTexture(const std::string& path);
+
 };
 
 struct ScopedDriver {

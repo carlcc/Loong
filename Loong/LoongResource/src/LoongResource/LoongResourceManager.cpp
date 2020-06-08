@@ -41,7 +41,7 @@ std::shared_ptr<LoongTexture> LoongResourceManager::GetTexture(const std::string
     LOONG_TRACE("Load texture '{}'", path);
     auto texture = LoongTextureLoader::Create(image, true, [](const std::string& p) {
         gLoadedTextures.erase(p);
-        LOONG_ERROR("Unload texture '{}'", p);
+        LOONG_TRACE("Unload texture '{}'", p);
     });
     if (texture != nullptr) {
         gLoadedTextures.insert({ path, texture });
