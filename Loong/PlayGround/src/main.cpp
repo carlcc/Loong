@@ -11,8 +11,12 @@
 #include "LoongGui/LoongGuiImage.h"
 #include "LoongGui/LoongGuiText.h"
 #include "LoongGui/LoongGuiWindow.h"
+#include "LoongRenderer/LoongCamera.h"
+#include "LoongRenderer/LoongRenderer.h"
+#include "LoongResource/LoongGpuBuffer.h"
+#include "LoongResource/LoongGpuModel.h"
 #include "LoongResource/LoongResourceManager.h"
-
+#include "LoongResource/LoongShader.h"
 #include <imgui.h>
 #include <iostream>
 
@@ -22,11 +26,29 @@ namespace Loong {
 
 class MyApplication : public Foundation::LoongHasSlots {
 public:
+    struct UBO {
+        Math::Matrix4 ub_Model;
+        Math::Matrix4 ub_View;
+        Math::Matrix4 ub_Projection;
+        Math::Vector3 ub_ViewPos;
+        float ub_Time;
+    };
+
     MyApplication()
     {
         texture_ = Resource::LoongResourceManager::GetTexture("/Loong.jpg");
+        unlitShader_ = Resource::LoongResourceManager::GetShader("/unlit.glsl");
+        cubeModel_ = Resource::LoongResourceManager::GetModel("/cube.fbx");
+        unlitShader_->Bind();
+        UBO ubo;
+        basicUniforms_.BufferData(&ubo, 1); // Note: Must allocate memory first
+        basicUniforms_.SetBindingPoint(0, sizeof(UBO));
+        auto index = unlitShader_->GetUniformBlockLocation("BasicUBO");
+        unlitShader_->BindUniformBlock(index, 0);
+        unlitShader_->Unbind();
 
         gApp->SubscribeUpdate(this, &MyApplication::OnUpdate);
+        gApp->SubscribeRender(this, &MyApplication::OnRender);
         loongWindow_.ClearChildren();
 
         auto* button = loongWindow_.CreateChild<Gui::LoongGuiButton>("PushMe");
@@ -49,8 +71,6 @@ public:
     void OnUpdate()
     {
         clock_.Update();
-        glClearColor(clearColor_[0], clearColor_[1], clearColor_[2], clearColor_[3]);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         auto& input = gApp->GetInputManager();
 
@@ -65,6 +85,31 @@ public:
         }
 
         loongWindow_.Draw();
+    }
+
+    void OnRender()
+    {
+        int width, height;
+        {
+            gApp->GetFramebufferSize(width, height);
+            glEnable(GL_DEPTH_TEST);
+            glViewport(0, 0, width, height);
+            std::cout << "(" << width << ", " << height << ")" << std::endl;
+            glClearColor(clearColor_[0], clearColor_[1], clearColor_[2], clearColor_[3]);
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        }
+
+        unlitShader_->Bind();
+        UBO ubo;
+        ubo.ub_ViewPos = { 0.0F, 1.0F, 3.0F };
+        ubo.ub_Model = Math::Identity;
+        ubo.ub_View = Math::LookAt(ubo.ub_ViewPos, Math::Zero, Math::kUp);
+        ubo.ub_Projection = Math::Perspective(Math::DegreeToRad(45.0F), width, height, 0.01F, 1000.F);
+        // camera_.UpdateMatrices(width, height, { 2.0F, 0.0F, 2.0F }, Math::Identity);
+        for (auto* mesh : cubeModel_->GetMeshes()) {
+            basicUniforms_.SetSubData(&ubo, 0);
+            renderer_.Draw(*mesh);
+        }
     }
 
     void OnPressButton(Gui::LoongGuiButton* button)
@@ -84,6 +129,11 @@ public:
     Gui::LoongGuiButton* button_ { nullptr };
 
     std::shared_ptr<Resource::LoongTexture> texture_ { nullptr };
+    std::shared_ptr<Resource::LoongShader> unlitShader_ { nullptr };
+    std::shared_ptr<Resource::LoongGpuModel> cubeModel_ { nullptr };
+    Renderer::Renderer renderer_;
+    Renderer::LoongCamera camera_;
+    Resource::LoongUniformBuffer basicUniforms_;
 };
 
 }
