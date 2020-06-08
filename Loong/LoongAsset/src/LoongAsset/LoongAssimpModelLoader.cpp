@@ -10,7 +10,6 @@
 #include <assimp/matrix4x4.h>
 #include <assimp/postprocess.h>
 #include <assimp/scene.h>
-#include <vector>
 
 namespace Loong::Asset {
 

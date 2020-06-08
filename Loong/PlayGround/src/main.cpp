@@ -104,7 +104,7 @@ public:
         ubo.ub_ViewPos = { 0.0F, 1.0F, 3.0F };
         ubo.ub_Model = Math::Identity;
         ubo.ub_View = Math::LookAt(ubo.ub_ViewPos, Math::Zero, Math::kUp);
-        ubo.ub_Projection = Math::Perspective(Math::DegreeToRad(45.0F), width, height, 0.01F, 1000.F);
+        ubo.ub_Projection = Math::Perspective(Math::DegreeToRad(45.0F), (float)width, (float)height, 0.01F, 1000.F);
         // camera_.UpdateMatrices(width, height, { 2.0F, 0.0F, 2.0F }, Math::Identity);
         for (auto* mesh : cubeModel_->GetMeshes()) {
             basicUniforms_.SetSubData(&ubo, 0);

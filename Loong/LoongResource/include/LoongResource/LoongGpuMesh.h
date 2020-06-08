@@ -11,7 +11,7 @@
 
 namespace Loong::Asset {
 class LoongMesh;
-class LoongVertex;
+struct LoongVertex;
 }
 
 namespace Loong::Resource {

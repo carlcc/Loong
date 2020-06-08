@@ -3,6 +3,7 @@
 //
 
 #include "LoongAsset/LoongMesh.h"
+#include <algorithm>
 
 namespace Loong::Asset {
 

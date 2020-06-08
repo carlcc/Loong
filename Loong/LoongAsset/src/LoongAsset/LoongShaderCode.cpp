@@ -5,6 +5,7 @@
 #include "LoongAsset/LoongShaderCode.h"
 #include "LoongFileSystem/LoongFileSystem.h"
 #include "LoongFoundation/LoongLogger.h"
+#include <cassert>
 #include <sstream>
 
 namespace Loong::Asset {

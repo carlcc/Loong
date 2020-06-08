@@ -5,6 +5,7 @@
 #pragma once
 
 #include "LoongFoundation/LoongMath.h"
+#include <string>
 #include <vector>
 
 namespace Loong::Asset {
