@@ -17,6 +17,7 @@ target_link_libraries(LoongAsset
 PRIVATE
     LoongFileSystem
     LoongFoundation
+    FakeAssimp
 )
 
 source_group("src" FILES ${SOURCE})
