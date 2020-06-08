@@ -272,6 +272,8 @@ class AABB {
 public:
     Vector3 min {};
     Vector3 max {};
+
+    AABB Transformed(const Math::Matrix4& transform) const;
 };
 
 } // namespace Loong::Math
