@@ -24,6 +24,10 @@ public:
     LoongGpuModel& operator=(const LoongGpuModel&) = delete;
     LoongGpuModel& operator=(LoongGpuModel&) = delete;
 
+    const std::vector<LoongGpuMesh*>& GetMeshes() const { return meshes_; }
+    const std::vector<std::string>& GetMaterialNames() const { return materialNames_; }
+    const Math::AABB GetAABB() const { return aabb_; }
+
 private:
     std::vector<LoongGpuMesh*> meshes_ {};
     std::vector<std::string> materialNames_ {};
