@@ -6,7 +6,7 @@
 
 #include "LoongFoundation/LoongMath.h"
 
-namespace Loong::Resource {
+namespace Loong::Asset {
 
 struct LoongVertex {
     Math::Vector3 position;
