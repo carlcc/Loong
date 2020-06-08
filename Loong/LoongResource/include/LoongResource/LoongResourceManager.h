@@ -11,6 +11,7 @@ namespace Loong::Resource {
 
 class LoongTexture;
 class LoongGpuModel;
+class LoongShader;
 
 class LoongResourceManager {
 public:
@@ -24,6 +25,7 @@ public:
 
     static std::shared_ptr<LoongGpuModel> GetModel(const std::string& path);
 
+    static std::shared_ptr<LoongShader> GetShader(const std::string& path);
 };
 
 struct ScopedDriver {

@@ -27,7 +27,11 @@ public:
     {
     }
     LoongDefer(const LoongDefer&) = delete;
-    LoongDefer(LoongDefer&& d) noexcept = delete;
+    LoongDefer(LoongDefer&& d) noexcept
+    {
+        defered_ = d.defered_;
+        d.defered_ = []() {};
+    }
     LoongDefer(const LoongDefer&& d) noexcept = delete;
     LoongDefer& operator=(const LoongDefer&) = delete;
     LoongDefer& operator=(LoongDefer&& d) noexcept
