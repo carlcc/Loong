@@ -128,6 +128,7 @@ public:
     {
         Bind();
         glBindBufferRange(GL_UNIFORM_BUFFER, bindPoint, GetID(), 0, size);
+        Unbind();
     }
 };
 

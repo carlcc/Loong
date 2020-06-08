@@ -101,7 +101,7 @@ private:
     friend LoongPipelineFixedState operator^(const LoongPipelineFixedState& a, const LoongPipelineFixedState& b);
 };
 
-LoongPipelineFixedState operator^(const LoongPipelineFixedState& a, const LoongPipelineFixedState& b)
+inline LoongPipelineFixedState operator^(const LoongPipelineFixedState& a, const LoongPipelineFixedState& b)
 {
     LoongPipelineFixedState result;
     result.state_ = a.state_ ^ b.state_;

@@ -8,6 +8,9 @@
 namespace Loong::Resource {
 
 LoongGpuMesh::LoongGpuMesh(const Asset::LoongMesh& mesh)
+    : verticesCount_(uint32_t(mesh.GetVertices().size()))
+    , indicesCount_(uint32_t(mesh.GetIndices().size()))
+    , materialIndex_(uint32_t(mesh.GetMaterialIndex()))
 {
     CreateBuffers(mesh.GetVertices().data(), mesh.GetVertices().size(), mesh.GetIndices().data(), mesh.GetIndices().size());
     aabb_ = mesh.GetAABB();

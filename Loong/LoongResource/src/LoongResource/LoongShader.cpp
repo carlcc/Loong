@@ -75,7 +75,7 @@ uint32_t LoongShader::GetUniformLocation(const std::string& name) const
 
 inline bool IsEngineUBOMember(const std::string& uniformName)
 {
-    return uniformName.compare(0, 4, "ub_") == 0;
+    return uniformName.compare(0, 3, "ub_") == 0;
 }
 
 void LoongShader::QueryUniforms()
