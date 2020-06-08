@@ -63,3 +63,15 @@ set(ASSIMP_BUILD_X3D_IMPORTER OFF)
 set(ASSIMP_BUILD_XGL_IMPORTER OFF)
 set(ASSIMP_BUILD_X_IMPORTER OFF)
 add_subdirectory(assimp)
+
+
+add_library(FakeAssimp INTERFACE)
+target_include_directories(FakeAssimp
+INTERFACE
+    ${CMAKE_CURRENT_BINARY_DIR}/assimp/include
+    ${CMAKE_CURRENT_LIST_DIR}/assimp/include
+)
+target_link_libraries(FakeAssimp
+INTERFACE
+    assimp
+    )
