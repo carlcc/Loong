@@ -23,4 +23,5 @@ PRIVATE
         LoongAsset
         LoongFileSystem
         LoongResource
+        LoongRenderer
         )
