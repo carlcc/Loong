@@ -1,11 +1,8 @@
-if (WIN32)
-    set(LOONG_WIN32_FLAG WIN32)
-endif()
-
 add_subdirectory(LoongFoundation)
 add_subdirectory(LoongApp)
 add_subdirectory(LoongFileSystem)
 add_subdirectory(LoongAsset)
 add_subdirectory(LoongResource)
+add_subdirectory(LoongRenderer)
 add_subdirectory(LoongGui)
 add_subdirectory(PlayGround)
