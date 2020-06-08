@@ -17,6 +17,7 @@
 #include "LoongResource/LoongGpuModel.h"
 #include "LoongResource/LoongResourceManager.h"
 #include "LoongResource/LoongShader.h"
+#include "LoongResource/LoongTexture.h"
 #include <imgui.h>
 #include <iostream>
 
@@ -94,7 +95,6 @@ public:
             gApp->GetFramebufferSize(width, height);
             glEnable(GL_DEPTH_TEST);
             glViewport(0, 0, width, height);
-            std::cout << "(" << width << ", " << height << ")" << std::endl;
             glClearColor(clearColor_[0], clearColor_[1], clearColor_[2], clearColor_[3]);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         }
@@ -105,6 +105,8 @@ public:
         ubo.ub_Model = Math::Identity;
         ubo.ub_View = Math::LookAt(ubo.ub_ViewPos, Math::Zero, Math::kUp);
         ubo.ub_Projection = Math::Perspective(Math::DegreeToRad(45.0F), (float)width, (float)height, 0.01F, 1000.F);
+        texture_->Bind(0);
+        unlitShader_->SetUniformInt("u_DiffuseMap", 0);
         // camera_.UpdateMatrices(width, height, { 2.0F, 0.0F, 2.0F }, Math::Identity);
         for (auto* mesh : cubeModel_->GetMeshes()) {
             basicUniforms_.SetSubData(&ubo, 0);
