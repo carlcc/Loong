@@ -10,6 +10,7 @@
 namespace Loong::Resource {
 
 class LoongTexture;
+class LoongGpuModel;
 
 class LoongResourceManager {
 public:
@@ -20,6 +21,8 @@ public:
     static void Uninitialize();
 
     static std::shared_ptr<LoongTexture> GetTexture(const std::string& path);
+
+    static std::shared_ptr<LoongGpuModel> GetModel(const std::string& path);
 
 };
 

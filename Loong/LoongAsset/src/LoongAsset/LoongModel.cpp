@@ -5,20 +5,27 @@
 #include "LoongAsset/LoongModel.h"
 #include "LoongAsset/LoongMesh.h"
 #include "LoongAssimpModelLoader.h"
+#include "LoongFoundation/LoongLogger.h"
 #include <algorithm>
 
 namespace Loong::Asset {
 
 LoongModel::LoongModel(const std::string& path)
 {
+    LOONG_TRACE("Load model '{}' to 0x{:0X}", path, intptr_t(this));
+    // TODO: Use an internal format, instead of these raw format
     LoongAssimpModelLoader parser;
     if (parser.LoadModel(path, meshes_, materialNames_)) {
+        LOONG_TRACE("Load model '{}' to 0x{:0X} succeed", path, intptr_t(this));
         UpdateAABB();
+    } else {
+        LOONG_ERROR("Load model '{}' to 0x{:0X} failed", path, intptr_t(this));
     }
 }
 
 LoongModel::~LoongModel()
 {
+    LOONG_TRACE("Unload model '0x{:0X}'", intptr_t(this));
     for (auto* mesh : meshes_) {
         delete mesh;
     }

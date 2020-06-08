@@ -4,6 +4,7 @@
 
 #include "LoongAssimpModelLoader.h"
 #include "LoongAsset/LoongMesh.h"
+#include "LoongFileSystem/LoongFileSystem.h"
 #include "LoongFoundation/LoongLogger.h"
 #include <assimp/Importer.hpp>
 #include <assimp/matrix4x4.h>
@@ -15,6 +16,14 @@ namespace Loong::Asset {
 
 bool LoongAssimpModelLoader::LoadModel(const std::string& fileName, std::vector<LoongMesh*>& meshes, std::vector<std::string>& materials)
 {
+    int64_t fileSize = FS::LoongFileSystem::GetFileSize(fileName);
+    if (fileSize <= 0) {
+        LOONG_ERROR("Failed to load model '{}': Wrong file size", fileName);
+        return false;
+    }
+    std::vector<uint8_t> buffer(fileSize);
+    assert(FS::LoongFileSystem::LoadFileContent(fileName, buffer.data(), fileSize) == fileSize);
+
     Assimp::Importer import;
     unsigned int modelParserFlags = 0;
 
@@ -30,10 +39,10 @@ bool LoongAssimpModelLoader::LoadModel(const std::string& fileName, std::vector<
     modelParserFlags |= aiProcess_ImproveCacheLocality;
     modelParserFlags |= aiProcess_GenUVCoords;
     // modelParserFlags |= aiProcess_PreTransformVertices; // incompatible with aiProcess_OptimizeGraph
-    const aiScene* scene = import.ReadFile(fileName, modelParserFlags);
+    const aiScene* scene = import.ReadFileFromMemory(buffer.data(), buffer.size(), modelParserFlags);
 
     if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) {
-        LOONG_ERROR("Load model {} failed!", fileName);
+        LOONG_ERROR("Load model '{}' failed!", fileName);
         return false;
     }
 
