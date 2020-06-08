@@ -202,6 +202,9 @@ public:
             self_->UpdateSignal_.emit();
 
             ImGui::Render();
+
+            self_->RenderSignal_.emit();
+
             int display_w, display_h;
             GetFramebufferSize(display_w, display_h);
             glViewport(0, 0, display_w, display_h);
@@ -260,6 +263,11 @@ public:
         glfwSetInputMode(glfwWindow_, GLFW_CURSOR, modes[b]);
     }
 
+    void GetWindowSize(int& width, int& height) const
+    {
+        glfwGetWindowSize(glfwWindow_, &width, &height);
+    }
+
 private:
     GLFWwindow* glfwWindow_ { nullptr };
     LoongApp* self_ { nullptr };
@@ -312,6 +320,16 @@ void LoongApp::SetMouseMode(LoongApp::MouseMode b)
 const LoongInput& LoongApp::GetInputManager() const
 {
     return impl_->GetInputManager();
+}
+
+void LoongApp::GetWindowSize(int& width, int& height) const
+{
+    impl_->GetWindowSize(width, height);
+}
+
+void LoongApp::GetFrameBufferSize(int& width, int& height) const
+{
+    impl_->GetFramebufferSize(width, height);
 }
 
 }

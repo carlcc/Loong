@@ -53,6 +53,10 @@ public:
 
     const LoongInput& GetInputManager() const;
 
+    void GetWindowSize(int& width, int& height) const;
+
+    void GetFrameBufferSize(int& width, int& height) const;
+
     LOONG_DECLARE_SIGNAL(FrameBufferResize, int, int);
     LOONG_DECLARE_SIGNAL(WindowResize, int, int);
     LOONG_DECLARE_SIGNAL(KeyBoard, LoongKeyCode, LoongInputAction, int);
@@ -62,6 +66,7 @@ public:
     LOONG_DECLARE_SIGNAL(WindowIconify, bool);
     LOONG_DECLARE_SIGNAL(WindowClose);
     LOONG_DECLARE_SIGNAL(Update);
+    LOONG_DECLARE_SIGNAL(Render);
 
 private:
     class Impl;
