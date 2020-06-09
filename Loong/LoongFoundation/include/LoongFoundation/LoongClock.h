@@ -15,7 +15,7 @@ public:
     {
         using namespace std::chrono;
         currentSystemTimeMicros_ = duration_cast<microseconds>(system_clock::now().time_since_epoch()).count();
-        baseSteadyTimeMicros_ = duration_cast<microseconds>(high_resolution_clock::now().time_since_epoch()).count();
+        baseSteadyTimeMicros_ = duration_cast<microseconds>(steady_clock::now().time_since_epoch()).count();
         currentSteadyTimeMicros_ = baseSteadyTimeMicros_;
         deltaTimeMicros_ = 0;
         elapsedTimeMicros_ = 0;
@@ -25,7 +25,7 @@ public:
     {
         using namespace std::chrono;
         currentSystemTimeMicros_ = duration_cast<microseconds>(system_clock::now().time_since_epoch()).count();
-        int64_t steadyNow = duration_cast<microseconds>(high_resolution_clock::now().time_since_epoch()).count();
+        int64_t steadyNow = duration_cast<microseconds>(steady_clock::now().time_since_epoch()).count();
         deltaTimeMicros_ = steadyNow - currentSteadyTimeMicros_;
         elapsedTimeMicros_ = steadyNow - baseSteadyTimeMicros_;
         currentSteadyTimeMicros_ = steadyNow;
