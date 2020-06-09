@@ -1,14 +1,9 @@
-cmake_minimum_required (VERSION 3.6)
+cmake_minimum_required (VERSION 3.2)
 
 project(LoongFileSystem)
 
-set(SOURCE
-    src/LoongFileSystem/LoongFileSystem.cpp
-)
-
-set(INCLUDE
-    include/LoongFileSystem/LoongFileSystem.h
-)
+file(GLOB_RECURSE SOURCE src/*)
+file(GLOB_RECURSE INCLUDE include/*)
 
 add_library(LoongFileSystem STATIC ${SOURCE} ${INCLUDE})
 
