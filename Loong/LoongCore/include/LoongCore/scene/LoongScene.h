@@ -7,6 +7,10 @@
 #include "LoongCore/scene/LoongActor.h"
 #include <unordered_set>
 
+namespace Loong::Resource {
+class LoongMaterial;
+}
+
 namespace Loong::Core {
 
 class LoongCModelRenderer;
@@ -41,6 +45,8 @@ public:
     void RecursiveRemoveFromFastAccess(LoongActor* actor);
 
     LoongCCamera* GetFirstActiveCamera();
+
+    void Render(LoongCCamera& camera, const Resource::LoongMaterial* defaultMaterial);
 
 private:
     void ConstructFastAccess();

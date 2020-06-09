@@ -5,6 +5,11 @@
 #include "LoongCore/scene/LoongScene.h"
 #include "LoongCore/scene/components/LoongCCamera.h"
 #include "LoongCore/scene/components/LoongCModelRenderer.h"
+#include "LoongFoundation/LoongMath.h"
+#include "LoongResource/LoongGpuMesh.h"
+#include "LoongResource/LoongGpuModel.h"
+#include "LoongResource/LoongMaterial.h"
+#include <algorithm>
 #include <cassert>
 
 namespace Loong::Core {
@@ -87,6 +92,47 @@ LoongCCamera* LoongScene::GetFirstActiveCamera()
         return nullptr;
     }
     return *fastAccess_.cameras_.begin();
+}
+
+struct Drawable {
+    const Math::Matrix4* transform;
+    const Resource::LoongGpuMesh* mesh;
+    const Resource::LoongMaterial* material;
+};
+void LoongScene::Render(LoongCCamera& camera, const Resource::LoongMaterial* defaultMaterial)
+{
+    std::vector<Drawable> opaqueDrawables;
+    std::vector<Drawable> transparentDrawables;
+
+    // Prepare drawables
+    for (auto* modelRenderer : fastAccess_.modelRenderers_) {
+        Drawable drawable {};
+        auto* actor = modelRenderer->GetOwner();
+        drawable.transform = &actor->GetTransform().GetWorldTransformMatrix();
+
+        auto& meshes = modelRenderer->GetModel()->GetMeshes();
+        size_t meshCount = meshes.size();
+        for (size_t i = 0; i < meshCount; ++i) {
+            drawable.mesh = meshes[i];
+            drawable.material = modelRenderer->GetMaterials()[i].get();
+            if (drawable.material == nullptr) {
+                drawable.material = defaultMaterial;
+                if (drawable.material == nullptr) {
+                    continue;
+                }
+            }
+            if (drawable.material->IsBlendable()) {
+                transparentDrawables.push_back(drawable);
+            } else {
+                opaqueDrawables.push_back(drawable);
+            }
+        }
+    }
+
+    // sort
+
+
+    // render
 }
 
 }

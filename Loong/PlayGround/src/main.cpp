@@ -3,6 +3,8 @@
 #include "LoongApp/Driver.h"
 #include "LoongApp/LoongApp.h"
 #include "LoongCore/scene/LoongActor.h"
+#include "LoongCore/scene/LoongScene.h"
+#include "LoongCore/scene/components/LoongCCamera.h"
 #include "LoongCore/scene/components/LoongCModelRenderer.h"
 #include "LoongFileSystem/LoongFileSystem.h"
 #include "LoongFoundation/LoongClock.h"
@@ -41,11 +43,27 @@ public:
     MyApplication()
     {
         texture_ = Resource::LoongResourceManager::GetTexture("/Loong.jpg");
-        cubeModel_ = Resource::LoongResourceManager::GetModel("/cube.fbx");
-        material_ = std::make_shared<Resource::LoongMaterial>();
-        material_->SetShaderByFile("/unlit.glsl");
+        scene_ = std::make_shared<Core::LoongScene>(0, "SceneRoot", "");
+
         auto fireTexture = Resource::LoongResourceManager::GetTexture("/fire.jpg");
-        material_->GetUniformsData()["u_DiffuseMap"] = fireTexture;
+        auto material = std::make_shared<Resource::LoongMaterial>();
+        material->SetShaderByFile("/unlit.glsl");
+        material->GetUniformsData()["u_DiffuseMap"] = fireTexture;
+
+        auto cubeModel = Resource::LoongResourceManager::GetModel("/cube.fbx");
+        auto actor = std::make_shared<Core::LoongActor>(1, "ActorCube", "");
+        auto* modelRenderer = actor->AddComponent<Core::LoongCModelRenderer>();
+        modelRenderer->SetModel(cubeModel);
+        modelRenderer->SetMaterial(0, material);
+
+        actor->SetParent(scene_.get());
+
+        auto cameraActor = std::make_shared<Core::LoongActor>(2, "ActorCamera", "");
+        cameraComponent_ = cameraActor->AddComponent<Core::LoongCCamera>();
+        auto& cameraTransform = cameraActor->GetTransform();
+        cameraTransform.SetPosition({2.0F, 1.0F, 1.0F});
+        cameraTransform.LookAt(Math::Zero, Math::kUp);
+
         UBO ubo;
         basicUniforms_.BufferData(&ubo, 1); // Note: Must allocate memory first
         basicUniforms_.SetBindingPoint(0, sizeof(UBO));
@@ -89,12 +107,12 @@ public:
         }
 
         loongWindow_.Draw();
-        material_->GetUniformsData()["u_TextureTiling"] = Math::Vector2 { std::fabs(std::fmod(clock_.ElapsedTime(), 10.0f) - 5.0F) };
+        // material_->GetUniformsData()["u_TextureTiling"] = Math::Vector2 { std::fabs(std::fmod(clock_.ElapsedTime(), 10.0f) - 5.0F) };
         {
             static int frameCount = 0;
             static int lastTime = 0;
             if ((int)clock_.ElapsedTime() > lastTime) {
-                lastTime = (int) clock_.ElapsedTime();
+                lastTime = (int)clock_.ElapsedTime();
                 fpsText_->SetLabel(Foundation::Format("FPS: {}", frameCount));
                 frameCount = 0;
             }
@@ -113,7 +131,8 @@ public:
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         }
 
-        material_->Bind(texture_.get());
+        scene_.
+        // material_->Bind(texture_.get());
         UBO ubo;
         ubo.ub_ViewPos = { 0.0F, 1.0F, 3.0F };
         ubo.ub_Model = Math::Identity;
@@ -144,14 +163,11 @@ public:
     Gui::LoongGuiButton* button_ { nullptr };
 
     std::shared_ptr<Resource::LoongTexture> texture_ { nullptr };
-    std::shared_ptr<Resource::LoongGpuModel> cubeModel_ { nullptr };
     Renderer::Renderer renderer_;
-    Renderer::LoongCamera camera_;
     Resource::LoongUniformBuffer basicUniforms_;
 
-    std::shared_ptr<Resource::LoongMaterial> material_ { nullptr };
-    std::shared_ptr<Core::LoongActor> actor_ { nullptr };
-    std::shared_ptr<Core::LoongCModelRenderer> modelRenderer_ { nullptr };
+    std::shared_ptr<Core::LoongScene> scene_ { nullptr };
+    Core::LoongCCamera* cameraComponent_ { nullptr };
 };
 
 }
