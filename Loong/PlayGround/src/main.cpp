@@ -51,18 +51,19 @@ public:
         material->GetUniformsData()["u_DiffuseMap"] = fireTexture;
 
         auto cubeModel = Resource::LoongResourceManager::GetModel("/cube.fbx");
-        auto actor = std::make_shared<Core::LoongActor>(1, "ActorCube", "");
+        auto* actor = new Core::LoongActor(1, "ActorCube", "");
         auto* modelRenderer = actor->AddComponent<Core::LoongCModelRenderer>();
         modelRenderer->SetModel(cubeModel);
         modelRenderer->SetMaterial(0, material);
 
         actor->SetParent(scene_.get());
 
-        auto cameraActor = std::make_shared<Core::LoongActor>(2, "ActorCamera", "");
+        auto* cameraActor = new Core::LoongActor(2, "ActorCamera", "");
         cameraComponent_ = cameraActor->AddComponent<Core::LoongCCamera>();
         auto& cameraTransform = cameraActor->GetTransform();
         cameraTransform.SetPosition({2.0F, 1.0F, 1.0F});
         cameraTransform.LookAt(Math::Zero, Math::kUp);
+        cameraActor->SetParent(scene_.get());
 
         UBO ubo;
         basicUniforms_.BufferData(&ubo, 1); // Note: Must allocate memory first
@@ -131,18 +132,18 @@ public:
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         }
 
-        scene_.
-        // material_->Bind(texture_.get());
         UBO ubo;
         ubo.ub_ViewPos = { 0.0F, 1.0F, 3.0F };
         ubo.ub_Model = Math::Identity;
         ubo.ub_View = Math::LookAt(ubo.ub_ViewPos, Math::Zero, Math::kUp);
         ubo.ub_Projection = Math::Perspective(Math::DegreeToRad(45.0F), (float)width, (float)height, 0.01F, 1000.F);
-        // camera_.UpdateMatrices(width, height, { 2.0F, 0.0F, 2.0F }, Math::Identity);
-        for (auto* mesh : cubeModel_->GetMeshes()) {
+
+        auto& cameraActorTransform = cameraComponent_->GetOwner()->GetTransform();
+        cameraComponent_->GetCamera().UpdateMatrices(width, height, cameraActorTransform.GetWorldPosition(), cameraActorTransform.GetWorldRotation());
+        scene_->Render(renderer_, *cameraComponent_, nullptr, [&ubo, this](const Math::Matrix4& modelMatrix) {
+            ubo.ub_Model = modelMatrix;
             basicUniforms_.SetSubData(&ubo, 0);
-            renderer_.Draw(*mesh);
-        }
+        });
     }
 
     void OnPressButton(Gui::LoongGuiButton* button)
