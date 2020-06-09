@@ -26,6 +26,10 @@ public:
     {
     }
 
+    void AddModelRenderer(LoongCModelRenderer* modelRenderer) { fastAccess_.modelRenderers_.insert(modelRenderer); }
+
+    void RemoveModelRenderer(LoongCModelRenderer* modelRenderer) { fastAccess_.modelRenderers_.erase(modelRenderer); }
+
     void RecursiveAddToFastAccess(LoongActor* actor);
 
     void RecursiveRemoveFromFastAccess(LoongActor* actor);
