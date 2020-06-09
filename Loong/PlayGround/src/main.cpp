@@ -61,7 +61,7 @@ public:
         auto* cameraActor = new Core::LoongActor(2, "ActorCamera", "");
         cameraComponent_ = cameraActor->AddComponent<Core::LoongCCamera>();
         auto& cameraTransform = cameraActor->GetTransform();
-        cameraTransform.SetPosition({2.0F, 1.0F, 1.0F});
+        cameraTransform.SetPosition({0.0F, 1.0F, 12.0F});
         cameraTransform.LookAt(Math::Zero, Math::kUp);
         cameraActor->SetParent(scene_.get());
 
@@ -107,6 +107,12 @@ public:
             keyTexts_[i]->SetVisible(input.IsKeyPressed(App::LoongKeyCode(key)));
         }
 
+        if (auto* cubeActor = scene_->GetChildByName("ActorCube"); cubeActor != nullptr) {
+            cubeActor->GetTransform().Rotate(Math::kUp, clock_.DeltaTime());
+            cubeActor->GetTransform().SetPosition({std::sinf(clock_.ElapsedTime()) * 2.0F, 0.0F, std::cosf(clock_.ElapsedTime()) * 2.0F});
+        }
+
+
         loongWindow_.Draw();
         // material_->GetUniformsData()["u_TextureTiling"] = Math::Vector2 { std::fabs(std::fmod(clock_.ElapsedTime(), 10.0f) - 5.0F) };
         {
@@ -131,15 +137,14 @@ public:
             glClearColor(clearColor_[0], clearColor_[1], clearColor_[2], clearColor_[3]);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         }
-
-        UBO ubo;
-        ubo.ub_ViewPos = { 0.0F, 1.0F, 3.0F };
-        ubo.ub_Model = Math::Identity;
-        ubo.ub_View = Math::LookAt(ubo.ub_ViewPos, Math::Zero, Math::kUp);
-        ubo.ub_Projection = Math::Perspective(Math::DegreeToRad(45.0F), (float)width, (float)height, 0.01F, 1000.F);
-
         auto& cameraActorTransform = cameraComponent_->GetOwner()->GetTransform();
         cameraComponent_->GetCamera().UpdateMatrices(width, height, cameraActorTransform.GetWorldPosition(), cameraActorTransform.GetWorldRotation());
+
+        UBO ubo;
+        ubo.ub_ViewPos = cameraActorTransform.GetWorldPosition();
+        ubo.ub_View = cameraComponent_->GetCamera().GetViewMatrix();
+        ubo.ub_Projection = cameraComponent_->GetCamera().GetProjectionMatrix();
+
         scene_->Render(renderer_, *cameraComponent_, nullptr, [&ubo, this](const Math::Matrix4& modelMatrix) {
             ubo.ub_Model = modelMatrix;
             basicUniforms_.SetSubData(&ubo, 0);
