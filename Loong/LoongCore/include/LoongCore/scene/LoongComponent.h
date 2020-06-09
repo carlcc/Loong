@@ -31,6 +31,12 @@ public:
 
     LoongActor* GetOwner() const { return owner_; }
 
+    void SetSelfActive(bool active) { isActive_ = active; }
+
+    bool IsSelfActive() const { return isActive_; }
+
+    bool IsActive() const;
+
     virtual void OnStart() {}
 
     virtual void OnEnable() {}
@@ -60,7 +66,8 @@ public:
     virtual std::string GetName() = 0;
 
 private:
-    LoongActor* owner_;
+    LoongActor* owner_ { nullptr };
+    bool isActive_ { true };
 };
 
 }

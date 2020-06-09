@@ -16,7 +16,7 @@ class LoongMaterial;
 
 namespace Loong::Core {
 
-class LoongCModelRenderer : public LoongComponent {
+class LoongCModelRenderer final : public LoongComponent {
     using MaterialRef = std::shared_ptr<Resource::LoongMaterial>;
 
 public:
@@ -31,7 +31,7 @@ public:
 
     ~LoongCModelRenderer() override;
 
-    std::string GetName() override { return "Model Component"; };
+    std::string GetName() override { return "Model Renderer"; };
 
     void SetModel(std::shared_ptr<Resource::LoongGpuModel> model)
     {

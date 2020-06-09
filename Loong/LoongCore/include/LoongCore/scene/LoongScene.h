@@ -10,11 +10,13 @@
 namespace Loong::Core {
 
 class LoongCModelRenderer;
+class LoongCCamera;
 
 class LoongScene : public LoongActor {
 public:
     struct FastAccess {
         std::unordered_set<LoongCModelRenderer*> modelRenderers_;
+        std::unordered_set<LoongCCamera*> cameras_;
 
         void AbsorbAnother(const FastAccess& another);
         void SubtractAnother(const FastAccess& another);
@@ -30,9 +32,15 @@ public:
 
     void RemoveModelRenderer(LoongCModelRenderer* modelRenderer) { fastAccess_.modelRenderers_.erase(modelRenderer); }
 
+    void AddCamera(LoongCCamera* camera) { fastAccess_.cameras_.insert(camera); }
+
+    void RemoveCamera(LoongCCamera* camera) { fastAccess_.cameras_.erase(camera); }
+
     void RecursiveAddToFastAccess(LoongActor* actor);
 
     void RecursiveRemoveFromFastAccess(LoongActor* actor);
+
+    LoongCCamera* GetFirstActiveCamera();
 
 private:
     void ConstructFastAccess();
