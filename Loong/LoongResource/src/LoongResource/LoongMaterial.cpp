@@ -49,13 +49,13 @@ void LoongMaterial::Bind(LoongTexture* emptyTexture)
 
         switch (info.type) {
             // clang-format off
-        case LoongShader::UniformType::kUniformBool:      if (value.type() == typeid(bool)) shader_->SetUniformInt(name, std::any_cast<bool>(value));                     break;
-        case LoongShader::UniformType::kUniformInt:       if (value.type() == typeid(GLint)) shader_->SetUniformInt(name, std::any_cast<GLint>(value));                   break;
-        case LoongShader::UniformType::kUniformFloat:     if (value.type() == typeid(float)) shader_->SetUniformFloat(name, std::any_cast<float>(value));                 break;
-        case LoongShader::UniformType::kUniformFloatVec2: if (value.type() == typeid(Math::Vector2)) shader_->SetUniformVec2(name, std::any_cast<Math::Vector2>(value));  break;
-        case LoongShader::UniformType::kUniformFloatVec3: if (value.type() == typeid(Math::Vector3)) shader_->SetUniformVec3(name, std::any_cast<Math::Vector3>(value));  break;
-        case LoongShader::UniformType::kUniformFloatVec4: if (value.type() == typeid(Math::Vector4)) shader_->SetUniformVec4(name, std::any_cast<Math::Vector4>(value));  break;
-        case LoongShader::UniformType::kUniformFloatMat4: if (value.type() == typeid(Math::Matrix4)) shader_->SetUniformMat4(name, std::any_cast<Math::Matrix4 >(value)); break;
+        case LoongShader::UniformType::kUniformBool:      if (value.type() == typeid(bool)) shader_->SetUniformInt(name, std::any_cast<bool>(value));                     else { LOONG_WARNING("Wrong value type for shader variable {}, expect Bool!", name); } break;
+        case LoongShader::UniformType::kUniformInt:       if (value.type() == typeid(GLint)) shader_->SetUniformInt(name, std::any_cast<GLint>(value));                   else { LOONG_WARNING("Wrong value type for shader variable {}, expect Int!", name); } break;
+        case LoongShader::UniformType::kUniformFloat:     if (value.type() == typeid(float)) shader_->SetUniformFloat(name, std::any_cast<float>(value));                 else { LOONG_WARNING("Wrong value type for shader variable {}, expect Float!", name); } break;
+        case LoongShader::UniformType::kUniformFloatVec2: if (value.type() == typeid(Math::Vector2)) shader_->SetUniformVec2(name, std::any_cast<Math::Vector2>(value));  else { LOONG_WARNING("Wrong value type for shader variable {}, expect FloatVec2!", name); } break;
+        case LoongShader::UniformType::kUniformFloatVec3: if (value.type() == typeid(Math::Vector3)) shader_->SetUniformVec3(name, std::any_cast<Math::Vector3>(value));  else { LOONG_WARNING("Wrong value type for shader variable {}, expect FloatVec3!", name); } break;
+        case LoongShader::UniformType::kUniformFloatVec4: if (value.type() == typeid(Math::Vector4)) shader_->SetUniformVec4(name, std::any_cast<Math::Vector4>(value));  else { LOONG_WARNING("Wrong value type for shader variable {}, expect FloatVec4!", name); } break;
+        case LoongShader::UniformType::kUniformFloatMat4: if (value.type() == typeid(Math::Matrix4)) shader_->SetUniformMat4(name, std::any_cast<Math::Matrix4 >(value)); else { LOONG_WARNING("Wrong value type for shader variable {}, expect FloatMat4!", name); } break;
             // clang-format on
         case LoongShader::UniformType::kUniformSampler2D: {
             if (value.type() == typeid(std::shared_ptr<LoongTexture>)) {

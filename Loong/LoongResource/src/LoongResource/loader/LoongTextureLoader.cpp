@@ -39,6 +39,7 @@ std::shared_ptr<LoongTexture> LoongTextureLoader::Create(const Asset::LoongImage
     glGenTextures(1, &textureID);
     glBindTexture(GL_TEXTURE_2D, textureID);
 
+    glPixelStorei(GL_UNPACK_ALIGNMENT, 1); // Disable alignment
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, image.GetWidth(), image.GetHeight(), 0, imageFormat, GL_UNSIGNED_BYTE, image.GetData());
 
     if (generateMipmap) {
