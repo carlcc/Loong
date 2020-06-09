@@ -66,6 +66,16 @@ public:
 
     std::vector<LoongActor*>& GetChildren() { return children_; }
 
+    const std::vector<LoongActor*>& GetChildren() const { return children_; }
+
+    LoongActor* GetChildByName(const std::string& name) const;
+
+    LoongActor* GetChildByNameRecursive(const std::string& name) const;
+
+    LoongActor* GetChildByTag(const std::string& tag) const;
+
+    LoongActor* GetChildByTagRecursive(const std::string& tag) const;
+
     void MarkAsDestroy();
 
     void OnStart();

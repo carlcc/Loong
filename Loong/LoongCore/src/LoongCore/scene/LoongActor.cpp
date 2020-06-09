@@ -90,6 +90,60 @@ void LoongActor::DetachFromParent()
     }
 }
 
+template <class PropertyGetter, class ValueT>
+LoongActor* FindChildRecursive(const LoongActor* actor, const ValueT& value)
+{
+    for (auto* child : actor->GetChildren()) {
+        if (PropertyGetter::GetProperty(child) == value) {
+            return child;
+        }
+        auto* tmp = FindChildRecursive<PropertyGetter, ValueT>(child, value);
+        if (tmp != nullptr) {
+            return tmp;
+        }
+    }
+    return nullptr;
+}
+
+template <class PropertyGetter, class ValueT>
+LoongActor* FindChild(const LoongActor* actor, const ValueT& value)
+{
+    for (auto* child : actor->GetChildren()) {
+        if (PropertyGetter::GetProperty(child) == value) {
+            return child;
+        }
+    }
+    return nullptr;
+}
+
+struct ActorNameGetter {
+    static const std::string& GetProperty(const LoongActor* actor) { return actor->GetName(); }
+};
+
+LoongActor* LoongActor::GetChildByName(const std::string& name) const
+{
+    return FindChild<ActorNameGetter>(this, name);
+}
+
+LoongActor* LoongActor::GetChildByNameRecursive(const std::string &name) const
+{
+    return FindChildRecursive<ActorNameGetter>(this, name);
+}
+
+struct ActorTagGetter {
+    static const std::string& GetProperty(const LoongActor* actor) { return actor->GetTag(); }
+};
+
+LoongActor* LoongActor::GetChildByTag(const std::string& tag) const
+{
+    return FindChild<ActorTagGetter>(this, tag);
+}
+
+LoongActor* LoongActor::GetChildByTagRecursive(const std::string &tag) const
+{
+    return FindChildRecursive<ActorTagGetter>(this, tag);
+}
+
 void LoongActor::MarkAsDestroy()
 {
     isDestroyed_ = true;
