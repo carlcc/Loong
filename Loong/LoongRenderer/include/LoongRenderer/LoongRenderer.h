@@ -5,7 +5,7 @@
 #include <glad/glad.h>
 
 #include "LoongFoundation/LoongMath.h"
-#include "LoongRenderer/LoongPipelineFixedState.h"
+#include "LoongResource/LoongPipelineFixedState.h"
 #include <cstdint>
 #include <string>
 #include <vector>
@@ -173,15 +173,15 @@ public:
 
     std::vector<Resource::LoongGpuMesh*> GetMeshesInFrustum(const Resource::LoongGpuModel& model, const Math::Matrix4& modelTransform, const Foundation::Frustum& frustum);
 
-    LoongPipelineFixedState FetchGLState();
+    Resource::LoongPipelineFixedState FetchGLState();
 
-    void ApplyStateMask(LoongPipelineFixedState mask);
+    void ApplyStateMask(Resource::LoongPipelineFixedState mask);
 
     const FrameInfo& GetFrameInfo() const;
 
 private:
     FrameInfo frameInfo_;
-    LoongPipelineFixedState state_;
+    Resource::LoongPipelineFixedState state_;
 };
 
 }

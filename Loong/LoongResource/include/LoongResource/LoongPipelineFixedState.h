@@ -6,7 +6,7 @@
 
 #include <cstdint>
 
-namespace Loong::Renderer {
+namespace Loong::Resource {
 
 class LoongPipelineFixedState {
     enum StateFlag : uint32_t {

@@ -246,9 +246,9 @@ std::vector<Resource::LoongGpuMesh*> Renderer::GetMeshesInFrustum(const Resource
     return result;
 }
 
-LoongPipelineFixedState Renderer::FetchGLState()
+Resource::LoongPipelineFixedState Renderer::FetchGLState()
 {
-    LoongPipelineFixedState result;
+    Resource::LoongPipelineFixedState result;
 
     // clang-format off
     GLboolean cMask[4];
@@ -270,7 +270,7 @@ LoongPipelineFixedState Renderer::FetchGLState()
     return result;
 }
 
-void Renderer::ApplyStateMask(LoongPipelineFixedState mask)
+void Renderer::ApplyStateMask(Resource::LoongPipelineFixedState mask)
 {
     auto diffrence = mask ^ state_;
 
