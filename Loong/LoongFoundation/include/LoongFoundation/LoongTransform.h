@@ -125,10 +125,15 @@ public:
 
     void SetParent(Transform* parent)
     {
+        if (parent == parent_) {
+            return;
+        }
         if (parent_ != nullptr) {
             parent_->UnsubscribeTransformChange(this);
         }
         parent_ = parent;
+        // TODO: Calculate a new transform to keep global transform not change?
+        OnTransformChange();
         if (parent_ != nullptr) {
             parent_->SubscribeTransformChange(this, &Transform::OnTransformChange);
         }
