@@ -2,6 +2,8 @@
 
 #include "LoongApp/Driver.h"
 #include "LoongApp/LoongApp.h"
+#include "LoongCore/scene/LoongActor.h"
+#include "LoongCore/scene/components/LoongCModelRenderer.h"
 #include "LoongFileSystem/LoongFileSystem.h"
 #include "LoongFoundation/LoongClock.h"
 #include "LoongFoundation/LoongFormat.h"
@@ -15,6 +17,7 @@
 #include "LoongRenderer/LoongRenderer.h"
 #include "LoongResource/LoongGpuBuffer.h"
 #include "LoongResource/LoongGpuModel.h"
+#include "LoongResource/LoongMaterial.h"
 #include "LoongResource/LoongResourceManager.h"
 #include "LoongResource/LoongShader.h"
 #include "LoongResource/LoongTexture.h"
@@ -38,15 +41,14 @@ public:
     MyApplication()
     {
         texture_ = Resource::LoongResourceManager::GetTexture("/Loong.jpg");
-        unlitShader_ = Resource::LoongResourceManager::GetShader("/unlit.glsl");
         cubeModel_ = Resource::LoongResourceManager::GetModel("/cube.fbx");
-        unlitShader_->Bind();
+        material_ = std::make_shared<Resource::LoongMaterial>();
+        material_->SetShaderByFile("/unlit.glsl");
+        auto fireTexture = Resource::LoongResourceManager::GetTexture("/fire.jpg");
+        material_->GetUniformsData()["u_DiffuseMap"] = fireTexture;
         UBO ubo;
         basicUniforms_.BufferData(&ubo, 1); // Note: Must allocate memory first
         basicUniforms_.SetBindingPoint(0, sizeof(UBO));
-        auto index = unlitShader_->GetUniformBlockLocation("BasicUBO");
-        unlitShader_->BindUniformBlock(index, 0);
-        unlitShader_->Unbind();
 
         gApp->SubscribeUpdate(this, &MyApplication::OnUpdate);
         gApp->SubscribeRender(this, &MyApplication::OnRender);
@@ -58,6 +60,7 @@ public:
         auto* image = loongWindow_.CreateChild<Gui::LoongGuiImage>();
         image->SetTexture(texture_);
 
+        fpsText_ = loongWindow_.CreateChild<Gui::LoongGuiText>("FPS: ");
         for (int i = 0; i < 6; ++i) {
             int btn = int(App::LoongMouseButton::kButton1) + i;
             mouseTexts_[i] = loongWindow_.CreateChild<Gui::LoongGuiText>(Foundation::Format("Pressed button {}", btn));
@@ -86,6 +89,17 @@ public:
         }
 
         loongWindow_.Draw();
+        material_->GetUniformsData()["u_TextureTiling"] = Math::Vector2 { std::fabs(std::fmod(clock_.ElapsedTime(), 10.0f) - 5.0F) };
+        {
+            static int frameCount = 0;
+            static int lastTime = 0;
+            if ((int)clock_.ElapsedTime() > lastTime) {
+                lastTime = (int) clock_.ElapsedTime();
+                fpsText_->SetLabel(Foundation::Format("FPS: {}", frameCount));
+                frameCount = 0;
+            }
+            frameCount++;
+        }
     }
 
     void OnRender()
@@ -99,14 +113,12 @@ public:
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         }
 
-        unlitShader_->Bind();
+        material_->Bind(texture_.get());
         UBO ubo;
         ubo.ub_ViewPos = { 0.0F, 1.0F, 3.0F };
         ubo.ub_Model = Math::Identity;
         ubo.ub_View = Math::LookAt(ubo.ub_ViewPos, Math::Zero, Math::kUp);
         ubo.ub_Projection = Math::Perspective(Math::DegreeToRad(45.0F), (float)width, (float)height, 0.01F, 1000.F);
-        texture_->Bind(0);
-        unlitShader_->SetUniformInt("u_DiffuseMap", 0);
         // camera_.UpdateMatrices(width, height, { 2.0F, 0.0F, 2.0F }, Math::Identity);
         for (auto* mesh : cubeModel_->GetMeshes()) {
             basicUniforms_.SetSubData(&ubo, 0);
@@ -126,16 +138,20 @@ public:
     Foundation::LoongClock clock_;
     Gui::LoongGuiWindow loongWindow_ { "MainWindow" };
 
+    Gui::LoongGuiText* fpsText_ { nullptr };
     Gui::LoongGuiText* mouseTexts_[6] { nullptr };
     Gui::LoongGuiText* keyTexts_[26] { nullptr };
     Gui::LoongGuiButton* button_ { nullptr };
 
     std::shared_ptr<Resource::LoongTexture> texture_ { nullptr };
-    std::shared_ptr<Resource::LoongShader> unlitShader_ { nullptr };
     std::shared_ptr<Resource::LoongGpuModel> cubeModel_ { nullptr };
     Renderer::Renderer renderer_;
     Renderer::LoongCamera camera_;
     Resource::LoongUniformBuffer basicUniforms_;
+
+    std::shared_ptr<Resource::LoongMaterial> material_ { nullptr };
+    std::shared_ptr<Core::LoongActor> actor_ { nullptr };
+    std::shared_ptr<Core::LoongCModelRenderer> modelRenderer_ { nullptr };
 };
 
 }
