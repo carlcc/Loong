@@ -27,10 +27,9 @@ public:
         kCullCustom = 3,
     };
 
-    explicit LoongCModelRenderer(LoongActor* owner)
-        : LoongComponent(owner)
-    {
-    }
+    explicit LoongCModelRenderer(LoongActor* owner);
+
+    ~LoongCModelRenderer() override;
 
     std::string GetName() override { return "Model Component"; };
 
