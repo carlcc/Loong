@@ -24,4 +24,5 @@ PRIVATE
         LoongFileSystem
         LoongResource
         LoongRenderer
+        LoongCore
         )
