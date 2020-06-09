@@ -6,6 +6,7 @@
 #include "LoongCore/scene/components/LoongCCamera.h"
 #include "LoongCore/scene/components/LoongCModelRenderer.h"
 #include "LoongFoundation/LoongMath.h"
+#include "LoongRenderer/LoongRenderer.h"
 #include "LoongResource/LoongGpuMesh.h"
 #include "LoongResource/LoongGpuModel.h"
 #include "LoongResource/LoongMaterial.h"
@@ -98,17 +99,22 @@ struct Drawable {
     const Math::Matrix4* transform;
     const Resource::LoongGpuMesh* mesh;
     const Resource::LoongMaterial* material;
+    float distance;
 };
-void LoongScene::Render(LoongCCamera& camera, const Resource::LoongMaterial* defaultMaterial)
+
+void LoongScene::Render(Renderer::Renderer& renderer, LoongCCamera& camera, const Resource::LoongMaterial* defaultMaterial, const SetModelMatrixCallback& onSetModelMatrix)
 {
     std::vector<Drawable> opaqueDrawables;
     std::vector<Drawable> transparentDrawables;
+
+    auto& cameraActor = *camera.GetOwner();
 
     // Prepare drawables
     for (auto* modelRenderer : fastAccess_.modelRenderers_) {
         Drawable drawable {};
         auto* actor = modelRenderer->GetOwner();
         drawable.transform = &actor->GetTransform().GetWorldTransformMatrix();
+        drawable.distance = Math::Distance(actor->GetTransform().GetWorldPosition(), cameraActor.GetTransform().GetWorldPosition());
 
         auto& meshes = modelRenderer->GetModel()->GetMeshes();
         size_t meshCount = meshes.size();
@@ -130,9 +136,20 @@ void LoongScene::Render(LoongCCamera& camera, const Resource::LoongMaterial* def
     }
 
     // sort
-
+    std::sort(opaqueDrawables.begin(), opaqueDrawables.end(), [](const Drawable& a, const Drawable& b) -> bool {
+        return a.distance < b.distance;
+    });
+    std::sort(transparentDrawables.begin(), transparentDrawables.end(), [](const Drawable& a, const Drawable& b) -> bool {
+        return a.distance > b.distance;
+    });
 
     // render
+    for (auto& drawable : opaqueDrawables) {
+        onSetModelMatrix(*drawable.transform);
+        drawable.material->Bind(nullptr);
+
+        renderer.Draw(*drawable.mesh);
+    }
 }
 
 }

@@ -5,10 +5,14 @@
 #pragma once
 
 #include "LoongCore/scene/LoongActor.h"
+#include <functional>
 #include <unordered_set>
 
 namespace Loong::Resource {
 class LoongMaterial;
+}
+namespace Loong::Renderer {
+class Renderer;
 }
 
 namespace Loong::Core {
@@ -46,7 +50,8 @@ public:
 
     LoongCCamera* GetFirstActiveCamera();
 
-    void Render(LoongCCamera& camera, const Resource::LoongMaterial* defaultMaterial);
+    using SetModelMatrixCallback = std::function<void(const Math::Matrix4& modelMatrix)>;
+    void Render(Renderer::Renderer& renderer, LoongCCamera& camera, const Resource::LoongMaterial* defaultMaterial, const SetModelMatrixCallback& onSetModelMatrix);
 
 private:
     void ConstructFastAccess();
