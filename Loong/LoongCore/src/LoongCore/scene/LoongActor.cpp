@@ -4,6 +4,7 @@
 
 #include "LoongCore/scene/LoongActor.h"
 #include "LoongCore/scene/LoongScene.h"
+#include <algorithm>
 
 namespace Loong::Core {
 

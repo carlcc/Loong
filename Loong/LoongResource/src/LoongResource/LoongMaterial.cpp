@@ -30,7 +30,7 @@ void LoongMaterial::SetShaderByFile(const std::string& shaderFile)
     }
 }
 
-void LoongMaterial::Bind(LoongTexture* emptyTexture)
+void LoongMaterial::Bind(LoongTexture* emptyTexture) const
 {
     if (!HasShader())
         return;
@@ -75,7 +75,7 @@ void LoongMaterial::Bind(LoongTexture* emptyTexture)
     }
 }
 
-void LoongMaterial::UnBind()
+void LoongMaterial::UnBind() const
 {
     if (HasShader()) {
         shader_->Unbind();

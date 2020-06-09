@@ -24,9 +24,9 @@ public:
 
     std::shared_ptr<LoongShader> GetShader() const { return shader_; }
 
-    void Bind(LoongTexture* emptyTexture);
+    void Bind(LoongTexture* emptyTexture) const;
 
-    void UnBind();
+    void UnBind() const;
 
     template <typename T>
     void Set(const std::string& key, const T& value)
