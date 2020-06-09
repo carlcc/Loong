@@ -22,7 +22,7 @@ public:
     LoongActor(const LoongActor&) = delete;
     LoongActor(LoongActor&&) = delete;
 
-    ~LoongActor();
+    virtual ~LoongActor();
 
     LoongActor& operator=(const LoongActor&) = delete;
     LoongActor& operator=(LoongActor&&) = delete;
@@ -52,6 +52,15 @@ public:
     bool HasParent() const { return parent_ != nullptr; }
 
     LoongActor* GetParent() const { return parent_; }
+
+    LoongActor* GetRoot()
+    {
+        auto* root = this;
+        while (root->HasParent()) {
+            root = root->GetParent();
+        }
+        return root;
+    }
 
     uint32_t GetParentID() const { return HasParent() ? GetParent()->GetID() : 0; }
 
@@ -90,7 +99,7 @@ public:
     template <typename T, typename... Args>
     T* AddComponent(Args&&... args)
     {
-        // TODO: enable multiple components of same type
+        // Every actor should have only one component of a certain type to improve performance
         static_assert(std::is_base_of<LoongComponent, T>::value, "T should derive from CComponent");
 
         if (auto found = GetComponent<T>(); found != nullptr) {
@@ -145,7 +154,7 @@ public:
         return nullptr;
     }
 
-    std::vector<LoongComponent*>& GetComponents() { return components_; }
+    const std::vector<std::shared_ptr<LoongComponent>>& GetComponents() { return components_; }
 
     // virtual void OnSerialize(tinyxml2::XMLDocument& doc, tinyxml2::XMLNode* actorsRoot) override;
 
@@ -178,7 +187,7 @@ private:
     LoongActor* parent_ { nullptr };
     std::vector<LoongActor*> children_ {};
 
-    std::vector<LoongComponent*> components_ {};
+    std::vector<std::shared_ptr<LoongComponent>> components_ {};
 
     Foundation::Transform transform_ {};
 };
