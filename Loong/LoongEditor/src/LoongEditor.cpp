@@ -6,6 +6,7 @@
 #include "LoongApp/LoongApp.h"
 #include "LoongFoundation/LoongClock.h"
 #include "panels/LoongEditorHierarchyPanel.h"
+#include "panels/LoongEditorInspectorPanel.h"
 #include "panels/LoongEditorPanel.h"
 #include "utils/LoongEditorTemplates.h"
 #include <imgui.h>
@@ -46,7 +47,7 @@ bool LoongEditor::Initialize()
     PanelMaker panelMaker(this, panels_);
     panelMaker.MakePanel<LoongEditorHierarchyPanel>("Hierarchy");
     // panelMaker.MakePanel<EditorScenePanel>("scene");
-    // panelMaker.MakePanel<EditorInspectorPanel>("inspector");
+    panelMaker.MakePanel<LoongEditorInspectorPanel>("Inspector");
     // panelMaker.MakePanel<EditorContentPanel>("content");
     // panelMaker.MakePanel<EditorGamePanel>("game");
     // panelMaker.MakePanel<EditorMaterialEditorPanel>("material");

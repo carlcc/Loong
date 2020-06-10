@@ -9,6 +9,7 @@
 #include "LoongCore/scene/LoongActor.h"
 #include "LoongCore/scene/LoongScene.h"
 #include "LoongCore/scene/components/LoongCCamera.h"
+#include "LoongCore/scene/components/LoongCLight.h"
 #include "LoongCore/scene/components/LoongCModelRenderer.h"
 #include <imgui.h>
 
@@ -39,7 +40,7 @@ void FillActorMenu(Core::LoongActor* actor, Core::LoongScene* scene, LoongEditor
         using Actor = Core::LoongActor;
         static std::vector<std::pair<const char*, std::function<CComponent*(Actor*)>>> kComponentCreatorMap = {
             { "Model", [](Actor* a) -> CComponent* { return a->AddComponent<Core::LoongCModelRenderer>(); } },
-            // { "Light", [](Actor* a) -> CComponent* { return a->AddComponent<CLight>(); } },
+            { "Light", [](Actor* a) -> CComponent* { return a->AddComponent<Core::LoongCLight>(); } },
             { "Camera", [](Actor* a) -> CComponent* { return a->AddComponent<Core::LoongCCamera>(); } },
         };
         for (auto& [name, creator] : kComponentCreatorMap) {
