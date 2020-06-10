@@ -13,10 +13,8 @@ class LoongCLight : public LoongComponent {
 public:
     using Type = Renderer::LoongLight::Type;
 
-    explicit LoongCLight(LoongActor* owner)
-        : LoongComponent(owner)
-    {
-    }
+    explicit LoongCLight(LoongActor* owner);
+    ~LoongCLight() override;
 
     std::string GetName() override { return "Light"; }
 

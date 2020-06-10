@@ -10,14 +10,14 @@ namespace Loong::Core {
 LoongCCamera::LoongCCamera(LoongActor* owner)
     : LoongComponent(owner)
 {
-    if (auto* scene = dynamic_cast<LoongScene*>(owner); scene != nullptr) {
+    if (auto* scene = dynamic_cast<LoongScene*>(owner->GetRoot()); scene != nullptr) {
         scene->AddCamera(this);
     }
 }
 
 LoongCCamera::~LoongCCamera()
 {
-    if (auto* scene = dynamic_cast<LoongScene*>(GetOwner()); scene != nullptr) {
+    if (auto* scene = dynamic_cast<LoongScene*>(GetOwner()->GetRoot()); scene != nullptr) {
         scene->RemoveCamera(this);
     }
 }
