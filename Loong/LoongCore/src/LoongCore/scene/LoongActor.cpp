@@ -4,6 +4,7 @@
 
 #include "LoongCore/scene/LoongActor.h"
 #include "LoongCore/scene/LoongScene.h"
+#include "LoongFoundation/LoongLogger.h"
 #include <algorithm>
 
 namespace Loong::Core {
@@ -17,6 +18,7 @@ LoongActor::LoongActor(uint32_t actorID, std::string name, std::string tag)
 
 LoongActor::~LoongActor()
 {
+    LOONG_TRACE("Destruct actor {}(ID {})", name_, actorID_);
     DestroySignal_.emit(this);
 
     std::vector<LoongActor*> toDetach = children_;
@@ -125,7 +127,7 @@ LoongActor* LoongActor::GetChildByName(const std::string& name) const
     return FindChild<ActorNameGetter>(this, name);
 }
 
-LoongActor* LoongActor::GetChildByNameRecursive(const std::string &name) const
+LoongActor* LoongActor::GetChildByNameRecursive(const std::string& name) const
 {
     return FindChildRecursive<ActorNameGetter>(this, name);
 }
@@ -139,7 +141,7 @@ LoongActor* LoongActor::GetChildByTag(const std::string& tag) const
     return FindChild<ActorTagGetter>(this, tag);
 }
 
-LoongActor* LoongActor::GetChildByTagRecursive(const std::string &tag) const
+LoongActor* LoongActor::GetChildByTagRecursive(const std::string& tag) const
 {
     return FindChildRecursive<ActorTagGetter>(this, tag);
 }
