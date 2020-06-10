@@ -142,7 +142,7 @@ public:
     Foundation::LoongClock clock_;
 
     std::shared_ptr<Resource::LoongTexture> texture_ { nullptr };
-    Renderer::Renderer renderer_;
+    Renderer::LoongRenderer renderer_;
     Resource::LoongUniformBuffer basicUniforms_;
 
     std::shared_ptr<Core::LoongScene> scene_ { nullptr };

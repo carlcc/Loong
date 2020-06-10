@@ -12,6 +12,7 @@ namespace Loong::Resource {
 class LoongTexture;
 class LoongGpuModel;
 class LoongShader;
+class LoongMaterial;
 
 class LoongResourceManager {
 public:
@@ -26,6 +27,8 @@ public:
     static std::shared_ptr<LoongGpuModel> GetModel(const std::string& path);
 
     static std::shared_ptr<LoongShader> GetShader(const std::string& path);
+
+    static std::shared_ptr<LoongMaterial> GetMaterial(const std::string& path);
 };
 
 }

@@ -9,6 +9,7 @@
 #include "LoongFoundation/LoongDefer.h"
 #include "LoongFoundation/LoongLogger.h"
 #include "LoongResource/LoongGpuModel.h"
+#include "LoongResource/LoongMaterial.h"
 #include "LoongResource/LoongShader.h"
 #include "LoongResource/LoongTexture.h"
 #include "loader/LoongTextureLoader.h"
@@ -21,6 +22,7 @@ namespace Loong::Resource {
 static std::map<std::string, std::weak_ptr<LoongTexture>> gLoadedTextures;
 static std::map<std::string, std::weak_ptr<LoongGpuModel>> gLoadedModels;
 static std::map<std::string, std::weak_ptr<LoongShader>> gLoadedShaders;
+static std::map<std::string, std::weak_ptr<LoongMaterial>> gLoadedMaterials;
 
 bool LoongResourceManager::Initialize()
 {
@@ -32,6 +34,7 @@ void LoongResourceManager::Uninitialize()
     gLoadedTextures.clear();
     gLoadedModels.clear();
     gLoadedShaders.clear();
+    gLoadedMaterials.clear();
 }
 
 std::shared_ptr<LoongTexture> LoongResourceManager::GetTexture(const std::string& path)
@@ -216,6 +219,36 @@ std::shared_ptr<LoongShader> LoongResourceManager::GetShader(const std::string& 
     gLoadedShaders.insert({ path, spShaderProgram });
     LOONG_TRACE("Load shader '{}' succeed", path);
     return spShaderProgram;
+}
+
+std::shared_ptr<LoongMaterial> LoongResourceManager::GetMaterial(const std::string& path)
+{
+    return nullptr; // TODO: NYI
+//    auto it = gLoadedMaterials.find(path);
+//    if (it != gLoadedMaterials.end()) {
+//        auto sp = it->second.lock();
+//        assert(sp != nullptr);
+//        return sp;
+//    }
+//
+//    Asset::LoongImage image(path);
+//    if (!image) {
+//        LOONG_ERROR("Load image '{}' failed", path);
+//        return nullptr;
+//    }
+//
+//    LOONG_TRACE("Load texture '{}'", path);
+//    auto texture = LoongTextureLoader::Create(image, true, [](const std::string& p) {
+//        gLoadedTextures.erase(p);
+//        LOONG_TRACE("Unload texture '{}'", p);
+//    });
+//    if (texture != nullptr) {
+//        gLoadedTextures.insert({ path, texture });
+//        LOONG_TRACE("Load texture '{}' succeed", path);
+//    } else {
+//        LOONG_ERROR("Load texture '{}' failed", path);
+//    }
+//    return texture;
 }
 
 }
