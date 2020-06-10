@@ -108,13 +108,17 @@ void LoongScene::Render(Renderer::Renderer& renderer, LoongCCamera& camera, cons
     std::vector<Drawable> transparentDrawables;
 
     auto& cameraActor = *camera.GetOwner();
+    auto& cameraActorTransform = cameraActor.GetTransform();
 
     // Prepare drawables
     for (auto* modelRenderer : fastAccess_.modelRenderers_) {
+        // TODO: cull the objects cannot be seen
+
         Drawable drawable {};
         auto* actor = modelRenderer->GetOwner();
-        drawable.transform = &actor->GetTransform().GetWorldTransformMatrix();
-        drawable.distance = Math::Distance(actor->GetTransform().GetWorldPosition(), cameraActor.GetTransform().GetWorldPosition());
+        auto& actorTransform = actor->GetTransform();
+        drawable.transform = &actorTransform.GetWorldTransformMatrix();
+        drawable.distance = Math::Distance(actorTransform.GetWorldPosition(), cameraActorTransform.GetWorldPosition());
 
         auto& meshes = modelRenderer->GetModel()->GetMeshes();
         size_t meshCount = meshes.size();
