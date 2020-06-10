@@ -156,4 +156,18 @@ void LoongScene::Render(Renderer::Renderer& renderer, LoongCCamera& camera, cons
     }
 }
 
+// TODO: Use an object pool?
+static uint32_t gActorIdCounter = 0;
+std::unique_ptr<LoongActor> LoongScene::CreateActor(const std::string& name, const std::string& tag)
+{
+    auto* actor = new LoongActor(++gActorIdCounter, name, tag);
+    return std::unique_ptr<LoongActor>(actor);
+}
+
+std::unique_ptr<LoongScene> LoongScene::CreateScene(const std::string& name, const std::string& tag)
+{
+    auto* scene = new LoongScene(++gActorIdCounter, name, tag);
+    return std::unique_ptr<LoongScene>(scene);
+}
+
 }

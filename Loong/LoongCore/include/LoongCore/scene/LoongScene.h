@@ -31,10 +31,13 @@ public:
         void Clear();
     };
 
+protected:
     LoongScene(uint32_t actorID, std::string name, std::string tag)
         : LoongActor(actorID, std::move(name), std::move(tag))
     {
     }
+
+public:
 
     void AddModelRenderer(LoongCModelRenderer* modelRenderer) { fastAccess_.modelRenderers_.insert(modelRenderer); }
 
@@ -52,6 +55,10 @@ public:
 
     using SetModelMatrixCallback = std::function<void(const Math::Matrix4& modelMatrix)>;
     void Render(Renderer::Renderer& renderer, LoongCCamera& camera, const Resource::LoongMaterial* defaultMaterial, const SetModelMatrixCallback& onSetModelMatrix);
+
+    static std::unique_ptr<LoongActor> CreateActor(const std::string& name, const std::string& tag = "");
+
+    static std::unique_ptr<LoongScene> CreateScene(const std::string& name, const std::string& tag = "");
 
 private:
     void ConstructFastAccess();

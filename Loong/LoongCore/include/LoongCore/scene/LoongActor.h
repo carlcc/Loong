@@ -16,9 +16,10 @@ namespace Loong::Core {
 class LoongComponent;
 
 class LoongActor {
-public:
+protected:
     LoongActor(uint32_t actorID, std::string name, std::string tag);
 
+public:
     LoongActor(const LoongActor&) = delete;
     LoongActor(LoongActor&&) = delete;
 
@@ -200,6 +201,8 @@ private:
     std::vector<std::shared_ptr<LoongComponent>> components_ {};
 
     Foundation::Transform transform_ {};
+
+    friend class LoongScene;
 };
 
 }

@@ -42,7 +42,7 @@ public:
     LoongEditor()
     {
         texture_ = Resource::LoongResourceManager::GetTexture("Textures/Loong.jpg");
-        scene_ = std::make_shared<Core::LoongScene>(0, "SceneRoot", "");
+        scene_.reset(Core::LoongScene::CreateScene("SceneRoot").release());
 
         auto fireTexture = Resource::LoongResourceManager::GetTexture("Textures/fire.jpg");
         auto material = std::make_shared<Resource::LoongMaterial>();
@@ -50,14 +50,14 @@ public:
         material->GetUniformsData()["u_DiffuseMap"] = fireTexture;
 
         auto cubeModel = Resource::LoongResourceManager::GetModel("Models/cube.fbx");
-        auto* actor = new Core::LoongActor(1, "ActorCube", "");
+        auto* actor = Core::LoongScene::CreateActor("ActorCube").release();
         auto* modelRenderer = actor->AddComponent<Core::LoongCModelRenderer>();
         modelRenderer->SetModel(cubeModel);
         modelRenderer->SetMaterial(0, material);
 
         actor->SetParent(scene_.get());
 
-        auto* cameraActor = new Core::LoongActor(2, "ActorCamera", "");
+        auto* cameraActor = Core::LoongScene::CreateActor("ActorCamera").release();
         cameraComponent_ = cameraActor->AddComponent<Core::LoongCCamera>();
         auto& cameraTransform = cameraActor->GetTransform();
         cameraTransform.SetPosition({ 0.0F, 1.0F, 12.0F });
@@ -65,7 +65,7 @@ public:
         cameraActor->SetParent(scene_.get());
 
         UBO ubo;
-        basicUniforms_.BufferData(&ubo, 1); // Note: Must allocate memory first
+        basicUniforms_.BufferData(&ubo, 1, Resource::LoongGpuBufferUsage::kStreamDraw); // Note: Must allocate memory first
         basicUniforms_.SetBindingPoint(0, sizeof(UBO));
 
         gApp->SubscribeUpdate(this, &LoongEditor::OnUpdate);
