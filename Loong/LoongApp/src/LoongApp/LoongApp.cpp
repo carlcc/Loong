@@ -210,6 +210,8 @@ public:
             glViewport(0, 0, display_w, display_h);
             ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
+            self_->LateUpdateSignal_.emit();
+
             glfwSwapBuffers(glfwWindow_);
         }
         return 0;
