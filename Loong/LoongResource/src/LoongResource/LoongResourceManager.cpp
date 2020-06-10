@@ -79,7 +79,7 @@ std::shared_ptr<LoongGpuModel> LoongResourceManager::GetModel(const std::string&
     }
 
     LOONG_TRACE("Load GPU model '{}'", path);
-    auto* gpuModel = new LoongGpuModel(model);
+    auto* gpuModel = new LoongGpuModel(model, path);
     std::shared_ptr<LoongGpuModel> spGpuModel(gpuModel, [path](LoongGpuModel* m) {
         gLoadedModels.erase(path);
         delete m;

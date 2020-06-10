@@ -8,7 +8,7 @@
 
 namespace Loong::Resource {
 
-LoongGpuModel::LoongGpuModel(const Asset::LoongModel& model)
+LoongGpuModel::LoongGpuModel(const Asset::LoongModel& model, const std::string& path)
 {
     meshes_.reserve(model.GetMeshes().size());
     materialNames_ = model.GetMaterialNames();
@@ -17,6 +17,7 @@ LoongGpuModel::LoongGpuModel(const Asset::LoongModel& model)
     for (auto& mesh : model.GetMeshes()) {
         meshes_.emplace_back(new LoongGpuMesh(*mesh));
     }
+    path_ = path;
 }
 
 LoongGpuModel::~LoongGpuModel()

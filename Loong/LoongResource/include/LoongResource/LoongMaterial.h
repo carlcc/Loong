@@ -85,7 +85,7 @@ public:
 
     const std::map<std::string, std::any>& GetUniformsData() const { return uniformsData_; }
 
-    const std::string GetPath() const { return path_; }
+    const std::string& GetPath() const { return path_; }
 
     void SetPath(const std::string& path) { path_ = path; }
 

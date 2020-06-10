@@ -18,7 +18,7 @@ class LoongGpuMesh;
 
 class LoongGpuModel {
 public:
-    explicit LoongGpuModel(const Asset::LoongModel& model);
+    explicit LoongGpuModel(const Asset::LoongModel& model, const std::string& path);
     LoongGpuModel(const LoongGpuModel&) = delete;
     LoongGpuModel(LoongGpuModel&) = delete;
     ~LoongGpuModel();
@@ -29,11 +29,14 @@ public:
     const std::vector<std::string>& GetMaterialNames() const { return materialNames_; }
     const Math::AABB GetAABB() const { return aabb_; }
 
+    const std::string& GetPath() const { return path_; }
+
 private:
     std::vector<LoongGpuMesh*> meshes_ {};
     std::vector<std::string> materialNames_ {};
 
     Math::AABB aabb_ {};
+    std::string path_ {};
 };
 
 }
