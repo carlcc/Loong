@@ -4,10 +4,13 @@
 
 #pragma once
 
+#include "LoongEditorContext.h"
 #include "LoongFoundation/LoongSigslotHelper.h"
-#include "LoongGui/LoongGuiWindow.h"
+#include "widget/LoongEditorModalConfirmPopup.h"
+#include <functional>
 #include <memory>
-#include <vector>
+#include <queue>
+#include <unordered_map>
 
 namespace Loong::App {
 class LoongApp;
@@ -15,9 +18,16 @@ class LoongApp;
 
 namespace Loong::Editor {
 
+class LoongEditorPanel;
+
 class LoongEditor : public Foundation::LoongHasSlots {
 public:
-    explicit LoongEditor(Loong::App::LoongApp* app);
+    using EndFrameTask = std::function<void()>; // Tasks execute on end of logic frame (before rendering)
+    using PanelMap = std::unordered_map<std::string, std::shared_ptr<LoongEditorPanel>>;
+
+    explicit LoongEditor(Loong::App::LoongApp* app, const std::shared_ptr<LoongEditorContext>& context);
+
+    bool Initialize();
 
     void OnUpdate();
 
@@ -27,10 +37,38 @@ public:
 
     void OnFrameBufferResize(int width, int height);
 
+    template <class T>
+    T* GetPanel()
+    {
+        static_assert(std::is_base_of_v<LoongEditorPanel, std::remove_cv_t<T>>);
+        for (auto& [name, panel] : panels_) {
+            T* p = dynamic_cast<T*>(panel.get());
+            if (p != nullptr) {
+                return p;
+            }
+        }
+        assert(false);
+        return nullptr;
+    }
+
+    LoongEditorContext& GetContext() const { return *context_; }
+
+    void AddEndFrameTask(EndFrameTask&& task) { endFrameTaskQueue_.push(std::move(task)); }
+
+private:
+    void SetupDockSpace();
+
+    void OnUpdateMainMenuBar();
+
+    void DoEndFrameTasks();
+
 private:
     float clearColor_[4] { 0.3F, 0.4F, 0.5F, 1.0F };
     App::LoongApp* app_ { nullptr };
-    std::vector<std::shared_ptr<Gui::LoongGuiWindow>> panels_ {};
+    std::shared_ptr<LoongEditorContext> context_ { nullptr };
+    std::queue<EndFrameTask> endFrameTaskQueue_ {};
+    LoongEditorModalConfirmPopup confirmPopup_ {};
+    PanelMap panels_ {};
 };
 
 }

@@ -6,18 +6,26 @@
 
 #include "LoongApp/LoongApp.h"
 #include "LoongEditor.h"
+#include "LoongEditorContext.h"
 #include "LoongFoundation/LoongLogger.h"
 #include "LoongFoundation/LoongPathUtils.h"
 #include <iostream>
+#include <memory>
 
-void StartApp()
+void StartApp(int argc, char** argv)
 {
 
     Loong::App::LoongApp::WindowConfig config {};
     config.title = "LoongEditor";
     std::shared_ptr<Loong::App::LoongApp> app = std::make_shared<Loong::App::LoongApp>(config);
 
-    Loong::Editor::LoongEditor editor(app.get());
+    auto context = std::make_shared<Loong::Editor::LoongEditorContext>(argv[0]); // TODO: Right project file
+
+    Loong::Editor::LoongEditor editor(app.get(), context);
+    if (!editor.Initialize()) {
+        LOONG_ERROR("Initialized editor failed!");
+        return;
+    }
 
     app->Run();
 }
@@ -36,7 +44,7 @@ int main(int argc, char** argv)
         std::cout << "[" << logItem.level << "][" << logItem.location << "]: " << logItem.message << std::endl;
     });
 
-    StartApp();
+    StartApp(argc, argv);
 
     return 0;
 }

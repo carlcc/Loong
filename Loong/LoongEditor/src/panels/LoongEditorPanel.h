@@ -11,22 +11,24 @@
 namespace Loong::Editor {
 
 class LoongEditor;
+class LoongEditorContext;
+
+struct LoongEditorPanelConfig {
+    bool isResizable { true };
+    bool isClosable { true };
+    bool isMovable { true };
+    bool isHideBackground { false };
+    bool isForceHorizontalScrollbar { false };
+    bool isForceVerticalScrollbar { false };
+    bool allowHorizontalScrollbar { false };
+    bool isBringToFrontOnFocus { true };
+    bool isCollapsable { false };
+    bool allowInputs { true };
+};
 
 class LoongEditorPanel : public Foundation::LoongHasSlots {
-    struct PanelConfig {
-        bool isResizable { true };
-        bool isClosable { true };
-        bool isMovable = true;
-        bool isHideBackground { false };
-        bool isForceHorizontalScrollbar { false };
-        bool isForceVerticalScrollbar { false };
-        bool allowHorizontalScrollbar { false };
-        bool isBringToFrontOnFocus { true };
-        bool isCollapsable { false };
-        bool allowInputs { true };
-    };
-
-    explicit LoongEditorPanel(LoongEditor* editor, const std::string& name = "", bool opened = true, const PanelConfig& cfg = {});
+public:
+    explicit LoongEditorPanel(LoongEditor* editor, const std::string& name = "", bool opened = true, const LoongEditorPanelConfig& cfg = {});
     LoongEditorPanel(const LoongEditorPanel&) = delete;
     LoongEditorPanel(LoongEditorPanel&&) = delete;
     ~LoongEditorPanel() override = default;
@@ -43,13 +45,13 @@ class LoongEditorPanel : public Foundation::LoongHasSlots {
 
     void Update(const Foundation::LoongClock& clock);
 
-    virtual void Render(const Foundation::LoongClock& clock) {};
-
     bool IsVisible() const;
 
     bool IsHovered() const;
 
     bool IsFocused() const;
+
+    LoongEditorContext& GetEditorContext();
 
     LOONG_DECLARE_SIGNAL(OnOpen);
     LOONG_DECLARE_SIGNAL(OnClose);
@@ -64,7 +66,7 @@ protected:
     Math::Vector2 minSize_ { Math::Zero };
     Math::Vector2 maxSize_ { Math::Zero };
 
-    PanelConfig config_ {};
+    LoongEditorPanelConfig config_ {};
 
     LoongEditor* editor_ { nullptr };
 
