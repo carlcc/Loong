@@ -51,6 +51,8 @@ public:
         return nullptr;
     }
 
+    App::LoongApp& GetApp() const { return *app_; }
+
     LoongEditorContext& GetContext() const { return *context_; }
 
     void AddEndFrameTask(EndFrameTask&& task) { endFrameTaskQueue_.push(std::move(task)); }

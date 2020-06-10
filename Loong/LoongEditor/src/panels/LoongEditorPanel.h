@@ -8,6 +8,10 @@
 #include "LoongFoundation/LoongMath.h"
 #include "LoongFoundation/LoongSigslotHelper.h"
 
+namespace Loong::App {
+class LoongApp;
+}
+
 namespace Loong::Editor {
 
 class LoongEditor;
@@ -45,6 +49,8 @@ public:
 
     void Update(const Foundation::LoongClock& clock);
 
+    virtual void Render(const Foundation::LoongClock& clock) {}
+
     bool IsVisible() const;
 
     bool IsHovered() const;
@@ -52,6 +58,8 @@ public:
     bool IsFocused() const;
 
     LoongEditorContext& GetEditorContext();
+
+    App::LoongApp& GetApp();
 
     LOONG_DECLARE_SIGNAL(OnOpen);
     LOONG_DECLARE_SIGNAL(OnClose);

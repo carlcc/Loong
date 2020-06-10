@@ -5,6 +5,7 @@
 #include "LoongEditor.h"
 #include "LoongApp/LoongApp.h"
 #include "LoongFoundation/LoongClock.h"
+#include "panels/LoongEditorGamePanel.h"
 #include "panels/LoongEditorHierarchyPanel.h"
 #include "panels/LoongEditorInspectorPanel.h"
 #include "panels/LoongEditorPanel.h"
@@ -49,7 +50,7 @@ bool LoongEditor::Initialize()
     // panelMaker.MakePanel<EditorScenePanel>("scene");
     panelMaker.MakePanel<LoongEditorInspectorPanel>("Inspector");
     // panelMaker.MakePanel<EditorContentPanel>("content");
-    // panelMaker.MakePanel<EditorGamePanel>("game");
+    panelMaker.MakePanel<LoongEditorGamePanel>("Game");
     // panelMaker.MakePanel<EditorMaterialEditorPanel>("material");
 
     ////////////// For debug
@@ -70,6 +71,11 @@ void LoongEditor::OnUpdate()
         ImGui::ShowDemoWindow(&showImGuiDemoWindow_);
     }
 
+    for (auto& [name, panel] : panels_) {
+        if (panel->IsVisible()) {
+            panel->Render(editorClock);
+        }
+    }
     for (auto& [name, panel] : panels_) {
         if (panel->IsVisible()) {
             panel->Update(editorClock);

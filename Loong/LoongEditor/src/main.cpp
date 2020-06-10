@@ -9,6 +9,7 @@
 #include "LoongEditorContext.h"
 #include "LoongFoundation/LoongLogger.h"
 #include "LoongFoundation/LoongPathUtils.h"
+#include "LoongRenderer/LoongRenderer.h"
 #include <iostream>
 #include <memory>
 

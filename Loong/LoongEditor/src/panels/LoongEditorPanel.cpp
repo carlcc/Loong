@@ -97,4 +97,9 @@ LoongEditorContext& LoongEditorPanel::GetEditorContext()
     return editor_->GetContext();
 }
 
+App::LoongApp& LoongEditorPanel::GetApp()
+{
+    return editor_->GetApp();
+}
+
 }

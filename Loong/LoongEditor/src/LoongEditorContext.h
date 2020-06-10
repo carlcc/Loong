@@ -17,6 +17,12 @@ namespace Loong::Core {
 class LoongScene;
 class LoongActor;
 }
+namespace Loong::Renderer {
+class LoongRenderer;
+}
+namespace Loong::Resource {
+class LoongMaterial;
+}
 
 namespace Loong::Editor {
 
@@ -53,6 +59,10 @@ public:
 
     Core::LoongActor* GetCurrentSelectedActor() const { return currentSelectedActor_; }
 
+    Renderer::LoongRenderer& GetRenderer() const { return *renderer_; }
+
+    std::shared_ptr<Resource::LoongMaterial> GetDefaultMaterial() const { return defaultMaterial_; }
+
 private:
     std::string projectFile_ {};
     std::string projectDir_ {};
@@ -62,6 +72,7 @@ private:
     Foundation::LoongClock editorClock_ {};
     std::shared_ptr<Core::LoongScene> currentScene_ { nullptr };
     Core::LoongActor* currentSelectedActor_ { nullptr };
+    std::unique_ptr<Renderer::LoongRenderer> renderer_ { nullptr };
 };
 
 }
