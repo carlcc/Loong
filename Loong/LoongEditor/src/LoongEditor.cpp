@@ -14,6 +14,8 @@
 
 // for debug
 #include "LoongCore/scene/LoongScene.h"
+#include "LoongCore/scene/components/LoongCModelRenderer.h"
+#include "LoongResource/LoongResourceManager.h"
 
 namespace Loong::Editor {
 
@@ -57,6 +59,15 @@ bool LoongEditor::Initialize()
     std::shared_ptr<Core::LoongScene> scene;
     scene.reset(Core::LoongScene::CreateScene("Root").release());
     GetContext().SetCurrentScene(scene);
+    auto* cubeActor = Core::LoongScene::CreateActor("Cube").release();
+    cubeActor->SetParent(scene.get());
+    auto fireTexture = Resource::LoongResourceManager::GetTexture("Textures/fire.jpg");
+    auto material = std::make_shared<Resource::LoongMaterial>();
+    material->SetShaderByFile("Shaders/unlit.glsl");
+    material->GetUniformsData()["u_DiffuseMap"] = fireTexture;
+    auto* modelRenderer = cubeActor->AddComponent<Core::LoongCModelRenderer>();
+    modelRenderer->SetModel(Resource::LoongResourceManager::GetModel("Models/cube.fbx"));
+    modelRenderer->SetMaterial(0, material);
 
     return true;
 }
@@ -73,12 +84,15 @@ void LoongEditor::OnUpdate()
 
     for (auto& [name, panel] : panels_) {
         if (panel->IsVisible()) {
-            panel->Render(editorClock);
+            panel->Update(editorClock);
         }
     }
+    // NOTE: Since the frame buffer's size may be changed during update,
+    // which will make our rendered image invalid if we first Render then Update.
+    // So... Let's put Render after Update
     for (auto& [name, panel] : panels_) {
         if (panel->IsVisible()) {
-            panel->Update(editorClock);
+            panel->Render(editorClock);
         }
     }
 
