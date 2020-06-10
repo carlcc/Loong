@@ -162,6 +162,7 @@ void LoongScene::Render(Renderer::LoongRenderer& renderer, LoongCCamera& camera,
     for (auto& drawable : opaqueDrawables) {
         onSetModelMatrix(*drawable.transform);
         drawable.material->Bind(nullptr);
+        renderer.ApplyStateMask(drawable.material->GenerateStateMask());
 
         renderer.Draw(*drawable.mesh);
     }
