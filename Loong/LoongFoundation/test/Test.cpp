@@ -3,9 +3,12 @@
 //
 
 #include "LoongFoundation/LoongLogger.h"
+#include "LoongFoundation/LoongPathUtils.h"
 #include "LoongFoundation/LoongSigslotHelper.h"
+#include "LoongFoundation/LoongStringUtils.h"
 #include <cassert>
 #include <iostream>
+#include <vector>
 
 using namespace Loong::Foundation;
 
@@ -38,6 +41,8 @@ public:
     }
 };
 
+void TestPathUtils();
+
 int main(int argc, const char* argv[])
 {
     LogWriter writer;
@@ -48,7 +53,7 @@ int main(int argc, const char* argv[])
     emmiter.SubscribeMySig(receiver, &SigReceiver::foo);
     auto listenerId = emmiter.SubscribeMySig([](int a) {
         std::cout << "Hello_" << a << std::endl;
-           });
+    });
 
     emmiter.DoSomething();
 
@@ -57,5 +62,36 @@ int main(int argc, const char* argv[])
     listenerId.reset();
     emmiter.DoSomething();
 
+    TestPathUtils();
+
     return 0;
+}
+
+void TestPathUtils()
+{
+    std::vector<std::string> expected1 { "he", "ll", "", "o", "world", "!" };
+    std::vector<std::string> got1 = LoongStringUtils::Split("he/ll//o/world/!", "/");
+    assert(expected1 == got1);
+    std::vector<std::string> got2 = LoongStringUtils::Split("he/ll//o/world/!", "");
+    assert(got2.size() == 1 && "he/ll//o/world/!" == got2[0]);
+
+#if WIN32
+    assert(LoongPathUtils::Normalize("C:/a/b\\//c") == "C:/a/b/c");
+#else
+    assert(LoongPathUtils::Normalize("/a/b\\//c") == "/a/b/c");
+#endif
+    assert(LoongPathUtils::Normalize("/") == "/");
+    assert(LoongPathUtils::Normalize(".") == ".");
+    assert(LoongPathUtils::Normalize("") == "");
+    assert(LoongPathUtils::Normalize("././a/b\\//c") == "a/b/c");
+    assert(LoongPathUtils::Normalize("./../a/b\\//c") == "../a/b/c");
+    assert(LoongPathUtils::Normalize("./../a/../b\\//c") == "../b/c");
+
+    assert(LoongPathUtils::GetParent("a/b/c//\\d") == "a/b/c");
+    assert(LoongPathUtils::GetParent("a/b/.././c//\\d") == "a/c");
+#if WIN32
+    assert(LoongPathUtils::GetParent("C:/a") == "C:/");
+#else
+    assert(LoongPathUtils::GetParent("/a") == "/");
+#endif
 }
