@@ -23,7 +23,7 @@ namespace Loong::Renderer {
 
 class LoongCamera;
 
-class Renderer {
+class LoongRenderer {
 public:
     struct FrameInfo {
         uint64_t batchCount { 0 };
@@ -102,13 +102,13 @@ public:
     };
     // clang-format on
 
-    Renderer() = default;
-    Renderer(const Renderer&) = delete;
-    Renderer(Renderer&&) = delete;
-    ~Renderer() = default;
+    LoongRenderer() = default;
+    LoongRenderer(const LoongRenderer&) = delete;
+    LoongRenderer(LoongRenderer&&) = delete;
+    ~LoongRenderer() = default;
 
-    Renderer& operator=(const Renderer&) = delete;
-    Renderer& operator=(Renderer&&) = delete;
+    LoongRenderer& operator=(const LoongRenderer&) = delete;
+    LoongRenderer& operator=(LoongRenderer&&) = delete;
 
     void SetClearColor(float r, float g, float b, float a = 1.0f);
 

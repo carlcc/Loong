@@ -102,7 +102,7 @@ struct Drawable {
     float distance;
 };
 
-void LoongScene::Render(Renderer::Renderer& renderer, LoongCCamera& camera, const Resource::LoongMaterial* defaultMaterial, const SetModelMatrixCallback& onSetModelMatrix)
+void LoongScene::Render(Renderer::LoongRenderer& renderer, LoongCCamera& camera, const Resource::LoongMaterial* defaultMaterial, const SetModelMatrixCallback& onSetModelMatrix)
 {
     std::vector<Drawable> opaqueDrawables;
     std::vector<Drawable> transparentDrawables;

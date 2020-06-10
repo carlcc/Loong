@@ -7,7 +7,7 @@
 
 namespace Loong::Resource {
 
-LoongFramebuffer::LoongFramebuffer(uint32_t width, uint32_t height)
+LoongFrameBuffer::LoongFrameBuffer(uint32_t width, uint32_t height)
 {
     glGenFramebuffers(1, &id_);
     glGenTextures(1, &renderTexture_);
@@ -27,14 +27,14 @@ LoongFramebuffer::LoongFramebuffer(uint32_t width, uint32_t height)
     Resize(width, height);
 }
 
-LoongFramebuffer::LoongFramebuffer(LoongFramebuffer&& b) noexcept
+LoongFrameBuffer::LoongFrameBuffer(LoongFrameBuffer&& b) noexcept
 {
     std::swap(b.id_, id_);
     std::swap(b.renderTexture_, renderTexture_);
     std::swap(b.depthStencilBuffer_, depthStencilBuffer_);
 }
 
-LoongFramebuffer::~LoongFramebuffer()
+LoongFrameBuffer::~LoongFrameBuffer()
 {
     if (id_ != 0) {
         glDeleteBuffers(1, &id_);
@@ -50,7 +50,7 @@ LoongFramebuffer::~LoongFramebuffer()
     }
 }
 
-LoongFramebuffer& LoongFramebuffer::operator=(LoongFramebuffer&& b) noexcept
+LoongFrameBuffer& LoongFrameBuffer::operator=(LoongFrameBuffer&& b) noexcept
 {
     std::swap(b.id_, id_);
     std::swap(b.renderTexture_, renderTexture_);
@@ -58,17 +58,17 @@ LoongFramebuffer& LoongFramebuffer::operator=(LoongFramebuffer&& b) noexcept
     return *this;
 }
 
-void LoongFramebuffer::Bind()
+void LoongFrameBuffer::Bind() const
 {
     glBindFramebuffer(GL_FRAMEBUFFER, id_);
 }
 
-void LoongFramebuffer::Unbind()
+void LoongFrameBuffer::Unbind() const
 {
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
-void LoongFramebuffer::Resize(uint32_t width, uint32_t height)
+void LoongFrameBuffer::Resize(uint32_t width, uint32_t height)
 {
     if (width == width_ || height == height_) {
         return;

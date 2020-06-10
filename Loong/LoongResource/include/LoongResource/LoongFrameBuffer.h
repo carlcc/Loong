@@ -10,19 +10,19 @@
 
 namespace Loong::Resource {
 
-class LoongFramebuffer {
+class LoongFrameBuffer {
 public:
-    explicit LoongFramebuffer(uint32_t width = 0, uint32_t height = 0);
-    LoongFramebuffer(const LoongFramebuffer&) = delete;
-    LoongFramebuffer(LoongFramebuffer&& b) noexcept;
-    ~LoongFramebuffer();
+    explicit LoongFrameBuffer(uint32_t width = 0, uint32_t height = 0);
+    LoongFrameBuffer(const LoongFrameBuffer&) = delete;
+    LoongFrameBuffer(LoongFrameBuffer&& b) noexcept;
+    ~LoongFrameBuffer();
 
-    LoongFramebuffer& operator=(const LoongFramebuffer&) = delete;
-    LoongFramebuffer& operator=(LoongFramebuffer&& b) noexcept;
+    LoongFrameBuffer& operator=(const LoongFrameBuffer&) = delete;
+    LoongFrameBuffer& operator=(LoongFrameBuffer&& b) noexcept;
 
-    void Bind();
+    void Bind() const;
 
-    void Unbind();
+    void Unbind() const;
 
     void Resize(uint32_t width, uint32_t height);
 

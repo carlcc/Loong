@@ -12,7 +12,7 @@ namespace Loong::Resource {
 class LoongMaterial;
 }
 namespace Loong::Renderer {
-class Renderer;
+class LoongRenderer;
 }
 
 namespace Loong::Core {
@@ -54,7 +54,7 @@ public:
     LoongCCamera* GetFirstActiveCamera();
 
     using SetModelMatrixCallback = std::function<void(const Math::Matrix4& modelMatrix)>;
-    void Render(Renderer::Renderer& renderer, LoongCCamera& camera, const Resource::LoongMaterial* defaultMaterial, const SetModelMatrixCallback& onSetModelMatrix);
+    void Render(Renderer::LoongRenderer& renderer, LoongCCamera& camera, const Resource::LoongMaterial* defaultMaterial, const SetModelMatrixCallback& onSetModelMatrix);
 
     static std::unique_ptr<LoongActor> CreateActor(const std::string& name, const std::string& tag = "");
 
