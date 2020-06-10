@@ -10,6 +10,7 @@
 #include "LoongFoundation/LoongClock.h"
 #include "LoongFoundation/LoongFormat.h"
 #include "LoongFoundation/LoongLogger.h"
+#include "LoongFoundation/LoongPathUtils.h"
 #include "LoongFoundation/LoongSigslotHelper.h"
 #include "LoongGui/LoongGuiButton.h"
 #include "LoongGui/LoongGuiImage.h"
@@ -42,15 +43,15 @@ public:
 
     MyApplication()
     {
-        texture_ = Resource::LoongResourceManager::GetTexture("/Loong.jpg");
+        texture_ = Resource::LoongResourceManager::GetTexture("Textures/Loong.jpg");
         scene_ = std::make_shared<Core::LoongScene>(0, "SceneRoot", "");
 
-        auto fireTexture = Resource::LoongResourceManager::GetTexture("/fire.jpg");
+        auto fireTexture = Resource::LoongResourceManager::GetTexture("Textures/fire.jpg");
         auto material = std::make_shared<Resource::LoongMaterial>();
-        material->SetShaderByFile("/unlit.glsl");
+        material->SetShaderByFile("Shaders/unlit.glsl");
         material->GetUniformsData()["u_DiffuseMap"] = fireTexture;
 
-        auto cubeModel = Resource::LoongResourceManager::GetModel("/cube.fbx");
+        auto cubeModel = Resource::LoongResourceManager::GetModel("Models/cube.fbx");
         auto* actor = new Core::LoongActor(1, "ActorCube", "");
         auto* modelRenderer = actor->AddComponent<Core::LoongCModelRenderer>();
         modelRenderer->SetModel(cubeModel);
@@ -61,7 +62,7 @@ public:
         auto* cameraActor = new Core::LoongActor(2, "ActorCamera", "");
         cameraComponent_ = cameraActor->AddComponent<Core::LoongCCamera>();
         auto& cameraTransform = cameraActor->GetTransform();
-        cameraTransform.SetPosition({0.0F, 1.0F, 12.0F});
+        cameraTransform.SetPosition({ 0.0F, 1.0F, 12.0F });
         cameraTransform.LookAt(Math::Zero, Math::kUp);
         cameraActor->SetParent(scene_.get());
 
@@ -109,9 +110,8 @@ public:
 
         if (auto* cubeActor = scene_->GetChildByName("ActorCube"); cubeActor != nullptr) {
             cubeActor->GetTransform().Rotate(Math::kUp, clock_.DeltaTime());
-            cubeActor->GetTransform().SetPosition({std::sinf(clock_.ElapsedTime()) * 2.0F, 0.0F, std::cosf(clock_.ElapsedTime()) * 2.0F});
+            cubeActor->GetTransform().SetPosition({ std::sinf(clock_.ElapsedTime()) * 2.0F, 0.0F, std::cosf(clock_.ElapsedTime()) * 2.0F });
         }
-
 
         loongWindow_.Draw();
         // material_->GetUniformsData()["u_TextureTiling"] = Math::Vector2 { std::fabs(std::fmod(clock_.ElapsedTime(), 10.0f) - 5.0F) };
@@ -178,20 +178,6 @@ public:
 
 }
 
-#ifdef WIN32
-const char kSeparator = '\\';
-#else
-const char kSeparator = '/';
-#endif
-
-const std::string GetDir(const std::string& path)
-{
-    auto index = path.rfind(kSeparator);
-    assert(index != std::string::npos);
-
-    return path.substr(0, index);
-}
-
 void StartApp()
 {
     Loong::App::LoongApp::WindowConfig config {};
@@ -210,7 +196,7 @@ int main(int argc, char** argv)
     Loong::App::ScopedDriver appDriver;
 
     Loong::FS::ScopedDriver fsDriver(argv[0]);
-    auto path = GetDir(__FILE__);
+    auto path = Loong::Foundation::LoongPathUtils::GetParent(argv[0]) + "/Resources";
     Loong::FS::LoongFileSystem::MountSearchPath(path);
 
     Loong::Resource::ScopedDriver resourceDriver;
