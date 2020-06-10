@@ -79,8 +79,8 @@ void TestPathUtils()
     assert(LoongPathUtils::Normalize("C:/a/b\\//c") == "C:/a/b/c");
 #else
     assert(LoongPathUtils::Normalize("/a/b\\//c") == "/a/b/c");
-#endif
     assert(LoongPathUtils::Normalize("/") == "/");
+#endif
     assert(LoongPathUtils::Normalize(".") == ".");
     assert(LoongPathUtils::Normalize("") == "");
     assert(LoongPathUtils::Normalize("././a/b\\//c") == "a/b/c");

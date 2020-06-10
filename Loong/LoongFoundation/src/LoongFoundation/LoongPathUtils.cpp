@@ -4,6 +4,7 @@
 
 #include "LoongFoundation/LoongPathUtils.h"
 #include "LoongFoundation/LoongStringUtils.h"
+#include <cassert>
 #include <string>
 #include <string_view>
 #include <vector>
@@ -95,7 +96,7 @@ std::string Foundation::LoongPathUtils::Normalize(const std::string_view& path)
 
     if (isAbsolute) {
 #ifdef WIN32
-        return p.SubStringView(0, 2) + separator + RemoveDotDotInternal(p.SubStringView(3), separator);
+        return p.substr(0, 2) + kPathSeparator + RemoveDotDotInternal(p.substr(3));
 #else
         return kPathSeparator + (p.empty() ? std::string() : RemoveDotDotInternal(p.substr(1)));
 #endif

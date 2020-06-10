@@ -170,6 +170,8 @@ int main(int argc, char** argv)
     Loong::FS::ScopedDriver fsDriver(argv[0]);
     auto path = Loong::Foundation::LoongPathUtils::GetParent(argv[0]) + "/Resources";
     Loong::FS::LoongFileSystem::MountSearchPath(path);
+    path = Loong::Foundation::LoongPathUtils::Normalize(argv[0]) + "/../../Resources";
+    Loong::FS::LoongFileSystem::MountSearchPath(path);
 
     Loong::Resource::ScopedDriver resourceDriver;
 

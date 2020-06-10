@@ -32,7 +32,7 @@ public:
             result.insert(result.end(), typename Container::value_type(str_));
             return;
         }
-        auto start = 0;
+        size_t start = 0;
         auto index = str_.find(separator_);
         while (index != std::string_view::npos) {
             result.insert(result.end(), typename Container::value_type(str_.substr(start, index - start)));
