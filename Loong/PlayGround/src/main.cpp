@@ -13,10 +13,6 @@
 #include "LoongFoundation/LoongLogger.h"
 #include "LoongFoundation/LoongPathUtils.h"
 #include "LoongFoundation/LoongSigslotHelper.h"
-#include "LoongGui/LoongGuiButton.h"
-#include "LoongGui/LoongGuiImage.h"
-#include "LoongGui/LoongGuiText.h"
-#include "LoongGui/LoongGuiWindow.h"
 #include "LoongRenderer/LoongCamera.h"
 #include "LoongRenderer/LoongRenderer.h"
 #include "LoongResource/Driver.h"
@@ -27,6 +23,7 @@
 #include "LoongResource/LoongShader.h"
 #include "LoongResource/LoongTexture.h"
 #include <imgui.h>
+#include <iostream>
 
 std::shared_ptr<Loong::App::LoongApp> gApp;
 
@@ -73,24 +70,6 @@ public:
 
         gApp->SubscribeUpdate(this, &LoongEditor::OnUpdate);
         gApp->SubscribeRender(this, &LoongEditor::OnRender);
-        loongWindow_.ClearChildren();
-
-        auto* button = loongWindow_.CreateChild<Gui::LoongGuiButton>("PushMe");
-        button->SubscribeOnClick(this, &LoongEditor::OnPressButton);
-
-        auto* image = loongWindow_.CreateChild<Gui::LoongGuiImage>();
-        image->SetTexture(texture_);
-
-        fpsText_ = loongWindow_.CreateChild<Gui::LoongGuiText>("FPS: ");
-        for (int i = 0; i < 6; ++i) {
-            int btn = int(App::LoongMouseButton::kButton1) + i;
-            mouseTexts_[i] = loongWindow_.CreateChild<Gui::LoongGuiText>(Foundation::Format("Pressed button {}", btn));
-        }
-
-        for (int i = 0; i < 26; ++i) {
-            int key = int(App::LoongKeyCode::kKeyA) + i;
-            keyTexts_[i] = loongWindow_.CreateChild<Gui::LoongGuiText>(Foundation::Format("Pressed key {}", char(key)));
-        }
     }
 
     void OnUpdate()
@@ -99,33 +78,32 @@ public:
 
         auto& input = gApp->GetInputManager();
 
-        for (int i = 0; i < 6; ++i) {
-            int btn = int(App::LoongMouseButton::kButton1) + i;
-            mouseTexts_[i]->SetVisible(input.IsMouseButtonPressed(App::LoongMouseButton(btn)));
-        }
+        if (ImGui::Begin("MainWindow")) {
 
-        for (int i = 0; i < 26; ++i) {
-            int key = int(App::LoongKeyCode::kKeyA) + i;
-            keyTexts_[i]->SetVisible(input.IsKeyPressed(App::LoongKeyCode(key)));
-        }
-
-        if (auto* cubeActor = scene_->GetChildByName("ActorCube"); cubeActor != nullptr) {
-            cubeActor->GetTransform().Rotate(Math::kUp, clock_.DeltaTime());
-            cubeActor->GetTransform().SetPosition({ std::sinf(clock_.ElapsedTime()) * 2.0F, 0.0F, std::cosf(clock_.ElapsedTime()) * 2.0F });
-        }
-
-        loongWindow_.Draw();
-        // material_->GetUniformsData()["u_TextureTiling"] = Math::Vector2 { std::fabs(std::fmod(clock_.ElapsedTime(), 10.0f) - 5.0F) };
-        {
-            static int frameCount = 0;
-            static int lastTime = 0;
-            if ((int)clock_.ElapsedTime() > lastTime) {
-                lastTime = (int)clock_.ElapsedTime();
-                fpsText_->SetLabel(Foundation::Format("FPS: {}", frameCount));
-                frameCount = 0;
+            if (ImGui::Button("PressMe")) {
+                OnPressButton();
             }
-            frameCount++;
+            ImGui::Image((void*)intptr_t(texture_->GetId()), { 100.F, 100.F });
+            for (int i = 0; i < 6; ++i) {
+                int btn = int(App::LoongMouseButton::kButton1) + i;
+                if (input.IsMouseButtonPressed(App::LoongMouseButton(btn))) {
+                    ImGui::Text("%s", Foundation::Format("Pressed button {}", btn).c_str());
+                }
+            }
+
+            for (int i = 0; i < 26; ++i) {
+                int key = int(App::LoongKeyCode::kKeyA) + i;
+                if (input.IsKeyPressed(App::LoongKeyCode(key))) {
+                    ImGui::Text("%s", Foundation::Format("Pressed key {}", char(key)).c_str());
+                }
+            }
+
+            if (auto* cubeActor = scene_->GetChildByName("ActorCube"); cubeActor != nullptr) {
+                cubeActor->GetTransform().Rotate(Math::kUp, clock_.DeltaTime());
+                cubeActor->GetTransform().SetPosition({ std::sinf(clock_.ElapsedTime()) * 2.0F, 0.0F, std::cosf(clock_.ElapsedTime()) * 2.0F });
+            }
         }
+        ImGui::End();
     }
 
     void OnRender()
@@ -152,7 +130,7 @@ public:
         });
     }
 
-    void OnPressButton(Gui::LoongGuiButton* button)
+    void OnPressButton()
     {
         for (auto& c : clearColor_) {
             c = 1.0F * rand() / RAND_MAX;
@@ -162,12 +140,6 @@ public:
     float clearColor_[4] { 0.3F, 0.4F, 0.5F, 1.0F };
 
     Foundation::LoongClock clock_;
-    Gui::LoongGuiWindow loongWindow_ { "MainWindow" };
-
-    Gui::LoongGuiText* fpsText_ { nullptr };
-    Gui::LoongGuiText* mouseTexts_[6] { nullptr };
-    Gui::LoongGuiText* keyTexts_[26] { nullptr };
-    Gui::LoongGuiButton* button_ { nullptr };
 
     std::shared_ptr<Resource::LoongTexture> texture_ { nullptr };
     Renderer::Renderer renderer_;

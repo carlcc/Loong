@@ -18,7 +18,6 @@ add_executable(PlayGround ${SOURCE} ${INCLUDE})
 
 target_link_libraries(PlayGround
 PRIVATE
-        LoongGui
         LoongApp
         LoongAsset
         LoongFileSystem
