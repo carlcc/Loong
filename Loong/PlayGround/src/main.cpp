@@ -6,6 +6,7 @@
 #include "LoongCore/scene/LoongScene.h"
 #include "LoongCore/scene/components/LoongCCamera.h"
 #include "LoongCore/scene/components/LoongCModelRenderer.h"
+#include "LoongFileSystem/Driver.h"
 #include "LoongFileSystem/LoongFileSystem.h"
 #include "LoongFoundation/LoongClock.h"
 #include "LoongFoundation/LoongFormat.h"
@@ -18,6 +19,7 @@
 #include "LoongGui/LoongGuiWindow.h"
 #include "LoongRenderer/LoongCamera.h"
 #include "LoongRenderer/LoongRenderer.h"
+#include "LoongResource/Driver.h"
 #include "LoongResource/LoongGpuBuffer.h"
 #include "LoongResource/LoongGpuModel.h"
 #include "LoongResource/LoongMaterial.h"
@@ -25,13 +27,12 @@
 #include "LoongResource/LoongShader.h"
 #include "LoongResource/LoongTexture.h"
 #include <imgui.h>
-#include <iostream>
 
 std::shared_ptr<Loong::App::LoongApp> gApp;
 
 namespace Loong {
 
-class MyApplication : public Foundation::LoongHasSlots {
+class LoongEditor : public Foundation::LoongHasSlots {
 public:
     struct UBO {
         Math::Matrix4 ub_Model;
@@ -41,7 +42,7 @@ public:
         float ub_Time;
     };
 
-    MyApplication()
+    LoongEditor()
     {
         texture_ = Resource::LoongResourceManager::GetTexture("Textures/Loong.jpg");
         scene_ = std::make_shared<Core::LoongScene>(0, "SceneRoot", "");
@@ -70,12 +71,12 @@ public:
         basicUniforms_.BufferData(&ubo, 1); // Note: Must allocate memory first
         basicUniforms_.SetBindingPoint(0, sizeof(UBO));
 
-        gApp->SubscribeUpdate(this, &MyApplication::OnUpdate);
-        gApp->SubscribeRender(this, &MyApplication::OnRender);
+        gApp->SubscribeUpdate(this, &LoongEditor::OnUpdate);
+        gApp->SubscribeRender(this, &LoongEditor::OnRender);
         loongWindow_.ClearChildren();
 
         auto* button = loongWindow_.CreateChild<Gui::LoongGuiButton>("PushMe");
-        button->SubscribeOnClick(this, &MyApplication::OnPressButton);
+        button->SubscribeOnClick(this, &LoongEditor::OnPressButton);
 
         auto* image = loongWindow_.CreateChild<Gui::LoongGuiImage>();
         image->SetTexture(texture_);
@@ -184,7 +185,7 @@ void StartApp()
     config.title = "Play Ground";
     gApp = std::make_shared<Loong::App::LoongApp>(config);
 
-    Loong::MyApplication myApp;
+    Loong::LoongEditor myApp;
 
     gApp->Run();
 
@@ -194,7 +195,6 @@ void StartApp()
 int main(int argc, char** argv)
 {
     Loong::App::ScopedDriver appDriver;
-
     Loong::FS::ScopedDriver fsDriver(argv[0]);
     auto path = Loong::Foundation::LoongPathUtils::GetParent(argv[0]) + "/Resources";
     Loong::FS::LoongFileSystem::MountSearchPath(path);
