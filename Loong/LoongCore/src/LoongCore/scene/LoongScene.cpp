@@ -4,6 +4,7 @@
 
 #include "LoongCore/scene/LoongScene.h"
 #include "LoongCore/scene/components/LoongCCamera.h"
+#include "LoongCore/scene/components/LoongCLight.h"
 #include "LoongCore/scene/components/LoongCModelRenderer.h"
 #include "LoongFoundation/LoongMath.h"
 #include "LoongRenderer/LoongRenderer.h"
@@ -19,6 +20,7 @@ void LoongScene::FastAccess::AbsorbAnother(const LoongScene::FastAccess& another
 {
     modelRenderers_.insert(another.modelRenderers_.begin(), another.modelRenderers_.end());
     cameras_.insert(another.cameras_.begin(), another.cameras_.end());
+    lights_.insert(another.lights_.begin(), another.lights_.end());
 }
 
 void LoongScene::FastAccess::SubtractAnother(const LoongScene::FastAccess& another)
@@ -29,12 +31,16 @@ void LoongScene::FastAccess::SubtractAnother(const LoongScene::FastAccess& anoth
     for (auto* camera : another.cameras_) {
         cameras_.erase(camera);
     }
+    for (auto* light : another.lights_) {
+        lights_.erase(light);
+    }
 }
 
 void LoongScene::FastAccess::Clear()
 {
     modelRenderers_.clear();
     cameras_.clear();
+    lights_.clear();
 }
 
 void RecursiveAdd(LoongScene::FastAccess& access, LoongActor* actor)
@@ -44,6 +50,9 @@ void RecursiveAdd(LoongScene::FastAccess& access, LoongActor* actor)
     }
     if (auto* camera = actor->GetComponent<LoongCCamera>(); camera != nullptr) {
         access.cameras_.insert(camera);
+    }
+    if (auto* light = actor->GetComponent<LoongCLight>(); light != nullptr) {
+        access.lights_.insert(light);
     }
     for (auto* child : actor->GetChildren()) {
         RecursiveAdd(access, child);
@@ -89,10 +98,12 @@ void LoongScene::ConstructFastAccess()
 
 LoongCCamera* LoongScene::GetFirstActiveCamera()
 {
-    if (fastAccess_.cameras_.empty()) {
-        return nullptr;
+    for (auto* camera : fastAccess_.cameras_) {
+        if (camera->IsActive()) {
+            return camera;
+        }
     }
-    return *fastAccess_.cameras_.begin();
+    return nullptr;
 }
 
 struct Drawable {
