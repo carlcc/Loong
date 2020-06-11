@@ -10,9 +10,9 @@
 namespace Loong::Core {
 
 LoongActor::LoongActor(uint32_t actorID, std::string name, std::string tag)
-    : actorID_(actorID)
-    , name_(std::move(name))
+    : name_(std::move(name))
     , tag_(std::move(tag))
+    , actorID_(actorID)
 {
 }
 

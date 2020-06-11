@@ -131,7 +131,11 @@ void LoongScene::Render(Renderer::LoongRenderer& renderer, LoongCCamera& camera,
         drawable.transform = &actorTransform.GetWorldTransformMatrix();
         drawable.distance = Math::Distance(actorTransform.GetWorldPosition(), cameraActorTransform.GetWorldPosition());
 
-        auto& meshes = modelRenderer->GetModel()->GetMeshes();
+        auto gpuModel = modelRenderer->GetModel();
+        if (gpuModel == nullptr) {
+            continue;
+        }
+        auto& meshes = gpuModel->GetMeshes();
         size_t meshCount = meshes.size();
         for (size_t i = 0; i < meshCount; ++i) {
             drawable.mesh = meshes[i];
