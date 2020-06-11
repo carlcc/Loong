@@ -22,21 +22,20 @@ int StartApp(int argc, char** argv)
     config.title = "LoongEditor";
     std::shared_ptr<Loong::App::LoongApp> app = std::make_shared<Loong::App::LoongApp>(config);
 
-    {
-        // load font for ImGui
-        const char* kFontPath = "/Fonts/wqymicroheimono.ttf";
-        auto size = Loong::FS::LoongFileSystem::GetFileSize(kFontPath);
-        if (size < 0) {
-            LOONG_ERROR("Cannot load font file '{}', exit...", kFontPath);
-            return 1;
-        }
-        std::vector<uint8_t> buffer(size);
-        if (!Loong::FS::LoongFileSystem::LoadFileContent(kFontPath, buffer.data(), size)) {
-            LOONG_ERROR("Cannot load font file '{}', exit...", kFontPath);
-            return 1;
-        }
-        ImGui::GetIO().Fonts->AddFontFromMemoryTTF(buffer.data(), size, 16);
+    // load font for ImGui
+    const char* kFontPath = "/Fonts/wqymicroheimono.ttf";
+    auto size = Loong::FS::LoongFileSystem::GetFileSize(kFontPath);
+    if (size < 0) {
+        LOONG_ERROR("Cannot load font file '{}', exit...", kFontPath);
+        return 1;
     }
+
+    std::vector<uint8_t> buffer(size);
+    if (!Loong::FS::LoongFileSystem::LoadFileContent(kFontPath, buffer.data(), size)) {
+        LOONG_ERROR("Cannot load font file '{}', exit...", kFontPath);
+        return 1;
+    }
+    ImGui::GetIO().Fonts->AddFontFromMemoryTTF(buffer.data(), int(size), 16);
 
     std::shared_ptr<Loong::Editor::LoongEditorContext> context;
     {
