@@ -139,7 +139,8 @@ void LoongScene::Render(Renderer::LoongRenderer& renderer, LoongCCamera& camera,
         size_t meshCount = meshes.size();
         for (size_t i = 0; i < meshCount; ++i) {
             drawable.mesh = meshes[i];
-            drawable.material = modelRenderer->GetMaterials()[i].get();
+            auto materialIndex = drawable.mesh->GetMaterialIndex();
+            drawable.material = modelRenderer->GetMaterials()[materialIndex].get();
             if (drawable.material == nullptr) {
                 drawable.material = defaultMaterial;
                 if (drawable.material == nullptr) {
