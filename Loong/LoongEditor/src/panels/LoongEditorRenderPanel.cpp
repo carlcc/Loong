@@ -5,6 +5,7 @@
 #include "LoongEditorRenderPanel.h"
 #include "../LoongEditorContext.h"
 #include "../utils/ImGuiUtils.h"
+#include "../utils/LoongEditorSceneCameraController.h"
 #include "LoongApp/LoongApp.h"
 #include "LoongApp/LoongInput.h"
 #include "LoongApp/LoongInputAction.h"
@@ -22,7 +23,7 @@ LoongEditorRenderPanel::LoongEditorRenderPanel(LoongEditor* editor, const std::s
     frameBuffer_ = std::make_shared<Resource::LoongFrameBuffer>();
     cameraActor_ = Core::LoongScene::CreateActor("SceneViewCamera");
     cameraActor_->AddComponent<Core::LoongCCamera>();
-    // cameraActor_->AddComponent<EditorSceneCameraController>(editor);
+    cameraActor_->AddComponent<LoongEditorSceneCameraController>(editor);
 }
 
 void LoongEditorRenderPanel::UpdateImpl(const Foundation::LoongClock& clock)

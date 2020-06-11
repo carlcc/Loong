@@ -16,7 +16,11 @@ public:
     explicit LoongCLight(LoongActor* owner);
     ~LoongCLight() override;
 
-    std::string GetName() override { return "Light"; }
+    const std::string& GetName() override
+    {
+        static const std::string kName("Light");
+        return kName;
+    }
 
     Type GetType() const { return light_.type; }
 

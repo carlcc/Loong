@@ -63,7 +63,7 @@ public:
     //
     // virtual void OnTriggerExit(CPhysics& otherObject) {}
 
-    virtual std::string GetName() = 0;
+    virtual const std::string& GetName() = 0;
 
 private:
     LoongActor* owner_ { nullptr };

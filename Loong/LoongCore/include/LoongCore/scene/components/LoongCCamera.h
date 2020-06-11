@@ -15,7 +15,11 @@ public:
 
     ~LoongCCamera() override;
 
-    std::string GetName() override { return "Camera"; }
+    const std::string& GetName() override
+    {
+        static const std::string kName("Camera");
+        return kName;
+    }
 
     void SetFov(float value)
     {

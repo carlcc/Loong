@@ -31,7 +31,11 @@ public:
 
     ~LoongCModelRenderer() override;
 
-    std::string GetName() override { return "Model Renderer"; };
+    const std::string& GetName() override
+    {
+        static const std::string kName("Model Renderer");
+        return kName;
+    }
 
     void SetModel(std::shared_ptr<Resource::LoongGpuModel> model)
     {

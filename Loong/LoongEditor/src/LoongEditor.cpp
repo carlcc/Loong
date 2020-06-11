@@ -12,6 +12,7 @@
 #include "panels/LoongEditorInspectorPanel.h"
 #include "panels/LoongEditorMaterialEditorPanel.h"
 #include "panels/LoongEditorPanel.h"
+#include "panels/LoongEditorScenePanel.h"
 #include "utils/LoongEditorTemplates.h"
 #include <imgui.h>
 
@@ -47,7 +48,7 @@ bool LoongEditor::Initialize()
 {
     PanelMaker panelMaker(this, panels_);
     panelMaker.MakePanel<LoongEditorHierarchyPanel>("Hierarchy");
-    // panelMaker.MakePanel<EditorScenePanel>("scene");
+    panelMaker.MakePanel<LoongEditorScenePanel>("Scene");
     panelMaker.MakePanel<LoongEditorInspectorPanel>("Inspector");
     panelMaker.MakePanel<LoongEditorContentPanel>("Content");
     panelMaker.MakePanel<LoongEditorGamePanel>("Game");
@@ -60,6 +61,8 @@ bool showImGuiDemoWindow_ = true;
 void LoongEditor::OnUpdate()
 {
     auto& editorClock = GetContext().GetEditorClock();
+    editorClock.Update();
+    
     SetupDockSpace();
 
     if (showImGuiDemoWindow_) {
