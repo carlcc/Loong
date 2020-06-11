@@ -12,6 +12,11 @@ set(GLM_INCLUDE_DIR ${CMAKE_CURRENT_LIST_DIR}/thirdparty/glm/include)
 
 set(CMAKE_CXX_STANDARD 17)
 
+if (MSVC)
+else()
+    add_compile_options("-Wall")
+endif()
+
 add_subdirectory(Loong)
 
 file(COPY  ${CMAKE_CURRENT_LIST_DIR}/Resources DESTINATION  ${CMAKE_CURRENT_BINARY_DIR}/out)
