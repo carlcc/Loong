@@ -57,7 +57,7 @@ void FillActorMenu(Core::LoongActor* actor, Core::LoongScene* scene, LoongEditor
         }
         ImGui::EndMenu();
     }
-    if (ImGui::BeginMenu("Add Builtin###2")) {
+    if (ImGui::BeginMenu("Add Builtin###2", isActorSelected)) {
         struct BuiltinModelInfo {
             const char* menuName;
             std::string actorName;

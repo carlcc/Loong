@@ -20,6 +20,7 @@ PRIVATE
         LoongResource
         LoongRenderer
         LoongCore
+        nfd
         )
 
 source_group("src" FILES ${SOURCE})

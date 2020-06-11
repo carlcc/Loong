@@ -48,6 +48,7 @@ std::shared_ptr<LoongTexture> LoongResourceManager::GetTexture(const std::string
     }
 
     Asset::LoongImage image(path);
+    image.FlipVertically();
     if (!image) {
         LOONG_ERROR("Load image '{}' failed", path);
         return nullptr;
