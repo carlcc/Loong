@@ -209,7 +209,7 @@ std::shared_ptr<LoongShader> LoongResourceManager::GetShader(const std::string& 
     if (program == 0) {
         return nullptr;
     }
-    auto* shaderProgram = new LoongShader(program);
+    auto* shaderProgram = new LoongShader(program, path);
     std::shared_ptr<LoongShader> spShaderProgram(shaderProgram, [path](LoongShader* m) {
         gLoadedShaders.erase(path);
         delete m;
@@ -224,31 +224,31 @@ std::shared_ptr<LoongShader> LoongResourceManager::GetShader(const std::string& 
 std::shared_ptr<LoongMaterial> LoongResourceManager::GetMaterial(const std::string& path)
 {
     return nullptr; // TODO: NYI
-//    auto it = gLoadedMaterials.find(path);
-//    if (it != gLoadedMaterials.end()) {
-//        auto sp = it->second.lock();
-//        assert(sp != nullptr);
-//        return sp;
-//    }
-//
-//    Asset::LoongImage image(path);
-//    if (!image) {
-//        LOONG_ERROR("Load image '{}' failed", path);
-//        return nullptr;
-//    }
-//
-//    LOONG_TRACE("Load texture '{}'", path);
-//    auto texture = LoongTextureLoader::Create(image, true, [](const std::string& p) {
-//        gLoadedTextures.erase(p);
-//        LOONG_TRACE("Unload texture '{}'", p);
-//    });
-//    if (texture != nullptr) {
-//        gLoadedTextures.insert({ path, texture });
-//        LOONG_TRACE("Load texture '{}' succeed", path);
-//    } else {
-//        LOONG_ERROR("Load texture '{}' failed", path);
-//    }
-//    return texture;
+    //    auto it = gLoadedMaterials.find(path);
+    //    if (it != gLoadedMaterials.end()) {
+    //        auto sp = it->second.lock();
+    //        assert(sp != nullptr);
+    //        return sp;
+    //    }
+    //
+    //    Asset::LoongImage image(path);
+    //    if (!image) {
+    //        LOONG_ERROR("Load image '{}' failed", path);
+    //        return nullptr;
+    //    }
+    //
+    //    LOONG_TRACE("Load texture '{}'", path);
+    //    auto texture = LoongTextureLoader::Create(image, true, [](const std::string& p) {
+    //        gLoadedTextures.erase(p);
+    //        LOONG_TRACE("Unload texture '{}'", p);
+    //    });
+    //    if (texture != nullptr) {
+    //        gLoadedTextures.insert({ path, texture });
+    //        LOONG_TRACE("Load texture '{}' succeed", path);
+    //    } else {
+    //        LOONG_ERROR("Load texture '{}' failed", path);
+    //    }
+    //    return texture;
 }
 
 }

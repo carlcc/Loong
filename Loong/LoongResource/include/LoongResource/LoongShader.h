@@ -36,7 +36,7 @@ public:
 
 private:
     // Note: This construct will take over the ownship
-    explicit LoongShader(GLuint id);
+    explicit LoongShader(GLuint id, const std::string& path);
     friend class LoongResourceManager;
 
 public:
@@ -111,6 +111,8 @@ public:
 
     const std::vector<UniformInfo>& GetUniformInfo() const { return uniforms_; }
 
+    const std::string& GetPath() const { return path_; }
+
 private:
     void QueryUniforms();
     uint32_t GetUniformLocation(const std::string& name) const;
@@ -119,6 +121,7 @@ private:
     GLuint id_ { 0 };
     mutable std::unordered_map<std::string, int> locationCache_ {};
     std::vector<UniformInfo> uniforms_ {};
+    std::string path_ {};
 };
 
 }

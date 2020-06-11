@@ -9,8 +9,9 @@
 
 namespace Loong::Resource {
 
-LoongShader::LoongShader(GLuint id)
+LoongShader::LoongShader(GLuint id, const std::string& path)
     : id_(id)
+    , path_(path)
 {
     QueryUniforms();
 }

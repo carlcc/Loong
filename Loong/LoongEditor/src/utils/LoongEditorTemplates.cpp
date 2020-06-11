@@ -28,7 +28,7 @@ void ShowActorContextMenu(Core::LoongActor* actor, Core::LoongScene* scene, Loon
 void FillActorMenu(Core::LoongActor* actor, Core::LoongScene* scene, LoongEditor* editor)
 {
     if (ImGui::MenuItem("Add Child###0", nullptr, false, actor != nullptr)) {
-        editor->AddEndFrameTask([actor, scene]() {
+        editor->AddEndFrameTask([actor]() {
             auto* newActor = Core::LoongScene::CreateActor("New Actor").release();
             newActor->SetParent(actor);
             assert(actor != nullptr);
