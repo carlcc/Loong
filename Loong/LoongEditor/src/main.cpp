@@ -7,6 +7,7 @@
 #include "LoongApp/LoongApp.h"
 #include "LoongEditor.h"
 #include "LoongEditorContext.h"
+#include "LoongEditorProjectManager.h"
 #include "LoongFoundation/LoongLogger.h"
 #include "LoongFoundation/LoongPathUtils.h"
 #include "LoongRenderer/LoongRenderer.h"
@@ -37,7 +38,26 @@ int StartApp(int argc, char** argv)
         ImGui::GetIO().Fonts->AddFontFromMemoryTTF(buffer.data(), size, 16);
     }
 
-    auto context = std::make_shared<Loong::Editor::LoongEditorContext>(argv[0]); // TODO: Right project file
+    std::shared_ptr<Loong::Editor::LoongEditorContext> context;
+    {
+        Loong::Editor::LoongEditorProjectManager projectManager(app.get());
+        if (!projectManager.Initialize()) {
+            LOONG_ERROR("Initialized project manager failed!");
+            return 2;
+        }
+        app->Run();
+
+        auto projectFile = projectManager.GetSelectedPath();
+        if (projectFile.empty()) {
+            LOONG_INFO("No project file selected, close!");
+            return 0; // The user closed project manager without select any project
+        }
+
+        context = std::make_shared<Loong::Editor::LoongEditorContext>(projectFile);
+        // Set the project directory as write dir, and mount it to root
+        Loong::FS::LoongFileSystem::SetWriteDir(context->GetProjectDirPath());
+        Loong::FS::LoongFileSystem::MountSearchPath(context->GetProjectDirPath());
+    }
 
     Loong::Editor::LoongEditor editor(app.get(), context);
     if (!editor.Initialize()) {
@@ -55,8 +75,6 @@ int main(int argc, char** argv)
     auto path = Loong::Foundation::LoongPathUtils::GetParent(argv[0]) + "/Resources";
     Loong::FS::ScopedDriver fsDriver(argv[0]);
     Loong::FS::LoongFileSystem::MountSearchPath(path);
-    // TODO: Set project path as write dir
-    Loong::FS::LoongFileSystem::SetWriteDir(path);
     path = Loong::Foundation::LoongPathUtils::Normalize(argv[0]) + "/../../Resources";
     Loong::FS::LoongFileSystem::MountSearchPath(path);
 

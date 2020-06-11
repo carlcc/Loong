@@ -62,7 +62,7 @@ void LoongEditor::OnUpdate()
 {
     auto& editorClock = GetContext().GetEditorClock();
     editorClock.Update();
-    
+
     SetupDockSpace();
 
     if (showImGuiDemoWindow_) {
