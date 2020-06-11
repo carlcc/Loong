@@ -50,7 +50,7 @@ void LoongEditorRenderPanel::UpdateImpl(const Foundation::LoongClock& clock)
     // auto windowSize = ImGui::GetItemRectSize();
     assert(frameBuffer_ != nullptr);
     frameBuffer_->Resize(viewportWidth_, viewportHeight_);
-    ImGui::Image((void*)(intptr_t)frameBuffer_->GetTextureID(), viewportSize, ImVec2 { 0, 1 }, ImVec2 { 1, 0 });
+    ImGui::Image((void*)(intptr_t)frameBuffer_->GetColorAttachments()[0]->GetId(), viewportSize, ImVec2 { 0, 1 }, ImVec2 { 1, 0 });
 
     // Update camera actor
     if (ImGui::IsItemHovered(ImGuiHoveredFlags_None)) {

@@ -3,23 +3,27 @@
 //
 
 #include "LoongResource/LoongFrameBuffer.h"
+#include "LoongResource/LoongTexture.h"
+#include "loader/LoongTextureLoader.h"
 #include <utility>
 
 namespace Loong::Resource {
 
-LoongFrameBuffer::LoongFrameBuffer(uint32_t width, uint32_t height)
+LoongFrameBuffer::LoongFrameBuffer(uint32_t width, uint32_t height, uint32_t colorAttachmentsCount)
 {
     glGenFramebuffers(1, &id_);
-    glGenTextures(1, &renderTexture_);
     glGenRenderbuffers(1, &depthStencilBuffer_);
 
-    glBindTexture(GL_TEXTURE_2D, renderTexture_);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glBindTexture(GL_TEXTURE_2D, 0);
+    colorAttachments_.resize(colorAttachmentsCount);
+    for (auto& attachment : colorAttachments_) {
+        attachment = LoongTextureLoader::CreateFromMemory(nullptr, width, height, false, nullptr);
+        attachment->SetFilterMode(LoongTexture::FilterMode::kLinear, LoongTexture::FilterMode::kLinear);
+    }
 
     Bind();
-    glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, renderTexture_, 0);
+    for (size_t i = 0; i < colorAttachmentsCount; ++i) {
+        glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + i, colorAttachments_[i]->GetId(), 0);
+    }
     Unbind();
 
     width_ = width;
@@ -30,7 +34,7 @@ LoongFrameBuffer::LoongFrameBuffer(uint32_t width, uint32_t height)
 LoongFrameBuffer::LoongFrameBuffer(LoongFrameBuffer&& b) noexcept
 {
     std::swap(b.id_, id_);
-    std::swap(b.renderTexture_, renderTexture_);
+    std::swap(b.colorAttachments_, colorAttachments_);
     std::swap(b.depthStencilBuffer_, depthStencilBuffer_);
 }
 
@@ -39,10 +43,6 @@ LoongFrameBuffer::~LoongFrameBuffer()
     if (id_ != 0) {
         glDeleteBuffers(1, &id_);
         id_ = 0;
-    }
-    if (renderTexture_ != 0) {
-        glDeleteTextures(1, &renderTexture_);
-        renderTexture_ = 0;
     }
     if (depthStencilBuffer_ != 0) {
         glGenRenderbuffers(1, &depthStencilBuffer_);
@@ -53,7 +53,7 @@ LoongFrameBuffer::~LoongFrameBuffer()
 LoongFrameBuffer& LoongFrameBuffer::operator=(LoongFrameBuffer&& b) noexcept
 {
     std::swap(b.id_, id_);
-    std::swap(b.renderTexture_, renderTexture_);
+    std::swap(b.colorAttachments_, colorAttachments_);
     std::swap(b.depthStencilBuffer_, depthStencilBuffer_);
     return *this;
 }
@@ -74,9 +74,9 @@ void LoongFrameBuffer::Resize(uint32_t width, uint32_t height)
         return;
     }
 
-    glBindTexture(GL_TEXTURE_2D, renderTexture_);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, 0);
-    glBindTexture(GL_TEXTURE_2D, 0);
+    for (auto& attachment : colorAttachments_) {
+        attachment->Resize(width, height);
+    }
 
     glBindRenderbuffer(GL_RENDERBUFFER, depthStencilBuffer_);
     glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_STENCIL, width, height);

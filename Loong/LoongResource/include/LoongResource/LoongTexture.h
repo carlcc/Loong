@@ -12,11 +12,28 @@ namespace Loong::Resource {
 
 class LoongTexture {
 public:
+    enum class FilterMode {
+        kNeareast = GL_NEAREST,
+        kLinear = GL_LINEAR,
+        kNeareastMipmapNearest = GL_NEAREST_MIPMAP_NEAREST,
+        kNeareastMipmapLinear = GL_NEAREST_MIPMAP_LINEAR,
+        kLinearMipmapNearest = GL_LINEAR_MIPMAP_NEAREST,
+        kLinearMipmapLinear = GL_LINEAR_MIPMAP_LINEAR,
+    };
+    enum class WrapMode {
+        kRepeat = GL_REPEAT,
+        kClampToBoarder = GL_CLAMP_TO_BORDER,
+        kClampToEdge = GL_CLAMP_TO_EDGE,
+        kMirroredRepeat = GL_MIRRORED_REPEAT,
+        kMirroredClampToEdge = GL_MIRROR_CLAMP_TO_EDGE,
+    };
     ~LoongTexture();
 
     void Bind(uint32_t slot = 0) const;
 
     void Unbind() const;
+
+    void Resize(uint32_t width, uint32_t height);
 
     uint32_t GetId() const { return id_; }
 
@@ -29,6 +46,12 @@ public:
     bool IsMipmapped() const { return isMipmapped_; }
 
     const std::string& GetPath() const { return path_; }
+
+    void SetFilterMode(FilterMode min, FilterMode mag);
+
+    void SetWrapMode(WrapMode s, WrapMode t);
+
+    void SetFilterWrapMode(FilterMode min, FilterMode mag, WrapMode s, WrapMode t);
 
 private:
     void SetPath(const std::string& path) { path_ = path; }
