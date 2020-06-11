@@ -40,7 +40,6 @@ protected:
     }
 
 public:
-
     void AddModelRenderer(LoongCModelRenderer* modelRenderer) { fastAccess_.modelRenderers_.insert(modelRenderer); }
 
     void RemoveModelRenderer(LoongCModelRenderer* modelRenderer) { fastAccess_.modelRenderers_.erase(modelRenderer); }
@@ -58,6 +57,8 @@ public:
     void RecursiveRemoveFromFastAccess(LoongActor* actor);
 
     LoongCCamera* GetFirstActiveCamera();
+
+    const FastAccess& GetFastAccess() const { return fastAccess_; }
 
     using SetModelMatrixCallback = std::function<void(const Math::Matrix4& modelMatrix)>;
     void Render(Renderer::LoongRenderer& renderer, LoongCCamera& camera, const Resource::LoongMaterial* defaultMaterial, const SetModelMatrixCallback& onSetModelMatrix);
