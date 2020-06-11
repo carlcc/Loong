@@ -28,7 +28,11 @@ public:
 
     bool IsMipmapped() const { return isMipmapped_; }
 
+    const std::string& GetPath() const { return path_; }
+
 private:
+    void SetPath(const std::string& path) { path_ = path; }
+
     friend class LoongTextureLoader;
     LoongTexture() = default;
     LoongTexture(GLuint id, uint32_t width, uint32_t height, uint32_t bytesPerPixel, bool generateMipmap);
@@ -55,6 +59,9 @@ public:
     uint32_t height_ { 0 };
     uint32_t bytesPerPixel_ { 0 };
     bool isMipmapped_ { false };
+
+private:
+    std::string path_ {};
 };
 
 } // namespace Loong

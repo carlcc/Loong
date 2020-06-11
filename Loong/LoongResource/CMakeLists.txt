@@ -17,7 +17,9 @@ target_link_libraries(LoongResource
 PUBLIC
     LoongFoundation
     LoongAsset
+    LoongFileSystem
     glad
+    rapidjson
 )
 
 source_group("src" FILES ${SOURCE})

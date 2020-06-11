@@ -12,6 +12,7 @@
 #include "LoongResource/LoongMaterial.h"
 #include "LoongResource/LoongShader.h"
 #include "LoongResource/LoongTexture.h"
+#include "LoongResource/loader/LoongMaterialLoader.h"
 #include "loader/LoongTextureLoader.h"
 #include <cassert>
 #include <map>
@@ -223,32 +224,26 @@ std::shared_ptr<LoongShader> LoongResourceManager::GetShader(const std::string& 
 
 std::shared_ptr<LoongMaterial> LoongResourceManager::GetMaterial(const std::string& path)
 {
-    return nullptr; // TODO: NYI
-    //    auto it = gLoadedMaterials.find(path);
-    //    if (it != gLoadedMaterials.end()) {
-    //        auto sp = it->second.lock();
-    //        assert(sp != nullptr);
-    //        return sp;
-    //    }
-    //
-    //    Asset::LoongImage image(path);
-    //    if (!image) {
-    //        LOONG_ERROR("Load image '{}' failed", path);
-    //        return nullptr;
-    //    }
-    //
-    //    LOONG_TRACE("Load texture '{}'", path);
-    //    auto texture = LoongTextureLoader::Create(image, true, [](const std::string& p) {
-    //        gLoadedTextures.erase(p);
-    //        LOONG_TRACE("Unload texture '{}'", p);
-    //    });
-    //    if (texture != nullptr) {
-    //        gLoadedTextures.insert({ path, texture });
-    //        LOONG_TRACE("Load texture '{}' succeed", path);
-    //    } else {
-    //        LOONG_ERROR("Load texture '{}' failed", path);
-    //    }
-    //    return texture;
+    auto it = gLoadedMaterials.find(path);
+    if (it != gLoadedMaterials.end()) {
+        auto sp = it->second.lock();
+        assert(sp != nullptr);
+        return sp;
+    }
+
+    LOONG_TRACE("Load material '{}'", path);
+    auto material = LoongMaterialLoader::Create(path, [](const std::string& path) {
+        gLoadedMaterials.erase(path);
+        LOONG_TRACE("Unload material '{}'", path);
+    });
+
+    if (material != nullptr) {
+        gLoadedMaterials.insert({ path, material });
+        LOONG_TRACE("Load material '{}' succeed", path);
+    } else {
+        LOONG_ERROR("Load material '{}' failed", path);
+    }
+    return material;
 }
 
 }

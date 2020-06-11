@@ -64,7 +64,6 @@ set(ASSIMP_BUILD_XGL_IMPORTER OFF)
 set(ASSIMP_BUILD_X_IMPORTER OFF)
 add_subdirectory(assimp)
 
-
 add_library(FakeAssimp INTERFACE)
 target_include_directories(FakeAssimp
 INTERFACE
@@ -75,3 +74,5 @@ target_link_libraries(FakeAssimp
 INTERFACE
     assimp
     )
+
+add_subdirectory(rapidjson)

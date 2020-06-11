@@ -21,6 +21,10 @@ public:
 
     static bool UnmountSearchPath(const std::string& sysPath);
 
+    static bool SetWriteDir(const std::string& sysPath);
+
+    static const char* GetWriteDir();
+
     static std::vector<std::string> GetSearchPaths();
 
     static bool MakeDir(const std::string& path);
@@ -72,6 +76,8 @@ public:
     }
 
     static int64_t LoadFileContent(const std::string& path, void* buffer, uint64_t bufferSize);
+
+    static int64_t StoreFileContent(const std::string& path, const void* buffer, uint64_t bufferSize);
 
     enum class ErrorCode {
         kOk,

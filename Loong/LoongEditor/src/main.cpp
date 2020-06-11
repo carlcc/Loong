@@ -38,6 +38,8 @@ int main(int argc, char** argv)
     auto path = Loong::Foundation::LoongPathUtils::GetParent(argv[0]) + "/Resources";
     Loong::FS::ScopedDriver fsDriver(argv[0]);
     Loong::FS::LoongFileSystem::MountSearchPath(path);
+    // TODO: Set project path as write dir
+    Loong::FS::LoongFileSystem::SetWriteDir(path);
     path = Loong::Foundation::LoongPathUtils::Normalize(argv[0]) + "/../../Resources";
     Loong::FS::LoongFileSystem::MountSearchPath(path);
 

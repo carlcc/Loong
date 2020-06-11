@@ -28,6 +28,16 @@ bool LoongFileSystem::UnmountSearchPath(const std::string& sysPath)
     return 0 != PHYSFS_unmount(sysPath.c_str());
 }
 
+bool LoongFileSystem::SetWriteDir(const std::string& sysPath)
+{
+    return 0 != PHYSFS_setWriteDir(sysPath.c_str());
+}
+
+const char *LoongFileSystem::GetWriteDir()
+{
+    return PHYSFS_getWriteDir();
+}
+
 std::vector<std::string> LoongFileSystem::GetSearchPaths()
 {
     std::vector<std::string> result;
@@ -162,6 +172,29 @@ int64_t LoongFileSystem::LoadFileContent(const std::string& path, void* bufferVo
         if (0 != PHYSFS_eof(file)) {
             break;
         }
+    }
+    return totalCount;
+}
+
+int64_t LoongFileSystem::StoreFileContent(const std::string& path, const void* bufferVoid, uint64_t bufferSize)
+{
+    auto* file = PHYSFS_openWrite(path.c_str());
+    if (file == nullptr) {
+        return -1;
+    }
+    OnScopeExit { PHYSFS_close(file); };
+
+    auto* buffer = static_cast<const uint8_t*>(bufferVoid);
+
+    int64_t totalCount = 0;
+    while (bufferSize > 0) {
+        auto cnt = PHYSFS_writeBytes(file, buffer, bufferSize);
+        if (cnt == -1) {
+            return -1;
+        }
+        totalCount += cnt;
+        buffer += cnt;
+        bufferSize -= cnt;
     }
     return totalCount;
 }

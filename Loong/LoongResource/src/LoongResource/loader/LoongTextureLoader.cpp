@@ -55,6 +55,7 @@ std::shared_ptr<LoongTexture> LoongTextureLoader::Create(const Asset::LoongImage
     glBindTexture(GL_TEXTURE_2D, 0);
 
     auto* tex = new LoongTexture(textureID, image.GetWidth(), image.GetHeight(), image.GetChannelCount(), generateMipmap);
+    tex->SetPath(image.GetPath());
     if (onDestroy != nullptr) {
         return std::shared_ptr<LoongTexture>(tex, [onDestroy, path = image.GetPath()](LoongTexture* tex) {
             onDestroy(path);
@@ -127,4 +128,4 @@ std::shared_ptr<LoongTexture> LoongTextureLoader::CreateFromMemory(uint8_t* data
     }
 }
 
-} // namespace Ss
+} // namespace Loong

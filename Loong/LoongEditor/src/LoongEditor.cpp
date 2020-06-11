@@ -63,13 +63,9 @@ bool LoongEditor::Initialize()
     GetContext().SetCurrentScene(scene);
     auto* cubeActor = Core::LoongScene::CreateActor("Cube").release();
     cubeActor->SetParent(scene.get());
-    auto fireTexture = Resource::LoongResourceManager::GetTexture("Textures/fire.jpg");
-    auto material = std::make_shared<Resource::LoongMaterial>();
-    material->SetShaderByFile("Shaders/unlit.glsl");
-    material->GetUniformsData()["u_DiffuseMap"] = fireTexture;
     auto* modelRenderer = cubeActor->AddComponent<Core::LoongCModelRenderer>();
     modelRenderer->SetModel(Resource::LoongResourceManager::GetModel("Models/cube.fbx"));
-    modelRenderer->SetMaterial(0, material);
+    modelRenderer->SetMaterial(0, Resource::LoongResourceManager::GetMaterial("Models/Test.fbx"));
 
     return true;
 }
