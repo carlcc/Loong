@@ -38,7 +38,13 @@ bool LoongAssimpModelLoader::LoadModel(const std::string& fileName, std::vector<
     modelParserFlags |= aiProcess_ImproveCacheLocality;
     modelParserFlags |= aiProcess_GenUVCoords;
     // modelParserFlags |= aiProcess_PreTransformVertices; // incompatible with aiProcess_OptimizeGraph
-    const aiScene* scene = import.ReadFileFromMemory(buffer.data(), buffer.size(), modelParserFlags);
+    // const aiScene* scene = import.ReadFileFromMemory(buffer.data(), buffer.size(), modelParserFlags);
+    auto realDir = FS::LoongFileSystem::GetRealDir(fileName);
+    if (!realDir.has_value()) {
+        LOONG_ERROR("Load model '{}' failed, cannot get real path!", fileName);
+        return false;
+    }
+    const aiScene* scene = import.ReadFile(realDir.value() + "/" + fileName, modelParserFlags);
 
     if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) {
         LOONG_ERROR("Load model '{}' failed!", fileName);
