@@ -41,10 +41,6 @@ protected:
     uint32_t viewportHeight_ { 0 };
     // This actor is owned by this panel, instead of the scene tree
     std::shared_ptr<Core::LoongActor> cameraActor_ { nullptr };
-
-private:
-    // just used to pass it to the constructor of cameraActor, use less
-    bool isPlaying_ { true };
 };
 
 }

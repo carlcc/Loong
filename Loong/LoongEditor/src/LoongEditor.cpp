@@ -5,9 +5,11 @@
 #include "LoongEditor.h"
 #include "LoongApp/LoongApp.h"
 #include "LoongFoundation/LoongClock.h"
+#include "panels/LoongEditorContentPanel.h"
 #include "panels/LoongEditorGamePanel.h"
 #include "panels/LoongEditorHierarchyPanel.h"
 #include "panels/LoongEditorInspectorPanel.h"
+#include "panels/LoongEditorMaterialEditorPanel.h"
 #include "panels/LoongEditorPanel.h"
 #include "utils/LoongEditorTemplates.h"
 #include <imgui.h>
@@ -51,9 +53,9 @@ bool LoongEditor::Initialize()
     panelMaker.MakePanel<LoongEditorHierarchyPanel>("Hierarchy");
     // panelMaker.MakePanel<EditorScenePanel>("scene");
     panelMaker.MakePanel<LoongEditorInspectorPanel>("Inspector");
-    // panelMaker.MakePanel<EditorContentPanel>("content");
+    panelMaker.MakePanel<LoongEditorContentPanel>("Content");
     panelMaker.MakePanel<LoongEditorGamePanel>("Game");
-    // panelMaker.MakePanel<EditorMaterialEditorPanel>("material");
+    panelMaker.MakePanel<LoongEditorMaterialEditorPanel>("Material");
 
     ////////////// For debug
     std::shared_ptr<Core::LoongScene> scene;

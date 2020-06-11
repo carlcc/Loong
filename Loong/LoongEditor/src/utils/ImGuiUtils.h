@@ -30,4 +30,24 @@ public:
     }
 };
 
+template <class T>
+static void SetDragData(const char* key, const T& data)
+{
+    ImGui::SetDragDropPayload(key, &data, sizeof(T));
+}
+
+template <class T>
+static T GetDropData(const char* key)
+{
+    if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload(key)) {
+        IM_ASSERT(payload->DataSize == sizeof(T));
+        T data = *static_cast<T*>(payload->Data);
+        return data;
+    } else {
+        return nullptr;
+    }
+}
+
+constexpr const char* kDragTypeFile = "SPARKLE_FILE";
+
 }

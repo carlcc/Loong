@@ -26,6 +26,8 @@ class LoongMaterial;
 
 namespace Loong::Editor {
 
+class LoongFileTreeNode;
+
 class LoongEditorContext final : public Foundation::LoongHasSlots {
 public:
     struct UniformBlock {
@@ -63,6 +65,10 @@ public:
 
     std::shared_ptr<Resource::LoongMaterial> GetDefaultMaterial() const { return defaultMaterial_; }
 
+    LoongFileTreeNode* GetCurrentSelectedFileTreeNode() const { return currentSelectedFileTreeNode_; }
+
+    void SetCurrentSelectedFileTreeNode(LoongFileTreeNode* node) { currentSelectedFileTreeNode_ = node; }
+
 private:
     std::string projectFile_ {};
     std::string projectDir_ {};
@@ -73,6 +79,7 @@ private:
     std::shared_ptr<Core::LoongScene> currentScene_ { nullptr };
     Core::LoongActor* currentSelectedActor_ { nullptr };
     std::unique_ptr<Renderer::LoongRenderer> renderer_ { nullptr };
+    LoongFileTreeNode* currentSelectedFileTreeNode_ { nullptr };
 };
 
 }

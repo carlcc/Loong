@@ -4,12 +4,14 @@
 
 #include "LoongEditorInspector.h"
 #include "../../utils/ImGuiUtils.h"
+#include "../../utils/LoongFileTreeNode.h"
 #include "LoongCore/scene/components/LoongCCamera.h"
 #include "LoongCore/scene/components/LoongCLight.h"
 #include "LoongCore/scene/components/LoongCModelRenderer.h"
 #include "LoongFoundation/LoongTransform.h"
 #include "LoongRenderer/LoongLight.h"
 #include "LoongResource/LoongMaterial.h"
+#include "LoongResource/LoongResourceManager.h"
 #include <any>
 #include <imgui.h>
 #include <imgui_stdlib.h>
@@ -166,17 +168,20 @@ void LoongEditorInspector::Inspect(Core::LoongCModelRenderer* model)
             // model->SetColor(value);
         }
 
-        //        if (ImGui::BeginDragDropTarget()) {
-        //            FileTreeNode* node = ImGuiHelper::GetDropData<FileTreeNode*>(kDragTypeFile);
-        //            if (node != nullptr) {
-        //                auto newModel = ResourceManager::GetModel(node->GetRelativePath());
-        //                if (newModel != nullptr) {
-        //                    model->SetModel(newModel);
-        //                    lowModel = newModel;
-        //                }
-        //            }
-        //            ImGui::EndDragDropTarget();
-        //        }
+        if (ImGui::BeginDragDropTarget()) {
+            auto* node = ImGuiUtils::GetDropData<LoongFileTreeNode*>(ImGuiUtils::kDragTypeFile);
+            if (node != nullptr) {
+                auto fullPath = node->GetFullPath();
+                auto newModel = Resource::LoongResourceManager::GetModel(fullPath);
+                if (newModel != nullptr) {
+                    model->SetModel(newModel);
+                    lowModel = newModel;
+                } else {
+                    LOONG_ERROR("Cannot set model to '{}', which is not a valid model file", fullPath);
+                }
+            }
+            ImGui::EndDragDropTarget();
+        }
 
         ImGui::SameLine();
         if (ImGui::Button("X")) {
@@ -212,16 +217,19 @@ void LoongEditorInspector::Inspect(Core::LoongCModelRenderer* model)
                 if (ImGui::InputText("", &modelPath, ImGuiInputTextFlags_ReadOnly)) {
                 }
 
-                // if (ImGui::BeginDragDropTarget()) {
-                //     FileTreeNode* node = ImGuiHelper::GetDropData<FileTreeNode*>(kDragTypeFile);
-                //     if (node != nullptr) {
-                //         auto newMaterial = ResourceManager::GetMaterial(node->GetRelativePath());
-                //         if (newMaterial != nullptr) {
-                //             model->SetMaterial(int(i), newMaterial);
-                //         }
-                //     }
-                //     ImGui::EndDragDropTarget();
-                // }
+                if (ImGui::BeginDragDropTarget()) {
+                    auto* node = ImGuiUtils::GetDropData<LoongFileTreeNode*>(ImGuiUtils::kDragTypeFile);
+                    if (node != nullptr) {
+                        auto fullPath = node->GetFullPath();
+                        auto newMaterial = Resource::LoongResourceManager::GetMaterial(fullPath);
+                        if (newMaterial != nullptr) {
+                            model->SetMaterial(int(i), newMaterial);
+                        } else {
+                            LOONG_ERROR("Cannot set material to '{}', which is not a valid material file", fullPath);
+                        }
+                    }
+                    ImGui::EndDragDropTarget();
+                }
                 ImGui::SameLine();
                 if (ImGui::Button("X")) {
                     model->SetMaterial(int(i), nullptr);
