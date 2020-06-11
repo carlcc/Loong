@@ -11,6 +11,7 @@
 #include "LoongCore/scene/components/LoongCCamera.h"
 #include "LoongCore/scene/components/LoongCLight.h"
 #include "LoongCore/scene/components/LoongCModelRenderer.h"
+#include "LoongResource/LoongResourceManager.h"
 #include <imgui.h>
 
 namespace Loong::Editor::LoongEditorTemplates {
@@ -27,7 +28,10 @@ void ShowActorContextMenu(Core::LoongActor* actor, Core::LoongScene* scene, Loon
 
 void FillActorMenu(Core::LoongActor* actor, Core::LoongScene* scene, LoongEditor* editor)
 {
-    if (ImGui::MenuItem("Add Child###0", nullptr, false, actor != nullptr)) {
+    bool isActorSelected = actor != nullptr;
+    bool isRootActor = actor != nullptr && !actor->HasParent();
+
+    if (ImGui::MenuItem("Add Empty Child###0", nullptr, false, isActorSelected)) {
         editor->AddEndFrameTask([actor]() {
             auto* newActor = Core::LoongScene::CreateActor("New Actor").release();
             newActor->SetParent(actor);
@@ -35,7 +39,7 @@ void FillActorMenu(Core::LoongActor* actor, Core::LoongScene* scene, LoongEditor
             LOONG_DEBUG("Create child(ID {}) for actor {}(ID {})", newActor->GetID(), actor->GetName(), actor->GetID());
         });
     }
-    if (ImGui::BeginMenu("Add Component###1", actor != nullptr)) {
+    if (ImGui::BeginMenu("Add Component###1", isActorSelected && !isRootActor)) {
         using CComponent = Core::LoongComponent;
         using Actor = Core::LoongActor;
         static std::vector<std::pair<const char*, std::function<CComponent*(Actor*)>>> kComponentCreatorMap = {
@@ -53,14 +57,47 @@ void FillActorMenu(Core::LoongActor* actor, Core::LoongScene* scene, LoongEditor
         ImGui::EndMenu();
     }
     if (ImGui::BeginMenu("Add Builtin###2")) {
-        if (ImGui::MenuItem("Cube")) {
-            // TODO
+        struct BuiltinModelInfo {
+            const char* menuName;
+            std::string actorName;
+            std::string modelPath;
+        };
+        static BuiltinModelInfo kBuiltinModelInfos[] = {
+            { "Cube", "Cube ", "/Models/cube.fbx" },
+            { "Cone", "Cone ", "/Models/Cone.fbx" },
+            { "Cylinder", "Cylinder ", "/Models/Cylinder.fbx" },
+            { "Pipe", "Pipe ", "/Models/Pipe.fbx" },
+            { "Plane", "Plane ", "/Models/Plane.fbx" },
+            { "Pyramid", "Pyramid ", "/Models/Pyramid.fbx" },
+            { "Sphere", "Sphere ", "/Models/Sphere.fbx" },
+        };
+        for (const auto& info : kBuiltinModelInfos) {
+            if (ImGui::MenuItem(info.menuName)) {
+                editor->AddEndFrameTask([actor, &actorName = info.actorName, &path = info.modelPath]() {
+                    auto* newActor = Core::LoongScene::CreateActor("").release();
+                    newActor->SetName(actorName + std::to_string(newActor->GetID()));
+                    newActor->SetParent(actor);
+                    auto* modelRenderer = newActor->AddComponent<Core::LoongCModelRenderer>();
+                    modelRenderer->SetModel(Resource::LoongResourceManager::GetModel(path));
+                    LOONG_DEBUG("Create child(ID {}) for actor {}(ID {})", newActor->GetID(), actor->GetName(), actor->GetID());
+                });
+            }
+        }
+        ImGui::Separator();
+        if (ImGui::MenuItem("Camera")) {
+            editor->AddEndFrameTask([actor]() {
+                auto* newActor = Core::LoongScene::CreateActor("").release();
+                newActor->SetName("Camera " + std::to_string(newActor->GetID()));
+                newActor->SetParent(actor);
+                newActor->AddComponent<Core::LoongCCamera>();
+                LOONG_DEBUG("Create child(ID {}) for actor {}(ID {})", newActor->GetID(), actor->GetName(), actor->GetID());
+            });
         }
         ImGui::EndMenu();
     }
     ImGui::Separator();
 
-    if (ImGui::MenuItem("Delete###3", nullptr, false, actor != nullptr && actor != actor->GetRoot())) {
+    if (ImGui::MenuItem("Delete###3", nullptr, false, isActorSelected && !isRootActor)) {
         actor->MarkAsDestroy();
         if (actor == editor->GetContext().GetCurrentSelectedActor()) {
             editor->GetContext().SetCurrentSelectedActor(nullptr);

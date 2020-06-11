@@ -10,25 +10,42 @@
 #include "LoongFoundation/LoongLogger.h"
 #include "LoongFoundation/LoongPathUtils.h"
 #include "LoongRenderer/LoongRenderer.h"
+#include <imgui.h>
 #include <iostream>
 #include <memory>
 
-void StartApp(int argc, char** argv)
+int StartApp(int argc, char** argv)
 {
 
     Loong::App::LoongApp::WindowConfig config {};
     config.title = "LoongEditor";
     std::shared_ptr<Loong::App::LoongApp> app = std::make_shared<Loong::App::LoongApp>(config);
 
+    {
+        // load font for ImGui
+        const char* kFontPath = "/Fonts/wqymicroheimono.ttf";
+        auto size = Loong::FS::LoongFileSystem::GetFileSize(kFontPath);
+        if (size < 0) {
+            LOONG_ERROR("Cannot load font file '{}', exit...", kFontPath);
+            return 1;
+        }
+        std::vector<uint8_t> buffer(size);
+        if (!Loong::FS::LoongFileSystem::LoadFileContent(kFontPath, buffer.data(), size)) {
+            LOONG_ERROR("Cannot load font file '{}', exit...", kFontPath);
+            return 1;
+        }
+        ImGui::GetIO().Fonts->AddFontFromMemoryTTF(buffer.data(), size, 16);
+    }
+
     auto context = std::make_shared<Loong::Editor::LoongEditorContext>(argv[0]); // TODO: Right project file
 
     Loong::Editor::LoongEditor editor(app.get(), context);
     if (!editor.Initialize()) {
         LOONG_ERROR("Initialized editor failed!");
-        return;
+        return 2;
     }
 
-    app->Run();
+    return app->Run();
 }
 
 int main(int argc, char** argv)
@@ -48,7 +65,6 @@ int main(int argc, char** argv)
     auto listener = Loong::Foundation::Logger::Get().SubscribeLog([](const Loong::Foundation::LogItem& logItem) {
         std::cout << "[" << logItem.level << "][" << logItem.location << "]: " << logItem.message << std::endl;
     });
-
     StartApp(argc, argv);
 
     return 0;

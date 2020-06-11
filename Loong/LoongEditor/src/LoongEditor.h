@@ -65,7 +65,6 @@ private:
     void DoEndFrameTasks();
 
 private:
-    float clearColor_[4] { 0.3F, 0.4F, 0.5F, 1.0F };
     App::LoongApp* app_ { nullptr };
     std::shared_ptr<LoongEditorContext> context_ { nullptr };
     std::queue<EndFrameTask> endFrameTaskQueue_ {};

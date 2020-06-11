@@ -4,6 +4,7 @@
 
 #include "LoongEditor.h"
 #include "LoongApp/LoongApp.h"
+#include "LoongCore/scene/LoongScene.h"
 #include "LoongFoundation/LoongClock.h"
 #include "panels/LoongEditorContentPanel.h"
 #include "panels/LoongEditorGamePanel.h"
@@ -13,11 +14,6 @@
 #include "panels/LoongEditorPanel.h"
 #include "utils/LoongEditorTemplates.h"
 #include <imgui.h>
-
-// for debug
-#include "LoongCore/scene/LoongScene.h"
-#include "LoongCore/scene/components/LoongCModelRenderer.h"
-#include "LoongResource/LoongResourceManager.h"
 
 namespace Loong::Editor {
 
@@ -56,16 +52,6 @@ bool LoongEditor::Initialize()
     panelMaker.MakePanel<LoongEditorContentPanel>("Content");
     panelMaker.MakePanel<LoongEditorGamePanel>("Game");
     panelMaker.MakePanel<LoongEditorMaterialEditorPanel>("Material");
-
-    ////////////// For debug
-    std::shared_ptr<Core::LoongScene> scene;
-    scene.reset(Core::LoongScene::CreateScene("Root").release());
-    GetContext().SetCurrentScene(scene);
-    auto* cubeActor = Core::LoongScene::CreateActor("Cube").release();
-    cubeActor->SetParent(scene.get());
-    auto* modelRenderer = cubeActor->AddComponent<Core::LoongCModelRenderer>();
-    modelRenderer->SetModel(Resource::LoongResourceManager::GetModel("Models/cube.fbx"));
-    modelRenderer->SetMaterial(0, Resource::LoongResourceManager::GetMaterial("Models/Test.fbx"));
 
     return true;
 }
@@ -154,14 +140,17 @@ void LoongEditor::OnUpdateMainMenuBar()
     if (ImGui::BeginMenuBar()) {
         if (ImGui::BeginMenu("File")) {
             if (ImGui::MenuItem("New Scene")) {
+                auto createNewScene = [this]() {
+                    std::shared_ptr<Core::LoongScene> newScene;
+                    newScene.reset(Core::LoongScene::CreateScene("Root").release());
+                    context_->SetCurrentScene(newScene);
+                };
                 if (GetContext().GetCurrentScene() != nullptr) {
                     confirmPopup_.Show();
                     confirmPopup_.SetMessage("There is a scene opened, you may lost your modification if you continue,\n are you sure to continue?");
-                    confirmPopup_.SetConfirmedTask([this]() {
-                        std::shared_ptr<Core::LoongScene> newScene;
-                        newScene.reset(Core::LoongScene::CreateScene("Root").release());
-                        context_->SetCurrentScene(newScene);
-                    });
+                    confirmPopup_.SetConfirmedTask(createNewScene);
+                } else {
+                    createNewScene();
                 }
             }
 
