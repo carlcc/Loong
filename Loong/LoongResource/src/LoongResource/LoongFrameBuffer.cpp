@@ -21,8 +21,8 @@ LoongFrameBuffer::LoongFrameBuffer(uint32_t width, uint32_t height, uint32_t col
     }
 
     Bind();
-    for (size_t i = 0; i < colorAttachmentsCount; ++i) {
-        glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + i, colorAttachments_[i]->GetId(), 0);
+    for (uint32_t i = 0; i < colorAttachmentsCount; ++i) {
+        glFramebufferTexture(GL_FRAMEBUFFER, GLenum(GL_COLOR_ATTACHMENT0 + i), colorAttachments_[i]->GetId(), 0);
     }
     Unbind();
 
