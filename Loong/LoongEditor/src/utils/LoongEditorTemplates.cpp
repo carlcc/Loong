@@ -4,6 +4,7 @@
 
 #include "LoongEditorTemplates.h"
 #include "../LoongEditor.h"
+#include "../LoongEditorConstants.h"
 #include "../LoongEditorContext.h"
 #include "ImGuiUtils.h"
 #include "LoongCore/scene/LoongActor.h"
@@ -63,13 +64,13 @@ void FillActorMenu(Core::LoongActor* actor, Core::LoongScene* scene, LoongEditor
             std::string modelPath;
         };
         static BuiltinModelInfo kBuiltinModelInfos[] = {
-            { "Cube", "Cube ", "/Models/cube.fbx" },
-            { "Cone", "Cone ", "/Models/Cone.fbx" },
-            { "Cylinder", "Cylinder ", "/Models/Cylinder.fbx" },
-            { "Pipe", "Pipe ", "/Models/Pipe.fbx" },
-            { "Plane", "Plane ", "/Models/Plane.fbx" },
-            { "Pyramid", "Pyramid ", "/Models/Pyramid.fbx" },
-            { "Sphere", "Sphere ", "/Models/Sphere.fbx" },
+            { "Cube", "Cube ", Constants::kCubeModelPath },
+            { "Cone", "Cone ", Constants::kConeModelPath },
+            { "Cylinder", "Cylinder ", Constants::kCylinderModelPath },
+            { "Pipe", "Pipe ", Constants::kPipeModelPath },
+            { "Plane", "Plane ", Constants::kPlaneModelPath },
+            { "Pyramid", "Pyramid ", Constants::kPyramidModelPath },
+            { "Sphere", "Sphere ", Constants::kSphereModelPath },
         };
         for (const auto& info : kBuiltinModelInfos) {
             if (ImGui::MenuItem(info.menuName)) {

@@ -4,6 +4,7 @@
 
 #include "LoongEditorMaterialEditorPanel.h"
 #include "../LoongEditor.h"
+#include "../LoongEditorConstants.h"
 #include "../LoongEditorContext.h"
 #include "../utils/ImGuiUtils.h"
 #include "../utils/LoongFileTreeNode.h"
@@ -11,10 +12,12 @@
 #include "LoongCore/scene/components/LoongCCamera.h"
 #include "LoongCore/scene/components/LoongCModelRenderer.h"
 #include "LoongFoundation/LoongDefer.h"
+#include "LoongRenderer/LoongRenderer.h"
 #include "LoongResource/LoongFrameBuffer.h"
 #include "LoongResource/LoongMaterial.h"
 #include "LoongResource/LoongResourceManager.h"
 #include "LoongResource/LoongShader.h"
+#include "LoongResource/loader/LoongMaterialLoader.h"
 #include "inspector/LoongEditorInspector.h"
 #include <imgui.h>
 #include <imgui_stdlib.h>
@@ -33,6 +36,7 @@ LoongEditorMaterialEditorPanel::LoongEditorMaterialEditorPanel(LoongEditor* edit
         previewActor_ = Core::LoongScene::CreateActor("Actor").release();
         previewModel_ = previewActor_->AddComponent<Core::LoongCModelRenderer>();
         previewModel_->SubscribeModelChanged(this, &LoongEditorMaterialEditorPanel::OnPreviewActorModelChanged);
+        previewActor_->SetParent(previewScene_.get());
     }
 }
 
@@ -42,11 +46,11 @@ void LoongEditorMaterialEditorPanel::Render(const Foundation::LoongClock& clock)
         return;
     }
     frameBuffer_->Bind();
+    auto* camera = cameraActor_->GetComponent<Core::LoongCCamera>();
     glViewport(0, 0, viewportWidth_, viewportHeight_);
-    if (auto scene = GetEditorContext().GetCurrentScene(); scene != nullptr) {
-        auto* camera = cameraActor_->GetComponent<Core::LoongCCamera>();
-        RenderSceneForCamera(*previewScene_, *camera);
-    }
+    GetEditorContext().GetRenderer().Clear(camera->GetCamera(), true, true, true);
+    RenderSceneForCamera(*previewScene_, *camera);
+
     frameBuffer_->Unbind();
 }
 
@@ -62,19 +66,19 @@ void LoongEditorMaterialEditorPanel::AdjustPreviewModelAndCamera()
     cameraActor_->GetTransform().LookAt(Math::Zero, Math::kUp);
 }
 
-//void LoongEditorMaterialEditorPanel::OpenMaterial(const FileTreeNode* fileNode)
-//{
-//    currentMaterial_ = ResourceManager::GetMaterial(fileNode->GetRelativePath());
-//    if (currentMaterial_ != nullptr) {
-//        *materialBackUp_ = *currentMaterial_;
-//        materialFileFullPath_ = fileNode->GetFullPath();
-//        auto model = ResourceManager::GetModel("resource/models/Sphere.fbx");
-//        previewModel_->SetModel(model);
-//        previewModel_->SetMaterial(0, currentMaterial_);
-//
-//        AdjustPreviewModelAndCamera();
-//    }
-//}
+void LoongEditorMaterialEditorPanel::OpenMaterial(const LoongFileTreeNode* fileNode)
+{
+    currentMaterial_ = Resource::LoongResourceManager::GetMaterial(fileNode->GetFullPath());
+    if (currentMaterial_ != nullptr) {
+        *materialBackUp_ = *currentMaterial_;
+        materialFileFullPath_ = fileNode->GetFullPath();
+        auto model = Resource::LoongResourceManager::GetModel(Constants::kSphereModelPath);
+        previewModel_->SetModel(model);
+        previewModel_->SetMaterial(0, currentMaterial_);
+
+        AdjustPreviewModelAndCamera();
+    }
+}
 
 void LoongEditorMaterialEditorPanel::OnPreviewActorModelChanged(Resource::LoongGpuModel* newModel, Resource::LoongGpuModel* oldModel)
 {
@@ -119,24 +123,29 @@ void LoongEditorMaterialEditorPanel::UpdateProperies(const Foundation::LoongCloc
         if (ImGui::Button("Restore")) {
             *currentMaterial_ = *materialBackUp_;
         }
-        //     ImGui::SameLine();
-        //     if (ImGui::Button("Save")) {
-        //         MaterialLoader::Write(materialFileFullPath_, currentMaterial_.get());
-        //         *materialBackUp_ = *currentMaterial_;
-        //     }
+        ImGui::SameLine();
+        if (ImGui::Button("Save")) {
+            // TODO: Show a confirm?
+            Resource::LoongMaterialLoader::Write(materialFileFullPath_, currentMaterial_.get());
+            *materialBackUp_ = *currentMaterial_;
+        }
     }
     ImGui::Separator();
 
     {
         if (ImGui::CollapsingHeader("The Preview Model", ImGuiTreeNodeFlags_None)) {
+            ImGuiUtils::ScopedId scopedId(1);
             LoongEditorInspector::Inspect(previewActor_->GetTransform());
             LoongEditorInspector::Inspect(previewModel_);
         }
         if (ImGui::CollapsingHeader("The Preview Camera", ImGuiTreeNodeFlags_None)) {
+            ImGuiUtils::ScopedId scopedId(2);
             LoongEditorInspector::Inspect(cameraActor_->GetTransform());
             LoongEditorInspector::Inspect(cameraActor_->GetComponent<Core::LoongCCamera>());
         }
     }
+
+    ImGui::Separator();
 
     {
         ImGui::BeginChild("Properties");

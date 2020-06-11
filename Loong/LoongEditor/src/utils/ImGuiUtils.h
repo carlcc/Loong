@@ -6,6 +6,11 @@
 #include "LoongFoundation/LoongMath.h"
 #include <imgui.h>
 
+namespace Loong::Editor {
+class LoongFileTreeNode;
+class LoongEditor;
+}
+
 namespace Loong::Editor::ImGuiUtils {
 
 inline ImVec2 ToImVec(const Math::Vector2& v)
@@ -30,14 +35,16 @@ public:
     }
 };
 
+void HandleOpenFile(const LoongFileTreeNode* fileNode, LoongEditor* editor);
+
 template <class T>
-static void SetDragData(const char* key, const T& data)
+inline void SetDragData(const char* key, const T& data)
 {
     ImGui::SetDragDropPayload(key, &data, sizeof(T));
 }
 
 template <class T>
-static T GetDropData(const char* key)
+inline T GetDropData(const char* key)
 {
     if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload(key)) {
         IM_ASSERT(payload->DataSize == sizeof(T));

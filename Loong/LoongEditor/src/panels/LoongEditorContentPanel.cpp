@@ -144,7 +144,7 @@ void LoongEditorContentPanel::DrawNode(LoongFileTreeNode* node, LoongFileTreeNod
 
     if (ImGui::BeginPopupContextItem("ContentContextMenu")) {
         if (ImGui::MenuItem("Open", nullptr, nullptr, !node->isDir)) {
-            // ImGuiHelper::HandleOpenFile(node, editor_);
+            ImGuiUtils::HandleOpenFile(node, editor_);
         }
         // if (ImGui::BeginMenu("Create", node->isDir)) {
         //     if (ImGui::BeginMenu("Material")) {

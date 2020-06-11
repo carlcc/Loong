@@ -77,6 +77,16 @@ public:
     {
         StringSplitor<std::string_view> { str, separator }.Split(container);
     }
+
+    static bool StartsWith(const std::string_view& str, const std::string_view& sub)
+    {
+        return str.size() > sub.size() && str.compare(0, sub.size(), sub) == 0;
+    }
+
+    static bool EndsWith(const std::string_view& str, const std::string_view& sub)
+    {
+        return str.size() > sub.size() && str.compare(str.size() - sub.size(), sub.size(), sub) == 0;
+    }
 };
 
 }

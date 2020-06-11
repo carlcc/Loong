@@ -16,13 +16,15 @@ class LoongGpuModel;
 
 namespace Loong::Editor {
 
+class LoongFileTreeNode;
+
 class LoongEditorMaterialEditorPanel : public LoongEditorRenderPanel {
 public:
     LoongEditorMaterialEditorPanel(LoongEditor* editor, const std::string& name, bool opened, const LoongEditorPanelConfig& cfg);
 
     void Render(const Foundation::LoongClock& clock) override;
 
-    // void OpenMaterial(const FileTreeNode* fileNode);
+    void OpenMaterial(const LoongFileTreeNode* fileNode);
 
 protected:
     void UpdateImpl(const Foundation::LoongClock& clock) override;
