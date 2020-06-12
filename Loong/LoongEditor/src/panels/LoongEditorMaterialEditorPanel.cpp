@@ -57,6 +57,9 @@ void LoongEditorMaterialEditorPanel::Render(const Foundation::LoongClock& clock)
 void LoongEditorMaterialEditorPanel::AdjustPreviewModelAndCamera()
 {
     auto model = previewModel_->GetModel();
+    if (model == nullptr) {
+        return;
+    }
     auto& aabb = model->GetAABB();
     auto size = aabb.max - aabb.min;
     auto maxDimension = std::max({ size.x, size.y, size.z });
