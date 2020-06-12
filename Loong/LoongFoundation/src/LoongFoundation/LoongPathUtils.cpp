@@ -42,7 +42,7 @@ void NormalizeSeparatorInternal(std::string& path)
     path.resize(i);
 }
 
-std::string RemoveDotDotInternal(const std::string_view& path)
+std::string RemoveDotDotInternal(std::string_view path)
 {
     std::vector<std::string_view> paths = LoongStringUtils::Split(path, kPathSeparator);
     std::vector<const std::string_view*> stack;
@@ -83,7 +83,7 @@ bool IsAbsolutePath(const std::string_view& path)
 #endif
 }
 
-std::string Foundation::LoongPathUtils::Normalize(const std::string_view& path)
+std::string Foundation::LoongPathUtils::Normalize(std::string_view path)
 {
     if (path.empty()) {
         return "";
@@ -109,13 +109,41 @@ std::string Foundation::LoongPathUtils::Normalize(const std::string_view& path)
     }
 }
 
-std::string LoongPathUtils::GetParent(const std::string_view& path)
+std::string LoongPathUtils::GetParent(std::string_view path)
 {
     std::string p;
     p.reserve((3 + path.length()));
     p += path;
     p += "/..";
     return Normalize(p);
+}
+
+std::string_view LoongPathUtils::GetFileName(std::string_view path)
+{
+    auto index1 = path.rfind('/');
+    auto index2 = path.rfind('\\');
+    if (index1 == std::string_view::npos) {
+        if (index2 == std::string_view::npos) {
+            return path;
+        } else {
+            return path.substr(index2 + 1);
+        }
+    } else {
+        if (index2 == std::string_view::npos) {
+            return path.substr(index1 + 1);
+        } else {
+            return path.substr((index1 > index2 ? index1 : index2) + 1);
+        }
+    }
+}
+
+std::string_view LoongPathUtils::GetFileExtension(std::string_view fileName)
+{
+    auto index = fileName.rfind('.');
+    if (index == std::string_view::npos) {
+        return fileName;
+    }
+    return fileName.substr(index);
 }
 
 }

@@ -12,9 +12,16 @@ class LoongPathUtils {
 public:
     LoongPathUtils() = delete;
 
-    static std::string Normalize(const std::string_view& path);
+    static std::string Normalize(std::string_view path);
 
-    static std::string GetParent(const std::string_view& path);
+    static std::string GetParent(std::string_view path);
+
+    static std::string_view GetFileName(std::string_view path);
+
+    // The input is pure name, not path
+    // The return value contains dot (.),
+    // e.g. Input: "a.tar.bz2" returns ".bz2"
+    static std::string_view GetFileExtension(std::string_view fileName);
 };
 
 }
