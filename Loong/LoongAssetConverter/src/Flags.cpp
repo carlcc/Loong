@@ -18,12 +18,12 @@ bool Flags::ParseCommandLine(int argc, char** argv)
 {
     auto inputOptionHandler = [](int& index, int argc, char** argv) -> bool {
         TRY_INCREASE_INDEX(index, argc, R"(Missing argument for "-i" or "--input")");
-        GetInterial().inputFile = argv[index + 1];
+        GetInterial().inputFile = argv[index];
         return true;
     };
     auto outputOptionHandler = [](int& index, int argc, char** argv) -> bool {
         TRY_INCREASE_INDEX(index, argc, R"(Missing argument for "-o" or "--output")");
-        GetInterial().outputDir = argv[index + 1];
+        GetInterial().outputDir = argv[index];
         return true;
     };
     const std::unordered_map<std::string, std::function<bool(int&, int, char**)>> kCommandHandlerMap {
