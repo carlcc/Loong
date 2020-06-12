@@ -4,9 +4,10 @@
 
 #include "ModelExport.h"
 #include "Flags.h"
-#include "LoongFoundation/LoongAchiver.h"
 #include "LoongFoundation/LoongDefer.h"
+#include "LoongFoundation/LoongLogger.h"
 #include "LoongFoundation/LoongPathUtils.h"
+#include "LoongFoundation/LoongSerializer.h"
 #include <LoongAsset/LoongMesh.h>
 #include <LoongAsset/LoongModel.h>
 #include <LoongFoundation/LoongMath.h>
@@ -132,11 +133,22 @@ bool ExportModelFiles(const aiScene* scene)
 
     Asset::LoongModel model(std::move(meshes), std::move(materials));
 
-    Foundation::LoongArchiveOutputStream outputStream(ofs);
+    struct FileOutputStream : public Foundation::LoongArchiveOutputStream {
+        explicit FileOutputStream(FILE* fout)
+            : fout_(fout)
+        {
+        }
+        bool operator()(void* d, size_t l)
+        {
+            return fwrite(d, l, 1, fout_) == 1;
+        }
 
-    Foundation::LoongArchive<Foundation::LoongArchiveOutputStream> archive(outputStream);
+    private:
+        FILE* fout_ { nullptr };
+    };
+    FileOutputStream outputStream(ofs);
 
-    return model.Serialize(archive);
+    return Foundation::Serialize(model, outputStream);
 }
 
 }
