@@ -23,13 +23,16 @@ public:
 
     const Math::AABB& GetAABB() const { return aabb_; }
 
+    template <class Archive>
+    bool Serialize(Archive& archive) { return archive(vertices_, indices_, materialIndex_, aabb_); }
+
 private:
     void UpdateAABB();
 
 protected:
     std::vector<LoongVertex> vertices_;
     std::vector<uint32_t> indices_;
-    const uint32_t materialIndex_ { 0 };
+    uint32_t materialIndex_ { 0 };
     Math::AABB aabb_ {};
 };
 

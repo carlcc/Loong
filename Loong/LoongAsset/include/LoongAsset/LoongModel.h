@@ -16,6 +16,12 @@ class LoongMesh;
 class LoongModel {
 public:
     explicit LoongModel(const std::string& path);
+    explicit LoongModel(std::vector<LoongMesh*>&& meshes, std::vector<std::string>&& materialNames)
+        : meshes_(std::move(meshes))
+        , materialNames_(std::move(materialNames))
+    {
+        UpdateAABB();
+    }
 
     ~LoongModel();
 
@@ -37,6 +43,9 @@ public:
     bool operator!() const { return meshes_.empty() && materialNames_.empty(); }
 
     explicit operator bool() const { return meshes_.size() > 0 || materialNames_.size() > 0; }
+
+    template <class Archive>
+    bool Serialize(Archive& archive) { return archive(meshes_, materialNames_, aabb_); }
 
 private:
     void UpdateAABB();
