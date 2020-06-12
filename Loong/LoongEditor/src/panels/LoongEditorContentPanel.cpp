@@ -9,6 +9,7 @@
 #include "LoongFileSystem/LoongFileSystem.h"
 #include "LoongFoundation/LoongDefer.h"
 #include <imgui.h>
+#include <set>
 #include <vector>
 
 namespace Loong::Editor {
@@ -52,10 +53,10 @@ void LoongEditorContentPanel::ScanForDir(LoongFileTreeNode* node)
 {
     auto fullPath = node->GetFullPath();
     if (FS::LoongFileSystem::IsDir(fullPath)) {
-        std::vector<std::string> files;
+        std::set<std::string> files;
         FS::LoongFileSystem::EnumerateFiles(fullPath, [&files](const std::string& name) {
             if (name != "." && name != "..") {
-                files.push_back(name);
+                files.insert(name);
             }
             return false;
         });

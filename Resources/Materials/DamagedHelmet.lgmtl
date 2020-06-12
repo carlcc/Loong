@@ -1,0 +1,29 @@
+{
+    "shader": "Shaders/unlit.glsl",
+    "params": {
+        "u_Diffuse": {
+            "type": "vec4",
+            "value": "1 1 1 1"
+        },
+        "u_DiffuseMap": {
+            "type": "tex2d",
+            "value": "/Textures/DamagedHelmet_0.jpg"
+        },
+        "u_TextureOffset": {
+            "type": "vec2",
+            "value": "0 0"
+        },
+        "u_TextureTiling": {
+            "type": "vec2",
+            "value": "1 1"
+        }
+    },
+    "state": {
+        "blend": false,
+        "backCulling": true,
+        "frontCulling": false,
+        "depthTest": true,
+        "depthWriting": true,
+        "colorWriting": true
+    }
+}
