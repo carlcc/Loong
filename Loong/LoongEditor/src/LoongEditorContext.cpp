@@ -24,4 +24,12 @@ LoongEditorContext::LoongEditorContext(const std::string& projectFile)
     renderer_.reset(new Renderer::LoongRenderer);
 }
 
+void LoongEditorContext::SetCurrentScene(std::shared_ptr<Core::LoongScene> scene)
+{
+    if (currentScene_ != scene) {
+        currentSelectedActor_ = nullptr;
+        currentScene_ = std::move(scene);
+    }
+}
+
 }

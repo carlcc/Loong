@@ -55,7 +55,7 @@ public:
 
     std::shared_ptr<Core::LoongScene> GetCurrentScene() const { return currentScene_; }
 
-    void SetCurrentScene(std::shared_ptr<Core::LoongScene> scene) { currentScene_ = std::move(scene); }
+    void SetCurrentScene(std::shared_ptr<Core::LoongScene> scene);
 
     void SetCurrentSelectedActor(Core::LoongActor* actor) { currentSelectedActor_ = actor; }
 
