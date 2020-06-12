@@ -24,6 +24,7 @@ add_library(nfd STATIC
 target_include_directories(nfd
 PUBLIC
         src/include
+	${NDF_PLATFORM_DEPS_INCLUDE_DIRS}
         )
 target_link_libraries(
         nfd PUBLIC ${NDF_PLATFORM_DEPS_LIBRARIES}
