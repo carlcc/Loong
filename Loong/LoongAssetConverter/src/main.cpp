@@ -6,16 +6,11 @@
 #include <assimp/scene.h>
 #include <iostream>
 #include "ModelExport.h"
+#include "TextureExport.h"
 
 namespace Loong::AssetConverter {
 
 bool ExportAnimationFiles(const aiScene* scene)
-{
-
-    return true;
-}
-
-bool ExportTextureFiles(const aiScene* scene)
 {
 
     return true;
@@ -85,7 +80,6 @@ int main(int argc, char* argv[])
     });
 
     if (!Flags::ParseCommandLine(argc, argv)) {
-        LOONG_ERROR("Parse command line failed!");
         return -1;
     }
 

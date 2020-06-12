@@ -14,6 +14,12 @@ struct Flags {
 
     std::string outputDir;
 
+    std::string modelPath;
+
+    std::string texturePath;
+
+    std::string rawTextureOutputFormat = ".jpg";
+
 private:
     Flags() = default;
     static Flags& GetInterial();

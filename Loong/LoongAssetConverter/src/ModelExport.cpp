@@ -4,13 +4,13 @@
 
 #include "ModelExport.h"
 #include "Flags.h"
+#include "LoongAsset/LoongMesh.h"
+#include "LoongAsset/LoongModel.h"
 #include "LoongFoundation/LoongDefer.h"
 #include "LoongFoundation/LoongLogger.h"
+#include "LoongFoundation/LoongMath.h"
 #include "LoongFoundation/LoongPathUtils.h"
 #include "LoongFoundation/LoongSerializer.h"
-#include <LoongAsset/LoongMesh.h>
-#include <LoongAsset/LoongModel.h>
-#include <LoongFoundation/LoongMath.h>
 #include <assimp/matrix4x4.h>
 #include <assimp/postprocess.h>
 #include <assimp/scene.h>
@@ -114,7 +114,8 @@ bool ExportModelFiles(const aiScene* scene)
     std::string_view extension = Foundation::LoongPathUtils::GetFileExtension(fileName);
     std::string outputFileName = fileName.substr(0, fileName.length() - extension.length()) + ".lgmdl";
 
-    std::string outputPath = flags.outputDir + '/' + outputFileName;
+    std::string outputPath = flags.outputDir + '/' + flags.modelPath + '/' + outputFileName;
+    outputPath = Foundation::LoongPathUtils::Normalize(outputPath);
 
     FILE* ofs = fopen(outputPath.c_str(), "wb");
     if (ofs == nullptr) {
