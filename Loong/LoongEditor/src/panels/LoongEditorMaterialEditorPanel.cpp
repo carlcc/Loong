@@ -45,13 +45,13 @@ void LoongEditorMaterialEditorPanel::Render(const Foundation::LoongClock& clock)
     if (!IsVisible() || viewportWidth_ <= 0 || viewportHeight_ <= 0) {
         return;
     }
-    frameBuffer_->Bind();
+    GetFrameBuffer()->Bind();
     auto* camera = cameraActor_->GetComponent<Core::LoongCCamera>();
     glViewport(0, 0, viewportWidth_, viewportHeight_);
     GetEditorContext().GetRenderer().Clear(camera->GetCamera(), true, true, true);
     RenderSceneForCamera(*previewScene_, *camera);
 
-    frameBuffer_->Unbind();
+    GetFrameBuffer()->Unbind();
 }
 
 void LoongEditorMaterialEditorPanel::AdjustPreviewModelAndCamera()

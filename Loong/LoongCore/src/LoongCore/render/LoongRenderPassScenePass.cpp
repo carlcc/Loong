@@ -17,7 +17,7 @@ struct Drawable {
     float distance;
 };
 
-void LoongRenderPassScenePass::Render(Renderer::LoongRenderer& renderer, LoongScene& scene, LoongCCamera& camera)
+void LoongRenderPassScenePass::Render(Renderer::LoongRenderer& renderer, Resource::LoongUniformBuffer& basicUniforms, LoongScene& scene, LoongCCamera& camera)
 {
     UniformBlock ub {};
     ub.ub_ViewPos = camera.GetOwner()->GetTransform().GetWorldPosition();
@@ -74,7 +74,7 @@ void LoongRenderPassScenePass::Render(Renderer::LoongRenderer& renderer, LoongSc
     // render
     for (auto& drawable : opaqueDrawables) {
         ub.ub_Model = *drawable.transform;
-        uniformBuffer_->SetSubData(&ub, 0);
+        basicUniforms.SetSubData(&ub, 0);
         drawable.material->Bind(nullptr);
         renderer.ApplyStateMask(drawable.material->GenerateStateMask());
 

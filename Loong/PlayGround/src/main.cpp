@@ -2,6 +2,7 @@
 
 #include "LoongApp/Driver.h"
 #include "LoongApp/LoongApp.h"
+#include "LoongCore/render/LoongRenderPassScenePass.h"
 #include "LoongCore/scene/LoongActor.h"
 #include "LoongCore/scene/LoongScene.h"
 #include "LoongCore/scene/components/LoongCCamera.h"
@@ -31,13 +32,6 @@ namespace Loong {
 
 class LoongEditor : public Foundation::LoongHasSlots {
 public:
-    struct UBO {
-        Math::Matrix4 ub_Model;
-        Math::Matrix4 ub_View;
-        Math::Matrix4 ub_Projection;
-        Math::Vector3 ub_ViewPos;
-        float ub_Time;
-    };
 
     LoongEditor()
     {
@@ -49,7 +43,7 @@ public:
         material->SetShaderByFile("Shaders/unlit.glsl");
         material->GetUniformsData()["u_DiffuseMap"] = fireTexture;
 
-        auto cubeModel = Resource::LoongResourceManager::GetModel("Models/cube.fbx");
+        auto cubeModel = Resource::LoongResourceManager::GetModel("Models/cube.lgmdl");
         auto* actor = Core::LoongScene::CreateActor("ActorCube").release();
         auto* modelRenderer = actor->AddComponent<Core::LoongCModelRenderer>();
         modelRenderer->SetModel(cubeModel);
@@ -64,9 +58,11 @@ public:
         cameraTransform.LookAt(Math::Zero, Math::kUp);
         cameraActor->SetParent(scene_.get());
 
-        UBO ubo;
+        Core::LoongRenderPass::UniformBlock ubo;
         basicUniforms_.BufferData(&ubo, 1, Resource::LoongGpuBufferUsage::kStreamDraw); // Note: Must allocate memory first
-        basicUniforms_.SetBindingPoint(0, sizeof(UBO));
+        basicUniforms_.SetBindingPoint(0, sizeof(ubo));
+
+        scenePass_ = std::make_shared<Core::LoongRenderPassScenePass>();
 
         gApp->SubscribeUpdate(this, &LoongEditor::OnUpdate);
         gApp->SubscribeRender(this, &LoongEditor::OnRender);
@@ -119,15 +115,7 @@ public:
         auto& cameraActorTransform = cameraComponent_->GetOwner()->GetTransform();
         cameraComponent_->GetCamera().UpdateMatrices(width, height, cameraActorTransform.GetWorldPosition(), cameraActorTransform.GetWorldRotation());
 
-        UBO ubo;
-        ubo.ub_ViewPos = cameraActorTransform.GetWorldPosition();
-        ubo.ub_View = cameraComponent_->GetCamera().GetViewMatrix();
-        ubo.ub_Projection = cameraComponent_->GetCamera().GetProjectionMatrix();
-
-        scene_->Render(renderer_, *cameraComponent_, nullptr, [&ubo, this](const Math::Matrix4& modelMatrix) {
-            ubo.ub_Model = modelMatrix;
-            basicUniforms_.SetSubData(&ubo, 0);
-        });
+        scenePass_->Render(renderer_, basicUniforms_, *scene_, *cameraComponent_);
     }
 
     void OnPressButton()
@@ -142,6 +130,7 @@ public:
     Foundation::LoongClock clock_;
 
     std::shared_ptr<Resource::LoongTexture> texture_ { nullptr };
+    std::shared_ptr<Core::LoongRenderPassScenePass> scenePass_ { nullptr };
     Renderer::LoongRenderer renderer_;
     Resource::LoongUniformBuffer basicUniforms_;
 

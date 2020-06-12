@@ -3,6 +3,7 @@
 //
 
 #include "LoongEditorContext.h"
+#include "LoongCore/render/LoongRenderPass.h"
 #include "LoongFoundation/LoongPathUtils.h"
 #include "LoongRenderer/LoongRenderer.h"
 #include "LoongResource/LoongGpuBuffer.h"
@@ -16,9 +17,9 @@ LoongEditorContext::LoongEditorContext(const std::string& projectFile)
     projectDir_ = Foundation::LoongPathUtils::GetParent(projectFile_);
 
     uniformBuffer_ = std::make_shared<Resource::LoongUniformBuffer>();
-    UniformBlock ub {};
+    Core::LoongRenderPass::UniformBlock ub {};
     uniformBuffer_->BufferData(&ub, 1, Resource::LoongGpuBufferUsage::kStreamDraw);
-    uniformBuffer_->SetBindingPoint(0, sizeof(UniformBlock));
+    uniformBuffer_->SetBindingPoint(0, sizeof(ub));
     defaultMaterial_ = Resource::LoongResourceManager::GetMaterial("Materials/Default.lgmtl");
 
     renderer_.reset(new Renderer::LoongRenderer);

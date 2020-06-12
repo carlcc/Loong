@@ -34,14 +34,14 @@ void LoongEditorScenePanel::Render(const Foundation::LoongClock& clock)
 
     {
         // Render the scene
-        frameBuffer_->Bind();
+        GetFrameBuffer()->Bind();
         glViewport(0, 0, viewportWidth_, viewportHeight_);
         auto& camera = *cameraActor_->GetComponent<Core::LoongCCamera>();
         GetEditorContext().GetRenderer().Clear(camera.GetCamera(), true, true, true);
         if (auto scene = GetEditorContext().GetCurrentScene(); scene != nullptr) {
             RenderSceneForCamera(*scene, camera);
         }
-        frameBuffer_->Unbind();
+        GetFrameBuffer()->Unbind();
     }
 }
 

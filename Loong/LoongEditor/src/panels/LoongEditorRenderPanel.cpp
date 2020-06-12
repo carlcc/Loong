@@ -9,6 +9,9 @@
 #include "LoongApp/LoongApp.h"
 #include "LoongApp/LoongInput.h"
 #include "LoongApp/LoongInputAction.h"
+#include "LoongCore/render/LoongRenderPass.h"
+#include "LoongCore/render/LoongRenderPassScenePass.h"
+#include "LoongCore/render/LoongRenderPipeline.h"
 #include "LoongCore/scene/LoongScene.h"
 #include "LoongCore/scene/components/LoongCCamera.h"
 #include "LoongResource/LoongFrameBuffer.h"
@@ -20,10 +23,17 @@ namespace Loong::Editor {
 LoongEditorRenderPanel::LoongEditorRenderPanel(LoongEditor* editor, const std::string& name, bool opened, const LoongEditorPanelConfig& cfg)
     : LoongEditorPanel(editor, name, opened, cfg)
 {
-    frameBuffer_ = std::make_shared<Resource::LoongFrameBuffer>();
     cameraActor_ = Core::LoongScene::CreateActor("SceneViewCamera");
     cameraActor_->AddComponent<Core::LoongCCamera>();
     cameraActor_->AddComponent<LoongEditorSceneCameraController>(editor);
+
+    scenePass_ = std::make_shared<Core::LoongRenderPassScenePass>();
+    scenePass_ ->SetDefaultMaterial(GetEditorContext().GetDefaultMaterial());
+}
+
+std::shared_ptr<Resource::LoongFrameBuffer> LoongEditorRenderPanel::GetFrameBuffer() const
+{
+    return scenePass_->GetFrameBuffer();
 }
 
 void LoongEditorRenderPanel::UpdateImpl(const Foundation::LoongClock& clock)
@@ -48,9 +58,11 @@ void LoongEditorRenderPanel::UpdateImpl(const Foundation::LoongClock& clock)
     //    rect.bottom_ = int(vMax.y);
 
     // auto windowSize = ImGui::GetItemRectSize();
-    assert(frameBuffer_ != nullptr);
-    frameBuffer_->Resize(viewportWidth_, viewportHeight_);
-    ImGui::Image((void*)(intptr_t)frameBuffer_->GetColorAttachments()[0]->GetId(), viewportSize, ImVec2 { 0, 1 }, ImVec2 { 1, 0 });
+    assert(scenePass_ != nullptr && scenePass_->GetFrameBuffer() != nullptr);
+
+    auto frameBuffer = GetFrameBuffer();
+    frameBuffer->Resize(viewportWidth_, viewportHeight_);
+    ImGui::Image((void*)(intptr_t)frameBuffer->GetColorAttachments()[0]->GetId(), viewportSize, ImVec2 { 0, 1 }, ImVec2 { 1, 0 });
 
     // Update camera actor
     if (ImGui::IsItemHovered(ImGuiHoveredFlags_None)) {
@@ -76,16 +88,13 @@ void LoongEditorRenderPanel::RenderSceneForCamera(Core::LoongScene& scene, Core:
     auto cameraRot = camera.GetOwner()->GetTransform().GetWorldRotation();
     camera.GetCamera().UpdateMatrices(viewportWidth_, viewportHeight_, cameraPos, cameraRot);
 
-    LoongEditorContext::UniformBlock ub {};
+    Core::LoongRenderPass::UniformBlock ub {};
     ub.ub_ViewPos = camera.GetOwner()->GetTransform().GetWorldPosition();
     ub.ub_Projection = camera.GetCamera().GetProjectionMatrix();
     ub.ub_View = camera.GetCamera().GetViewMatrix();
 
     auto& context = GetEditorContext();
-    scene.Render(context.GetRenderer(), camera, context.GetDefaultMaterial().get(), [uniformBuffer = context.GetUniformBuffer().get(), &ub](const Math::Matrix4& modelMatrix) {
-        ub.ub_Model = modelMatrix;
-        uniformBuffer->SetSubData(&ub, 0);
-    });
+    scenePass_->Render(context.GetRenderer(), *context.GetUniformBuffer(), scene, camera);
 }
 
 }

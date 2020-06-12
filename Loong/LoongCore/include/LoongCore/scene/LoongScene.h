@@ -60,9 +60,6 @@ public:
 
     const FastAccess& GetFastAccess() const { return fastAccess_; }
 
-    using SetModelMatrixCallback = std::function<void(const Math::Matrix4& modelMatrix)>;
-    void Render(Renderer::LoongRenderer& renderer, LoongCCamera& camera, const Resource::LoongMaterial* defaultMaterial, const SetModelMatrixCallback& onSetModelMatrix);
-
     static std::unique_ptr<LoongActor> CreateActor(const std::string& name, const std::string& tag = "");
 
     static std::unique_ptr<LoongScene> CreateScene(const std::string& name, const std::string& tag = "");

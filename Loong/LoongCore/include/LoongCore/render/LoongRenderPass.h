@@ -25,11 +25,20 @@ class LoongCCamera;
 
 class LoongRenderPass {
 public:
-    virtual void Render(Renderer::LoongRenderer& renderer, LoongScene& scene, LoongCCamera& camera) = 0;
+    struct UniformBlock {
+        Math::Matrix4 ub_Model;
+        Math::Matrix4 ub_View;
+        Math::Matrix4 ub_Projection;
+        Math::Vector3 ub_ViewPos;
+        float ub_Time;
+    };
+    
+    LoongRenderPass();
+    std::shared_ptr<Resource::LoongFrameBuffer> GetFrameBuffer() const { return frameBuffer_; }
+    virtual void Render(Renderer::LoongRenderer& renderer, Resource::LoongUniformBuffer& basicUniforms, LoongScene& scene, LoongCCamera& camera) = 0;
 
 protected:
     std::shared_ptr<Resource::LoongFrameBuffer> frameBuffer_ {};
-    std::shared_ptr<Resource::LoongUniformBuffer> uniformBuffer_ {};
     Resource::LoongPipelineFixedState renderState_ {};
 };
 

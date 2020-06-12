@@ -17,7 +17,7 @@ void LoongEditorGamePanel::Render(const Foundation::LoongClock& clock)
     if (!IsVisible() || viewportWidth_ <= 0 || viewportHeight_ <= 0) {
         return;
     }
-    frameBuffer_->Bind();
+    GetFrameBuffer()->Bind();
     if (auto scene = GetEditorContext().GetCurrentScene(); scene != nullptr) {
         auto& renderer = GetEditorContext().GetRenderer();
 
@@ -27,7 +27,7 @@ void LoongEditorGamePanel::Render(const Foundation::LoongClock& clock)
             RenderSceneForCamera(*scene, *camera);
         }
     }
-    frameBuffer_->Unbind();
+    GetFrameBuffer()->Unbind();
 }
 
 }

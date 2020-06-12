@@ -30,14 +30,6 @@ class LoongFileTreeNode;
 
 class LoongEditorContext final : public Foundation::LoongHasSlots {
 public:
-    struct UniformBlock {
-        Math::Matrix4 ub_Model;
-        Math::Matrix4 ub_View;
-        Math::Matrix4 ub_Projection;
-        Math::Vector3 ub_ViewPos;
-        float ub_Time;
-    };
-
     explicit LoongEditorContext(const std::string& projectFile);
     LoongEditorContext(const LoongEditorContext&) = delete;
     LoongEditorContext(LoongEditorContext&&) = delete;
