@@ -81,31 +81,6 @@ static void ProcessNode(const void* transform, const struct aiNode* node, const 
     }
 }
 
-Math::AABB CalculateAABB(const std::vector<Asset::LoongMesh*>& meshes, const std::vector<std::string>& materials)
-{
-    Math::AABB aabb;
-    if (meshes.empty()) {
-        aabb = {
-            { 0.F, 0.F, 0.F },
-            { 0.F, 0.F, 0.F },
-        };
-        return aabb;
-    }
-
-    aabb = meshes[0]->GetAABB();
-    for (size_t i = 1; i < meshes.size(); ++i) {
-        auto& mesh = *meshes[i];
-        auto& meshAabb = mesh.GetAABB();
-        aabb.min.x = std::min(aabb.min.x, meshAabb.min.x);
-        aabb.min.y = std::min(aabb.min.y, meshAabb.min.y);
-        aabb.min.z = std::min(aabb.min.z, meshAabb.min.z);
-        aabb.max.x = std::min(aabb.max.x, meshAabb.max.x);
-        aabb.max.y = std::min(aabb.max.y, meshAabb.max.y);
-        aabb.max.z = std::min(aabb.max.z, meshAabb.max.z);
-    }
-    return aabb;
-}
-
 bool ExportModelFiles(const aiScene* scene)
 {
     auto& flags = Flags::Get();
