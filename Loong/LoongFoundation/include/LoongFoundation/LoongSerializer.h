@@ -2,6 +2,7 @@
 
 #include "LoongFoundation/LoongMath.h"
 
+// TODO: This is absolutely not a portable serializer, we should rewrite it in the future
 namespace Loong::Foundation {
 
 // Derive the following class and implement `bool operator()(void* d, size_t l)` function

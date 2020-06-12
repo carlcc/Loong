@@ -4,6 +4,9 @@
 
 #pragma once
 
+#include <algorithm>
+#include <cctype>
+#include <sstream>
 #include <string>
 #include <string_view>
 
@@ -78,14 +81,37 @@ public:
         StringSplitor<std::string_view> { str, separator }.Split(container);
     }
 
-    static bool StartsWith(const std::string_view& str, const std::string_view& sub)
+    static bool StartsWith(std::string_view str, std::string_view sub)
     {
         return str.size() > sub.size() && str.compare(0, sub.size(), sub) == 0;
     }
 
-    static bool EndsWith(const std::string_view& str, const std::string_view& sub)
+    static bool EndsWith(const std::string_view str, const std::string_view sub)
     {
         return str.size() > sub.size() && str.compare(str.size() - sub.size(), sub.size(), sub) == 0;
+    }
+
+    template <class Strings>
+    static std::string Join(const Strings& strs, std::string_view delimiter = ",")
+    {
+        auto it = strs.begin();
+        std::stringstream ss;
+        ss << *it;
+        for (++it; it != strs.end(); ++it) {
+            ss << delimiter;
+            ss << *it;
+        }
+        return ss.str();
+    }
+
+    static void ToLower(std::string& s)
+    {
+        std::transform(std::begin(s), std::end(s), std::begin(s), [](char c) -> int { return std::tolower(c); });
+    }
+
+    static void ToUpper(std::string& s)
+    {
+        std::transform(std::begin(s), std::end(s), std::begin(s), [](char c) -> int { return std::toupper(c); });
     }
 };
 
