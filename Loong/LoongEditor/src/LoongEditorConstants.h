@@ -4,9 +4,16 @@
 
 #pragma once
 
+#include <set>
+#include <string>
+#include <string_view>
+
 namespace Loong::Editor::Constants {
 
-constexpr const char* kMaterialFileSuffix = ".lgmtl";
+extern const std::set<std::string_view> kMaterialFileSuffixes;
+extern const std::set<std::string_view> kModelFileSuffixes;
+extern const std::set<std::string_view> kShaderFileSuffixes;
+extern const std::set<std::string_view> kTextureFileSuffixes;
 constexpr const char* kCubeModelPath = "/Models/cube.lgmdl";
 constexpr const char* kConeModelPath = "/Models/cone.lgmdl";
 constexpr const char* kCylinderModelPath = "/Models/cylinder.lgmdl";

@@ -169,7 +169,7 @@ void LoongEditorInspector::Inspect(Core::LoongCModelRenderer* model)
         }
 
         if (ImGui::BeginDragDropTarget()) {
-            auto* node = ImGuiUtils::GetDropData<LoongFileTreeNode*>(ImGuiUtils::kDragTypeFile);
+            auto* node = ImGuiUtils::GetDropData<LoongFileTreeNode*>(ImGuiUtils::kDragTypeModelFile);
             if (node != nullptr) {
                 auto fullPath = node->GetFullPath();
                 auto newModel = Resource::LoongResourceManager::GetModel(fullPath);
@@ -218,7 +218,7 @@ void LoongEditorInspector::Inspect(Core::LoongCModelRenderer* model)
                 }
 
                 if (ImGui::BeginDragDropTarget()) {
-                    auto* node = ImGuiUtils::GetDropData<LoongFileTreeNode*>(ImGuiUtils::kDragTypeFile);
+                    auto* node = ImGuiUtils::GetDropData<LoongFileTreeNode*>(ImGuiUtils::kDragTypeMaterialFile);
                     if (node != nullptr) {
                         auto fullPath = node->GetFullPath();
                         auto newMaterial = Resource::LoongResourceManager::GetMaterial(fullPath);

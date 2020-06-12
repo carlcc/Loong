@@ -163,7 +163,7 @@ void LoongEditorMaterialEditorPanel::UpdateProperies(const Foundation::LoongCloc
             ImGui::InputText("", &currentShaderPath, ImGuiInputTextFlags_ReadOnly);
 
             if (ImGui::BeginDragDropTarget()) {
-                auto* node = ImGuiUtils::GetDropData<LoongFileTreeNode*>(ImGuiUtils::kDragTypeFile);
+                auto* node = ImGuiUtils::GetDropData<LoongFileTreeNode*>(ImGuiUtils::kDragTypeShaderFile);
                 if (node != nullptr) {
                     auto fullPath = node->GetFullPath();
                     auto newShader = Resource::LoongResourceManager::GetShader(fullPath);
@@ -268,7 +268,7 @@ void LoongEditorMaterialEditorPanel::UpdateProperies(const Foundation::LoongCloc
                             ImGui::Image((void*)(intptr_t)tex2->GetId(), kPreviewSize, ImVec2 { 0, 1 }, ImVec2 { 1, 0 });
                         }
                         if (ImGui::BeginDragDropTarget()) {
-                            auto* node = ImGuiUtils::GetDropData<LoongFileTreeNode*>(ImGuiUtils::kDragTypeFile);
+                            auto* node = ImGuiUtils::GetDropData<LoongFileTreeNode*>(ImGuiUtils::kDragTypeTextureFile);
                             if (node != nullptr) {
                                 auto fullPath = node->GetFullPath();
                                 auto newTexture = Resource::LoongResourceManager::GetTexture(fullPath);

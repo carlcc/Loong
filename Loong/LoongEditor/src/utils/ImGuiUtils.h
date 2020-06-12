@@ -55,6 +55,10 @@ inline T GetDropData(const char* key)
     }
 }
 
-constexpr const char* kDragTypeFile = "SPARKLE_FILE";
+constexpr const char* kDragTypeMaterialFile = "LG_MAT_FILE";
+constexpr const char* kDragTypeModelFile = "LG_MDL_FILE";
+constexpr const char* kDragTypeTextureFile = "LG_TEX_FILE";
+constexpr const char* kDragTypeShaderFile = "LG_SHADER_FILE";
+constexpr const char* kDragTypeActor = "LG_ACTOR";
 
 }

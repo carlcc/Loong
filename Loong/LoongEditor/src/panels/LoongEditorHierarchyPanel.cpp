@@ -40,6 +40,22 @@ void LoongEditorHierarchyPanel::DrawNode(Core::LoongActor* node, Core::LoongActo
 
     bool opened = ImGui::TreeNodeEx((node->GetName() + "###" + std::to_string(node->GetID())).c_str(), flags);
 
+    if (node->HasParent()) { // It is not root node
+        if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_None)) {
+            ImGui::Text("%s", node->GetName().c_str());
+            // TODO: Use different key or diffrend file type?
+            ImGuiUtils::SetDragData(ImGuiUtils::kDragTypeActor, node);
+            ImGui::EndDragDropSource();
+        }
+    }
+    if (ImGui::BeginDragDropTarget()) {
+        auto* draggedNode = ImGuiUtils::GetDropData<Core::LoongActor*>(ImGuiUtils::kDragTypeActor);
+        if (draggedNode != nullptr) {
+            draggedNode->SetParent(node);
+            LOONG_DEBUG("Reset actor '{}'(ID {})'s parent to '{}'(ID {})", draggedNode->GetName(), draggedNode->GetID(), node->GetName(), node->GetID());
+        }
+        ImGui::EndDragDropTarget();
+    }
     if (ImGui::IsItemClicked() && (ImGui::GetMousePos().x - ImGui::GetItemRectMin().x) > ImGui::GetTreeNodeToLabelSpacing()) {
         OnClickNodeSignal_.emit(node);
     }

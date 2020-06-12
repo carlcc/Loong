@@ -3,13 +3,18 @@
 //
 
 #include "LoongEditorContentPanel.h"
+#include "../LoongEditorConstants.h"
 #include "../LoongEditorContext.h"
 #include "../utils/ImGuiUtils.h"
 #include "../utils/LoongFileTreeNode.h"
 #include "LoongFileSystem/LoongFileSystem.h"
 #include "LoongFoundation/LoongDefer.h"
+#include "LoongFoundation/LoongPathUtils.h"
+#include "LoongFoundation/LoongStringUtils.h"
 #include <imgui.h>
 #include <set>
+#include <string>
+#include <string_view>
 #include <vector>
 
 namespace Loong::Editor {
@@ -139,7 +144,16 @@ void LoongEditorContentPanel::DrawNode(LoongFileTreeNode* node, LoongFileTreeNod
     if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_None)) {
         ImGui::Text("%s", node->fileName.c_str());
         // TODO: Use different key or diffrend file type?
-        ImGuiUtils::SetDragData(ImGuiUtils::kDragTypeFile, node);
+        auto suffix = Foundation::LoongPathUtils::GetFileExtension(node->fileName);
+        if (Constants::kModelFileSuffixes.count(suffix) > 0) {
+            ImGuiUtils::SetDragData(ImGuiUtils::kDragTypeModelFile, node);
+        } else if (Constants::kMaterialFileSuffixes.count(suffix) > 0) {
+            ImGuiUtils::SetDragData(ImGuiUtils::kDragTypeMaterialFile, node);
+        } else if (Constants::kTextureFileSuffixes.count(suffix) > 0) {
+            ImGuiUtils::SetDragData(ImGuiUtils::kDragTypeTextureFile, node);
+        } else if (Constants::kShaderFileSuffixes.count(suffix) > 0) {
+            ImGuiUtils::SetDragData(ImGuiUtils::kDragTypeShaderFile, node);
+        }
         ImGui::EndDragDropSource();
     }
 
