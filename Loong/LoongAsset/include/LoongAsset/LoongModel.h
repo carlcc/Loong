@@ -50,6 +50,8 @@ public:
 private:
     void UpdateAABB();
 
+    void Clear();
+
 private:
     std::vector<LoongMesh*> meshes_ {};
     std::vector<std::string> materialNames_ {};

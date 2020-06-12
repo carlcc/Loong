@@ -49,11 +49,7 @@ LoongModel::LoongModel(const std::string& path)
     if (Foundation::Serialize(*this, inputStream)) {
         LOONG_TRACE("Load model '{}' to 0x{:0X} succeed", path, intptr_t(this));
     } else {
-        for (auto* mesh : meshes_) {
-            delete mesh;
-        }
-        meshes_.clear();
-        materialNames_.clear();
+        Clear();
         LOONG_ERROR("Load model '{}' to 0x{:0X} failed", path, intptr_t(this));
     }
 }
@@ -61,9 +57,7 @@ LoongModel::LoongModel(const std::string& path)
 LoongModel::~LoongModel()
 {
     LOONG_TRACE("Unload model '0x{:0X}'", intptr_t(this));
-    for (auto* mesh : meshes_) {
-        delete mesh;
-    }
+    Clear();
 }
 
 void LoongModel::UpdateAABB()
@@ -87,6 +81,15 @@ void LoongModel::UpdateAABB()
         aabb_.max.y = std::min(aabb_.max.y, meshAabb.max.y);
         aabb_.max.z = std::min(aabb_.max.z, meshAabb.max.z);
     }
+}
+
+void LoongModel::Clear()
+{
+    for (auto* mesh : meshes_) {
+        delete mesh;
+    }
+    meshes_.clear();
+    materialNames_.clear();
 }
 
 }
