@@ -5,21 +5,69 @@
 #include "LoongAsset/LoongModel.h"
 #include "LoongAsset/LoongMesh.h"
 #include "LoongAssimpModelLoader.h"
+#include "LoongFileSystem/LoongFileSystem.h"
 #include "LoongFoundation/LoongLogger.h"
+#include "LoongFoundation/LoongSerializer.h"
+#include "LoongFoundation/LoongStringUtils.h"
 #include <algorithm>
 
 namespace Loong::Asset {
 
+struct MemoryInputStream : public Foundation::LoongArchiveInputStream {
+    explicit MemoryInputStream(uint8_t* buffer, size_t size)
+        : buffer_(buffer)
+        , size_(size)
+    {
+    }
+    bool operator()(void* d, size_t l)
+    {
+        if (l <= size_) {
+            memcpy(d, buffer_, l);
+            buffer_ += l;
+            size_ -= l;
+            return true;
+        }
+        return false;
+    }
+
+private:
+    uint8_t* buffer_ { nullptr };
+    size_t size_ { 0 };
+};
+
 LoongModel::LoongModel(const std::string& path)
 {
-    LOONG_TRACE("Load model '{}' to 0x{:0X}", path, intptr_t(this));
-    // TODO: Use an internal format, instead of these raw format
-    LoongAssimpModelLoader parser;
-    if (parser.LoadModel(path, meshes_, materialNames_)) {
-        LOONG_TRACE("Load model '{}' to 0x{:0X} succeed", path, intptr_t(this));
-        UpdateAABB();
+    if (Foundation::LoongStringUtils::EndsWith(path, ".lgmdl")) {
+        int64_t fileSize = FS::LoongFileSystem::GetFileSize(path);
+        if (fileSize <= 0) {
+            LOONG_ERROR("Failed to load model '{}': Wrong file size", path);
+            return;
+        }
+        std::vector<uint8_t> buffer(fileSize);
+        assert(FS::LoongFileSystem::LoadFileContent(path, buffer.data(), fileSize) == fileSize);
+
+        MemoryInputStream inputStream(buffer.data(), buffer.size());
+
+        if (Foundation::Serialize(*this, inputStream)) {
+            LOONG_TRACE("Load model '{}' to 0x{:0X} succeed", path, intptr_t(this));
+        } else {
+            for (auto* mesh : meshes_) {
+                delete mesh;
+            }
+            meshes_.clear();
+            materialNames_.clear();
+            LOONG_ERROR("Load model '{}' to 0x{:0X} failed", path, intptr_t(this));
+        }
     } else {
-        LOONG_ERROR("Load model '{}' to 0x{:0X} failed", path, intptr_t(this));
+        LOONG_TRACE("Load model '{}' to 0x{:0X}", path, intptr_t(this));
+        // TODO: Use an internal format, instead of these raw format
+        LoongAssimpModelLoader parser;
+        if (parser.LoadModel(path, meshes_, materialNames_)) {
+            LOONG_TRACE("Load model '{}' to 0x{:0X} succeed", path, intptr_t(this));
+            UpdateAABB();
+        } else {
+            LOONG_ERROR("Load model '{}' to 0x{:0X} failed", path, intptr_t(this));
+        }
     }
 }
 
