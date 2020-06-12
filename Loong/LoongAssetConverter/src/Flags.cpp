@@ -1,5 +1,3 @@
-#pragma once
-
 #include "Flags.h"
 #include "LoongFoundation/LoongLogger.h"
 #include <functional>
@@ -18,15 +16,21 @@ namespace Loong::AssetConverter {
 
 bool Flags::ParseCommandLine(int argc, char** argv)
 {
-    auto& flags = GetInterial();
-
     auto inputOptionHandler = [](int& index, int argc, char** argv) -> bool {
         TRY_INCREASE_INDEX(index, argc, R"(Missing argument for "-i" or "--input")");
         GetInterial().inputFile = argv[index + 1];
         return true;
     };
+    auto outputOptionHandler = [](int& index, int argc, char** argv) -> bool {
+        TRY_INCREASE_INDEX(index, argc, R"(Missing argument for "-o" or "--output")");
+        GetInterial().outputDir = argv[index + 1];
+        return true;
+    };
     const std::unordered_map<std::string, std::function<bool(int&, int, char**)>> kCommandHandlerMap {
         { "-i", inputOptionHandler },
+        { "--input", inputOptionHandler },
+        { "-o", outputOptionHandler },
+        { "--output", outputOptionHandler },
     };
 
     for (int index = 1; index < argc; ++index) {
@@ -36,10 +40,24 @@ bool Flags::ParseCommandLine(int argc, char** argv)
             LOONG_ERROR(R"(Unrecognized option "{}")", command);
             return false;
         }
-        if (it->second(index, argc, argv)) {
+        if (!it->second(index, argc, argv)) {
             return false;
         }
     }
+
+    return CheckFlags();
+}
+
+#define MUST_BE_SET_STRING(str) \
+    do {                        \
+        if (str.empty())        \
+            return false;       \
+    } while (false)
+bool Flags::CheckFlags()
+{
+    auto& flags = GetInterial();
+    MUST_BE_SET_STRING(flags.inputFile);
+    MUST_BE_SET_STRING(flags.outputDir);
 
     return true;
 }

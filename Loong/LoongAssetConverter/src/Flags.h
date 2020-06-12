@@ -12,9 +12,12 @@ struct Flags {
 
     std::string inputFile;
 
+    std::string outputDir;
+
 private:
     Flags() = default;
     static Flags& GetInterial();
+    static bool CheckFlags();
 };
 
 }

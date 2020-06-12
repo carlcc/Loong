@@ -17,6 +17,7 @@ PRIVATE
         LoongAsset
         LoongFileSystem
         LoongResource
+        FakeAssimp
         )
 
 source_group("src" FILES ${SOURCE})
