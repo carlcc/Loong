@@ -73,6 +73,10 @@ public:
 
     LoongActor* GetChildByNameRecursive(const std::string& name) const;
 
+    LoongActor* GetChildById(uint32_t id) const;
+
+    LoongActor* GetChildByIdRecursive(uint32_t id) const;
+
     LoongActor* GetChildByTag(const std::string& tag) const;
 
     LoongActor* GetChildByTagRecursive(const std::string& tag) const;

@@ -132,6 +132,20 @@ LoongActor* LoongActor::GetChildByNameRecursive(const std::string& name) const
     return FindChildRecursive<ActorNameGetter>(this, name);
 }
 
+struct ActorIdGetter {
+    static const uint32_t GetProperty(const LoongActor* actor) { return actor->GetID(); }
+};
+
+LoongActor* LoongActor::GetChildById(uint32_t id) const
+{
+    return FindChild<ActorIdGetter>(this, id);
+}
+
+LoongActor* LoongActor::GetChildByIdRecursive(uint32_t id) const
+{
+    return FindChildRecursive<ActorIdGetter>(this, id);
+}
+
 struct ActorTagGetter {
     static const std::string& GetProperty(const LoongActor* actor) { return actor->GetTag(); }
 };
