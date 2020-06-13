@@ -1,6 +1,12 @@
 //
 // Copyright (c) 2020 Carl Chen. All rights reserved.
 //
+
+#ifdef _MSC_VER
+// e.g. This function or variable may be unsafe. Consider using fopen_s instead.
+#pragma warning(disable : 4996)
+#endif
+
 #include "TextureExport.h"
 #include "Flags.h"
 #include "LoongFoundation/LoongDefer.h"
