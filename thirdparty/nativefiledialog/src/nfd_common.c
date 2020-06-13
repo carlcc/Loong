@@ -3,6 +3,10 @@
 
   http://www.frogtoss.com/labs
  */
+#ifdef _MSC_VER
+// e.g. This function or variable may be unsafe. Consider using fopen_s instead.
+#pragma warning(disable : 4996)
+#endif
 
 #include <stdlib.h>
 #include <assert.h>

@@ -11,6 +11,12 @@
 #define _WIN32_WINNT _WIN32_WINNT_VISTA
 #endif
 
+#ifdef _MSC_VER
+// e.g. This function or variable may be unsafe. Consider using fopen_s instead.
+#pragma warning(disable : 4996)
+#endif
+
+
 #define _CRTDBG_MAP_ALLOC
 #include <stdlib.h>
 #include <crtdbg.h>
