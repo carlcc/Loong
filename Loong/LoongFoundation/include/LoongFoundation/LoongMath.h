@@ -77,6 +77,30 @@ const Vector3 kUp      { 0.0F,  1.0F,  0.0F }; // NOLINT(cert-err58-cpp)
 // clang-format on
 
 template <class T>
+inline bool IsBetween(const T& v, const T& min, const T& max)
+{
+    return v >= min && v <= max;
+}
+
+template <>
+inline bool IsBetween<Vector2>(const Vector2& v, const Vector2& min, const Vector2& max)
+{
+    return IsBetween(v.x, min.x, max.x) && IsBetween(v.y, min.y, max.y);
+}
+
+template <>
+inline bool IsBetween<Vector3>(const Vector3& v, const Vector3& min, const Vector3& max)
+{
+    return IsBetween(v.x, min.x, max.x) && IsBetween(v.y, min.y, max.y) && IsBetween(v.z, min.z, max.z);
+}
+
+template <>
+inline bool IsBetween<Vector4>(const Vector4& v, const Vector4& min, const Vector4& max)
+{
+    return IsBetween(v.x, min.x, max.x) && IsBetween(v.y, min.y, max.y) && IsBetween(v.z, min.z, max.z) && IsBetween(v.w, min.w, max.w);
+}
+
+template <class T>
 inline T Min(const T& a, const T& b)
 {
     return glm::min(a, b);
@@ -266,7 +290,6 @@ inline T RadToDegree(T rad) { return glm::degrees(rad); }
 
 template <class T>
 inline T DegreeToRad(T degree) { return glm::radians(degree); }
-
 
 class AABB {
 public:

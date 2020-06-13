@@ -84,7 +84,7 @@ public:                                                                         
         using Listener = typename ::Loong::Foundation::CallableToSignalListener<Callable>::Listener; \
         auto listener = std::make_unique<Listener>(std::forward<Callable>(callable));                \
         sigName##Signal_.connect(listener.get(), &Listener::Invoke);                                 \
-        return std::move(listener);                                                                  \
+        return listener;                                                                             \
     }                                                                                                \
     template <class ReceiverType, class... Args>                                                     \
     void Subscribe##sigName(ReceiverType& pclass, void (ReceiverType::*pmemfun)(Args...))            \
