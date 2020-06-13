@@ -168,8 +168,10 @@ void LoongEditorMaterialEditorPanel::UpdateProperies(const Foundation::LoongCloc
                     auto fullPath = node->GetFullPath();
                     auto newShader = Resource::LoongResourceManager::GetShader(fullPath);
                     if (newShader != nullptr) {
-                        currentMaterial_->SetShader(newShader);
-                        currentShader = newShader;
+                        if (newShader != currentShader) {
+                            currentMaterial_->SetShader(newShader);
+                            currentShader = newShader;
+                        }
                     } else {
                         LOONG_ERROR("Cannot set shader to '{}', which is not a valid shader file", fullPath);
                     }

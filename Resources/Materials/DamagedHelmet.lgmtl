@@ -1,5 +1,5 @@
 {
-    "shader": "Shaders/unlit.glsl",
+    "shader": "/Shaders/unlit.glsl",
     "params": {
         "u_Diffuse": {
             "type": "vec4",
