@@ -96,7 +96,7 @@ public:
 
             if (auto* cubeActor = scene_->GetChildByName("ActorCube"); cubeActor != nullptr) {
                 cubeActor->GetTransform().Rotate(Math::kUp, clock_.DeltaTime());
-                cubeActor->GetTransform().SetPosition({ std::sinf(clock_.ElapsedTime()) * 2.0F, 0.0F, std::cosf(clock_.ElapsedTime()) * 2.0F });
+                cubeActor->GetTransform().SetPosition({ (float)std::sin(clock_.ElapsedTime()) * 2.0F, 0.0F, (float)std::cos(clock_.ElapsedTime()) * 2.0F });
             }
         }
         ImGui::End();
