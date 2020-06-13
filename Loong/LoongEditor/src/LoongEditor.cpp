@@ -74,14 +74,6 @@ void LoongEditor::OnUpdate()
             panel->Update(editorClock);
         }
     }
-    // NOTE: Since the frame buffer's size may be changed during update,
-    // which will make our rendered image invalid if we first Render then Update.
-    // So... Let's put Render after Update
-    for (auto& [name, panel] : panels_) {
-        if (panel->IsVisible()) {
-            panel->Render(editorClock);
-        }
-    }
 
     confirmPopup_.Draw();
     DoEndFrameTasks();
@@ -89,6 +81,13 @@ void LoongEditor::OnUpdate()
 
 void LoongEditor::OnRender()
 {
+    auto& editorClock = GetContext().GetEditorClock();
+    
+    for (auto& [name, panel] : panels_) {
+        if (panel->IsVisible()) {
+            panel->Render(editorClock);
+        }
+    }
 }
 
 void LoongEditor::OnLateUpdate()
