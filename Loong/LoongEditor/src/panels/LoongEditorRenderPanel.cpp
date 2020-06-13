@@ -28,7 +28,7 @@ LoongEditorRenderPanel::LoongEditorRenderPanel(LoongEditor* editor, const std::s
     cameraActor_->AddComponent<LoongEditorSceneCameraController>(editor);
 
     scenePass_ = std::make_shared<Core::LoongRenderPassScenePass>();
-    scenePass_ ->SetDefaultMaterial(GetEditorContext().GetDefaultMaterial());
+    scenePass_->SetDefaultMaterial(GetEditorContext().GetDefaultMaterial());
 }
 
 std::shared_ptr<Resource::LoongFrameBuffer> LoongEditorRenderPanel::GetFrameBuffer() const
@@ -41,9 +41,9 @@ void LoongEditorRenderPanel::UpdateImpl(const Foundation::LoongClock& clock)
     ImGuiUtils::ScopedId scopedId(this);
 
     ImGui::GetItemRectSize();
-    ImVec2 vMin = ImGui::GetWindowContentRegionMin();
-    ImVec2 vMax = ImGui::GetWindowContentRegionMax();
-    ImVec2 viewportSize = { vMax.x - vMin.x, vMax.y - vMin.y };
+    auto min = ImGuiUtils::ToVector2(ImGui::GetWindowContentRegionMin());
+    auto max = ImGuiUtils::ToVector2(ImGui::GetWindowContentRegionMax());
+    auto viewportSize = max - min;
     viewportWidth_ = int(viewportSize.x);
     viewportHeight_ = int(viewportSize.y);
     //    auto pos = ImGui::GetWindowPos();
@@ -62,7 +62,11 @@ void LoongEditorRenderPanel::UpdateImpl(const Foundation::LoongClock& clock)
 
     auto frameBuffer = GetFrameBuffer();
     frameBuffer->Resize(viewportWidth_, viewportHeight_);
-    ImGui::Image((void*)(intptr_t)frameBuffer->GetColorAttachments()[0]->GetId(), viewportSize, ImVec2 { 0, 1 }, ImVec2 { 1, 0 });
+    ImGui::Image((void*)(intptr_t)frameBuffer->GetColorAttachments()[0]->GetId(), ImGuiUtils::ToImVec(viewportSize), ImVec2 { 0, 1 }, ImVec2 { 1, 0 });
+
+    // Get the viewport's coordinate
+    viewportMin_ = ImGuiUtils::ToVector2(ImGui::GetItemRectMin());
+    viewportMax_ = ImGuiUtils::ToVector2(ImGui::GetItemRectMax());
 
     // Update camera actor
     if (ImGui::IsItemHovered(ImGuiHoveredFlags_None)) {
@@ -82,19 +86,14 @@ void LoongEditorRenderPanel::UpdateImpl(const Foundation::LoongClock& clock)
     }
 }
 
-void LoongEditorRenderPanel::RenderSceneForCamera(Core::LoongScene& scene, Core::LoongCCamera& camera)
+void LoongEditorRenderPanel::RenderSceneForCamera(Core::LoongScene& scene, Core::LoongCCamera& camera, Core::LoongRenderPass& renderPass)
 {
     auto cameraPos = camera.GetOwner()->GetTransform().GetWorldPosition();
     auto cameraRot = camera.GetOwner()->GetTransform().GetWorldRotation();
     camera.GetCamera().UpdateMatrices(viewportWidth_, viewportHeight_, cameraPos, cameraRot);
 
-    Core::LoongRenderPass::UniformBlock ub {};
-    ub.ub_ViewPos = camera.GetOwner()->GetTransform().GetWorldPosition();
-    ub.ub_Projection = camera.GetCamera().GetProjectionMatrix();
-    ub.ub_View = camera.GetCamera().GetViewMatrix();
-
     auto& context = GetEditorContext();
-    scenePass_->Render(context.GetRenderer(), *context.GetUniformBuffer(), scene, camera);
+    renderPass.Render(context.GetRenderer(), *context.GetUniformBuffer(), scene, camera);
 }
 
 }

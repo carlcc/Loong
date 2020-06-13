@@ -8,6 +8,7 @@
 #include "../LoongEditorContext.h"
 #include "../utils/ImGuiUtils.h"
 #include "../utils/LoongFileTreeNode.h"
+#include "LoongCore/render/LoongRenderPassScenePass.h"
 #include "LoongCore/scene/LoongScene.h"
 #include "LoongCore/scene/components/LoongCCamera.h"
 #include "LoongCore/scene/components/LoongCModelRenderer.h"
@@ -49,7 +50,7 @@ void LoongEditorMaterialEditorPanel::Render(const Foundation::LoongClock& clock)
     auto* camera = cameraActor_->GetComponent<Core::LoongCCamera>();
     glViewport(0, 0, viewportWidth_, viewportHeight_);
     GetEditorContext().GetRenderer().Clear(camera->GetCamera(), true, true, true);
-    RenderSceneForCamera(*previewScene_, *camera);
+    RenderSceneForCamera(*previewScene_, *camera, *scenePass_);
 
     GetFrameBuffer()->Unbind();
 }

@@ -15,6 +15,7 @@ class LoongActor;
 class LoongScene;
 class LoongCCamera;
 class LoongRenderPassScenePass;
+class LoongRenderPass;
 }
 
 namespace Loong::Editor {
@@ -34,11 +35,13 @@ public:
 protected:
     void UpdateImpl(const Foundation::LoongClock& clock) override;
 
-    void RenderSceneForCamera(Core::LoongScene& scene, Core::LoongCCamera& camera);
+    void RenderSceneForCamera(Core::LoongScene& scene, Core::LoongCCamera& camera, Core::LoongRenderPass& renderPass);
 
 protected:
     uint32_t viewportWidth_ { 0 };
     uint32_t viewportHeight_ { 0 };
+    Math::Vector2 viewportMin_ { 0 };
+    Math::Vector2 viewportMax_ { 0 };
     // This actor is owned by this panel, instead of the scene tree
     std::shared_ptr<Core::LoongActor> cameraActor_ { nullptr };
 

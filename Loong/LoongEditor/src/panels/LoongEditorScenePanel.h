@@ -6,6 +6,10 @@
 
 #include "LoongEditorRenderPanel.h"
 
+namespace Loong::Core {
+class LoongRenderPassIdPass;
+}
+
 namespace Loong::Editor {
 
 class LoongEditorScenePanel : public LoongEditorRenderPanel {
@@ -18,6 +22,7 @@ protected:
     void UpdateImpl(const Foundation::LoongClock& clock) override;
 
 private:
+    std::shared_ptr<Core::LoongRenderPassIdPass> idPass_ { nullptr };
 };
 
 }

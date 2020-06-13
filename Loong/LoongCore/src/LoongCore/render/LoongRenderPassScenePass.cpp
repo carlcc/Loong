@@ -10,22 +10,22 @@
 
 namespace Loong::Core {
 
-struct Drawable {
-    const Math::Matrix4* transform;
-    const Resource::LoongGpuMesh* mesh;
-    const Resource::LoongMaterial* material;
-    float distance;
-};
-
 void LoongRenderPassScenePass::Render(Renderer::LoongRenderer& renderer, Resource::LoongUniformBuffer& basicUniforms, LoongScene& scene, LoongCCamera& camera)
 {
+    struct ScenePassDrawable {
+        const Math::Matrix4* transform;
+        const Resource::LoongGpuMesh* mesh;
+        const Resource::LoongMaterial* material;
+        float distance;
+    };
+
     UniformBlock ub {};
     ub.ub_ViewPos = camera.GetOwner()->GetTransform().GetWorldPosition();
     ub.ub_Projection = camera.GetCamera().GetProjectionMatrix();
     ub.ub_View = camera.GetCamera().GetViewMatrix();
 
-    std::vector<Drawable> opaqueDrawables;
-    std::vector<Drawable> transparentDrawables;
+    std::vector<ScenePassDrawable> opaqueDrawables;
+    std::vector<ScenePassDrawable> transparentDrawables;
 
     auto& cameraActor = *camera.GetOwner();
     auto& cameraActorTransform = cameraActor.GetTransform();
@@ -34,7 +34,7 @@ void LoongRenderPassScenePass::Render(Renderer::LoongRenderer& renderer, Resourc
     for (auto* modelRenderer : scene.GetFastAccess().modelRenderers_) {
         // TODO: cull the objects cannot be seen
 
-        Drawable drawable {};
+        ScenePassDrawable drawable {};
         auto* actor = modelRenderer->GetOwner();
         auto& actorTransform = actor->GetTransform();
         drawable.transform = &actorTransform.GetWorldTransformMatrix();
@@ -64,15 +64,23 @@ void LoongRenderPassScenePass::Render(Renderer::LoongRenderer& renderer, Resourc
     }
 
     // sort
-    std::sort(opaqueDrawables.begin(), opaqueDrawables.end(), [](const Drawable& a, const Drawable& b) -> bool {
+    std::sort(opaqueDrawables.begin(), opaqueDrawables.end(), [](const ScenePassDrawable& a, const ScenePassDrawable& b) -> bool {
         return a.distance < b.distance;
     });
-    std::sort(transparentDrawables.begin(), transparentDrawables.end(), [](const Drawable& a, const Drawable& b) -> bool {
+    std::sort(transparentDrawables.begin(), transparentDrawables.end(), [](const ScenePassDrawable& a, const ScenePassDrawable& b) -> bool {
         return a.distance > b.distance;
     });
 
     // render
     for (auto& drawable : opaqueDrawables) {
+        ub.ub_Model = *drawable.transform;
+        basicUniforms.SetSubData(&ub, 0);
+        drawable.material->Bind(nullptr);
+        renderer.ApplyStateMask(drawable.material->GenerateStateMask());
+
+        renderer.Draw(*drawable.mesh);
+    }
+    for (auto& drawable : transparentDrawables) {
         ub.ub_Model = *drawable.transform;
         basicUniforms.SetSubData(&ub, 0);
         drawable.material->Bind(nullptr);
