@@ -20,8 +20,7 @@ LoongEditorContext::LoongEditorContext(const std::string& projectFile)
     Core::LoongRenderPass::UniformBlock ub {};
     uniformBuffer_->BufferData(&ub, 1, Resource::LoongGpuBufferUsage::kStreamDraw);
     uniformBuffer_->SetBindingPoint(0, sizeof(ub));
-    defaultMaterial_ = Resource::LoongResourceManager::GetMaterial("Materials/Default.lgmtl");
-
+    defaultMaterial_ = Resource::LoongResourceManager::GetMaterial("/Materials/Default.lgmtl");
     renderer_.reset(new Renderer::LoongRenderer);
 }
 

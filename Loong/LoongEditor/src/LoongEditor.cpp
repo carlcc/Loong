@@ -82,7 +82,7 @@ void LoongEditor::OnUpdate()
 void LoongEditor::OnRender()
 {
     auto& editorClock = GetContext().GetEditorClock();
-    
+
     for (auto& [name, panel] : panels_) {
         if (panel->IsVisible()) {
             panel->Render(editorClock);

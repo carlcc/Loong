@@ -6,12 +6,12 @@
 #include "LoongCore/scene/components/LoongCCamera.h"
 #include "LoongCore/scene/components/LoongCModelRenderer.h"
 #include "LoongRenderer/LoongRenderer.h"
+#include "LoongResource/LoongGpuModel.h"
 #include "LoongResource/LoongMaterial.h"
 #include "LoongResource/LoongResourceManager.h"
 #include "LoongResource/LoongShader.h"
 
 namespace Loong::Core {
-
 
 LoongRenderPassIdPass::LoongRenderPassIdPass()
 {
@@ -60,11 +60,26 @@ void LoongRenderPassIdPass::Render(Renderer::LoongRenderer& renderer, Resource::
         if (gpuModel == nullptr) {
             continue;
         }
-        auto& meshes = gpuModel->GetMeshes();
-        size_t meshCount = meshes.size();
-        for (size_t i = 0; i < meshCount; ++i) {
-            drawable.mesh = meshes[i];
+        for (auto* mesh : gpuModel->GetMeshes()) {
+            drawable.mesh = mesh;
             allDrawables.push_back(drawable);
+        }
+    }
+
+    if (cameraModel_ != nullptr) {
+        for (auto* cam : scene.GetFastAccess().cameras_) {
+            // TODO: cull the objects cannot be seen
+            IdPassDrawable drawable {};
+            auto* actor = cam->GetOwner();
+            auto& actorTransform = actor->GetTransform();
+            drawable.transform = &actorTransform.GetWorldTransformMatrix();
+            drawable.distance = Math::Distance(actorTransform.GetWorldPosition(), cameraActorTransform.GetWorldPosition());
+            drawable.actorId = actor->GetID();
+
+            for (auto* mesh : cameraModel_->GetMeshes()) {
+                drawable.mesh = mesh;
+                allDrawables.push_back(drawable);
+            }
         }
     }
 
@@ -76,7 +91,7 @@ void LoongRenderPassIdPass::Render(Renderer::LoongRenderer& renderer, Resource::
     renderer.ApplyStateMask(state_);
     sceneIdShader_->Bind();
     // render
-    for (auto & drawable : allDrawables) {
+    for (auto& drawable : allDrawables) {
         ub.ub_Model = *drawable.transform;
         basicUniforms.SetSubData(&ub, 0);
         sceneIdShader_->SetUniformVec4("u_id", ActorIdToColor(drawable.actorId));

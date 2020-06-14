@@ -13,6 +13,8 @@
 #include "LoongEditorScenePanel.h"
 #include "LoongRenderer/LoongRenderer.h"
 #include "LoongResource/LoongFrameBuffer.h"
+#include "LoongResource/LoongResourceManager.h"
+#include "LoongResource/loader/LoongTextureLoader.h"
 
 namespace Loong::Editor {
 
@@ -20,6 +22,19 @@ LoongEditorScenePanel::LoongEditorScenePanel(LoongEditor* editor, const std::str
     : LoongEditorRenderPanel(editor, name, opened, cfg)
 {
     idPass_ = std::make_shared<Core::LoongRenderPassIdPass>();
+
+    auto cameraMaterial = std::make_shared<Resource::LoongMaterial>();
+    cameraMaterial->SetShaderByFile("/Shaders/unlit.glsl");
+    uint8_t color[4] = { 0xFF, 0xFF, 0, 0xFF };
+    cameraMaterial->GetUniformsData()["u_DiffuseMap"] = Resource::LoongTextureLoader::CreateColor(color, true, nullptr);
+
+    auto cameraModel = Resource::LoongResourceManager::GetModel("/Models/camera.lgmdl");
+
+    scenePass_->SetCameraMaterial(cameraMaterial);
+    scenePass_->SetCameraModel(cameraModel);
+    scenePass_->SetRenderCamera(true);
+
+    idPass_->SetCameraModel(cameraModel);
 }
 
 void LoongEditorScenePanel::UpdateImpl(const Foundation::LoongClock& clock)

@@ -49,9 +49,9 @@ void LoongRenderPassScenePass::Render(Renderer::LoongRenderer& renderer, Resourc
         for (size_t i = 0; i < meshCount; ++i) {
             drawable.mesh = meshes[i];
             drawable.material = modelRenderer->GetMaterials()[i].get();
-            if (drawable.material == nullptr) {
+            if (drawable.material == nullptr || !drawable.material->HasShader()) {
                 drawable.material = defaultMaterial_.get();
-                if (drawable.material == nullptr) {
+                if (drawable.material == nullptr || !drawable.material->HasShader()) {
                     continue;
                 }
             }
@@ -59,6 +59,24 @@ void LoongRenderPassScenePass::Render(Renderer::LoongRenderer& renderer, Resourc
                 transparentDrawables.push_back(drawable);
             } else {
                 opaqueDrawables.push_back(drawable);
+            }
+        }
+    }
+
+    if (shouldRenderCamera_ && cameraModel_ != nullptr && cameraMaterial_ != nullptr && cameraMaterial_->HasShader()) {
+        // TODO: cull the objects cannot be seen
+        for (auto* cam : scene.GetFastAccess().cameras_) {
+            ScenePassDrawable drawable {};
+            auto* actor = cam->GetOwner();
+            auto& actorTransform = actor->GetTransform();
+            drawable.transform = &actorTransform.GetWorldTransformMatrix();
+            drawable.distance = Math::Distance(actorTransform.GetWorldPosition(), cameraActorTransform.GetWorldPosition());
+            drawable.material = cameraMaterial_.get();
+
+            auto& meshes = cameraModel_->GetMeshes();
+            for (auto* mesh : meshes) {
+                drawable.mesh = mesh;
+                transparentDrawables.push_back(drawable);
             }
         }
     }
