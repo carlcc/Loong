@@ -62,8 +62,8 @@ void LoongEditorPanel::Update(const Foundation::LoongClock& clock)
     // ImVec2 minSizeConstraint = ImGuiHelper::ToImVec(Math::Max(minSize_, { 0.0F, 0.0F }));
     // ImVec2 maxSizeConstraint = ImGuiHelper::ToImVec(Math::Max(maxSize_, { 10000.0F, 10000.0F }));
     // ImGui::SetNextWindowSizeConstraints(minSizeConstraint, maxSizeConstraint);
-
-    if (ImGui::Begin((name_ + panelId_).c_str(), config_.isClosable ? &isVisible_ : nullptr, windowFlags)) {
+    isContentVisible_ = ImGui::Begin((name_ + panelId_).c_str(), config_.isClosable ? &isVisible_ : nullptr, windowFlags);
+    if (isContentVisible_) {
         isHovered_ = ImGui::IsWindowHovered();
         isFocused_ = ImGui::IsWindowFocused();
 
@@ -80,6 +80,11 @@ void LoongEditorPanel::Update(const Foundation::LoongClock& clock)
 bool LoongEditorPanel::IsVisible() const
 {
     return isVisible_;
+}
+
+bool LoongEditorPanel::IsContentVisible() const
+{
+    return isContentVisible_;
 }
 
 bool LoongEditorPanel::IsHovered() const

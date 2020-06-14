@@ -15,7 +15,7 @@ namespace Loong::Editor {
 
 void LoongEditorGamePanel::Render(const Foundation::LoongClock& clock)
 {
-    if (!IsVisible() || viewportWidth_ <= 0 || viewportHeight_ <= 0) {
+    if (!IsVisible() || !IsContentVisible() || viewportWidth_ <= 0 || viewportHeight_ <= 0) {
         return;
     }
     GetFrameBuffer()->Bind();

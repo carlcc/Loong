@@ -53,6 +53,8 @@ public:
 
     bool IsVisible() const;
 
+    bool IsContentVisible() const;
+
     bool IsHovered() const;
 
     bool IsFocused() const;
@@ -80,6 +82,7 @@ protected:
 
 private:
     bool isVisible_ { true };
+    bool isContentVisible_ { true };
     bool isHovered_ { false };
     bool isFocused_ { false };
 };

@@ -52,7 +52,7 @@ void LoongEditorScenePanel::UpdateImpl(const Foundation::LoongClock& clock)
 
 void LoongEditorScenePanel::Render(const Foundation::LoongClock& clock)
 {
-    if (!IsVisible() || viewportWidth_ <= 0 || viewportHeight_ <= 0) {
+    if (!IsVisible() || !IsContentVisible() || viewportWidth_ <= 0 || viewportHeight_ <= 0) {
         return;
     }
 
