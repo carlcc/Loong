@@ -10,6 +10,10 @@ namespace Loong::Core {
 class LoongRenderPassIdPass;
 }
 
+namespace Loong::Resource {
+class LoongShader;
+}
+
 namespace Loong::Editor {
 
 class LoongEditorScenePanel : public LoongEditorRenderPanel {
@@ -23,6 +27,7 @@ protected:
 
 private:
     std::shared_ptr<Core::LoongRenderPassIdPass> idPass_ { nullptr };
+    std::shared_ptr<Resource::LoongShader> wireframeShader_ { nullptr };
 };
 
 }

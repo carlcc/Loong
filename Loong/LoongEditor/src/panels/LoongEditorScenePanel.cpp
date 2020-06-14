@@ -10,10 +10,12 @@
 #include "LoongCore/render/LoongRenderPassScenePass.h"
 #include "LoongCore/scene/LoongActor.h"
 #include "LoongCore/scene/components/LoongCCamera.h"
+#include "LoongCore/scene/components/LoongCModelRenderer.h"
 #include "LoongEditorScenePanel.h"
 #include "LoongRenderer/LoongRenderer.h"
 #include "LoongResource/LoongFrameBuffer.h"
 #include "LoongResource/LoongResourceManager.h"
+#include "LoongResource/LoongShader.h"
 #include "LoongResource/loader/LoongTextureLoader.h"
 
 namespace Loong::Editor {
@@ -25,7 +27,7 @@ LoongEditorScenePanel::LoongEditorScenePanel(LoongEditor* editor, const std::str
 
     auto cameraMaterial = std::make_shared<Resource::LoongMaterial>();
     cameraMaterial->SetShaderByFile("/Shaders/unlit.glsl");
-    uint8_t color[4] = { 0xFF, 0xFF, 0, 0xFF };
+    uint8_t color[4] = { 0x40, 0x80, 0xFF, 0xFF };
     cameraMaterial->GetUniformsData()["u_DiffuseMap"] = Resource::LoongTextureLoader::CreateColor(color, true, nullptr);
 
     auto cameraModel = Resource::LoongResourceManager::GetModel("/Models/camera.lgmdl");
@@ -35,6 +37,12 @@ LoongEditorScenePanel::LoongEditorScenePanel(LoongEditor* editor, const std::str
     scenePass_->SetRenderCamera(true);
 
     idPass_->SetCameraModel(cameraModel);
+
+    wireframeShader_ = Resource::LoongResourceManager::GetShader("/Shaders/wireframe.glsl");
+    wireframeShader_->Bind();
+    static const Math::Vector4 kWireframeColor { 0.7F, 0.8F, 0.9F, 1.0F };
+    wireframeShader_->SetUniformVec4("u_wireColor", kWireframeColor);
+    wireframeShader_->Unbind();
 }
 
 void LoongEditorScenePanel::UpdateImpl(const Foundation::LoongClock& clock)
@@ -88,6 +96,36 @@ void LoongEditorScenePanel::Render(const Foundation::LoongClock& clock)
         glViewport(0, 0, viewportWidth_, viewportHeight_);
         renderer.Clear(camera.GetCamera(), true, true, true);
         RenderSceneForCamera(*scene, camera, *scenePass_);
+
+        // Render the selected actor as wireframe
+        if (auto* selectedActor = GetEditorContext().GetCurrentSelectedActor(); selectedActor != nullptr) {
+            auto* modelRenderer = selectedActor->GetComponent<Core::LoongCModelRenderer>();
+            if (modelRenderer != nullptr && modelRenderer->GetModel() != nullptr) {
+                wireframeShader_->Bind();
+                auto stateBackup = renderer.FetchGLState();
+                auto newState = stateBackup;
+                newState.SetDepthTestEnabled(false);
+                newState.SetFaceCullEnabled(false);
+                renderer.ApplyStateMask(newState);
+
+                renderer.SetPolygonMode(Renderer::LoongRenderer::PolygonMode::kLine);
+
+                Core::LoongRenderPass::UniformBlock ubo {};
+                ubo.ub_Projection = camera.GetCamera().GetProjectionMatrix();
+                ubo.ub_View = camera.GetCamera().GetViewMatrix();
+                ubo.ub_ViewPos = camera.GetOwner()->GetTransform().GetWorldPosition();
+                ubo.ub_Model = selectedActor->GetTransform().GetWorldTransformMatrix();
+                GetEditorContext().GetUniformBuffer()->SetSubData(&ubo, 0);
+                for (auto* mesh : modelRenderer->GetModel()->GetMeshes()) {
+                    renderer.Draw(*mesh);
+                }
+
+                // Restore the GL states and fill mode
+                renderer.ApplyStateMask(stateBackup);
+                renderer.SetPolygonMode(Renderer::LoongRenderer::PolygonMode::kFill);
+                wireframeShader_->Unbind();
+            }
+        }
 
         GetFrameBuffer()->Unbind();
     }
