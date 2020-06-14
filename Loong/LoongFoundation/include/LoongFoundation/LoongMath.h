@@ -238,10 +238,7 @@ inline bool Decompose(const Matrix4& mat, Vector3& scale, Quat& rotation, Vector
 {
     Vector3 skew;
     Vector4 perspective;
-    auto b = glm::decompose(mat, scale, rotation, translation, skew, perspective);
-    // https://stackoverflow.com/questions/17918033/glm-decompose-mat4-into-translation-and-rotation
-    rotation = Conjugate(rotation);
-    return b;
+    return glm::decompose(mat, scale, rotation, translation, skew, perspective);
 }
 
 inline bool DecomposeScale(const Matrix4& mat, Vector3& scale)
@@ -250,10 +247,7 @@ inline bool DecomposeScale(const Matrix4& mat, Vector3& scale)
     Vector3 translation;
     Vector3 skew;
     Vector4 perspective;
-    auto b = glm::decompose(mat, scale, rotation, translation, skew, perspective);
-    // https://stackoverflow.com/questions/17918033/glm-decompose-mat4-into-translation-and-rotation
-    rotation = Conjugate(rotation);
-    return b;
+    return glm::decompose(mat, scale, rotation, translation, skew, perspective);
 }
 
 inline bool DecomposeRotation(const Matrix4& mat, Quat& rotation)
@@ -262,10 +256,7 @@ inline bool DecomposeRotation(const Matrix4& mat, Quat& rotation)
     Vector3 translation;
     Vector3 skew;
     Vector4 perspective;
-    auto b = glm::decompose(mat, scale, rotation, translation, skew, perspective);
-    // https://stackoverflow.com/questions/17918033/glm-decompose-mat4-into-translation-and-rotation
-    rotation = Conjugate(rotation);
-    return b;
+    return glm::decompose(mat, scale, rotation, translation, skew, perspective);
 }
 
 inline bool DecomposeTranslation(const Matrix4& mat, Vector3& translation)
@@ -274,10 +265,7 @@ inline bool DecomposeTranslation(const Matrix4& mat, Vector3& translation)
     Quat rotation;
     Vector3 skew;
     Vector4 perspective;
-    auto b = glm::decompose(mat, scale, rotation, translation, skew, perspective);
-    // https://stackoverflow.com/questions/17918033/glm-decompose-mat4-into-translation-and-rotation
-    rotation = Conjugate(rotation);
-    return b;
+    return glm::decompose(mat, scale, rotation, translation, skew, perspective);
 }
 
 inline float Clamp(float x, float min, float max)
