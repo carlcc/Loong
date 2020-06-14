@@ -4,7 +4,7 @@
 
 #include "LoongResource/LoongFrameBuffer.h"
 #include "LoongResource/LoongTexture.h"
-#include "loader/LoongTextureLoader.h"
+#include "LoongResource/loader/LoongTextureLoader.h"
 #include <utility>
 
 namespace Loong::Resource {

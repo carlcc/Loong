@@ -6,7 +6,7 @@
 #include "LoongAsset/LoongImage.h"
 #include "LoongFoundation/LoongLogger.h"
 #include "LoongResource/LoongTexture.h"
-#include "LoongTextureLoader.h"
+#include "LoongResource/loader/LoongTextureLoader.h"
 #include <cassert>
 
 namespace Loong::Resource {
@@ -66,13 +66,13 @@ std::shared_ptr<LoongTexture> LoongTextureLoader::Create(const Asset::LoongImage
     }
 }
 
-std::shared_ptr<LoongTexture> LoongTextureLoader::CreateColor(uint32_t data, bool generateMipmap, const std::function<void(const std::string&)>& onDestroy)
+std::shared_ptr<LoongTexture> LoongTextureLoader::CreateColor(uint8_t data[4], bool generateMipmap, const std::function<void(const std::string&)>& onDestroy)
 {
     GLuint textureID;
     glGenTextures(1, &textureID);
     glBindTexture(GL_TEXTURE_2D, textureID);
 
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, 1, 1, 0, GL_RGBA, GL_UNSIGNED_BYTE, &data);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, 1, 1, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
 
     // TODO: Configurable
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);

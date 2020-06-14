@@ -13,7 +13,7 @@
 #include "LoongResource/LoongShader.h"
 #include "LoongResource/LoongTexture.h"
 #include "LoongResource/loader/LoongMaterialLoader.h"
-#include "loader/LoongTextureLoader.h"
+#include "LoongResource/loader/LoongTextureLoader.h"
 #include <cassert>
 #include <map>
 #include <vector>
