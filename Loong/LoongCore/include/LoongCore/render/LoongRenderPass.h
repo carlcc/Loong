@@ -34,6 +34,8 @@ public:
     };
     
     LoongRenderPass();
+    virtual ~LoongRenderPass() = default;
+
     std::shared_ptr<Resource::LoongFrameBuffer> GetFrameBuffer() const { return frameBuffer_; }
     virtual void Render(Renderer::LoongRenderer& renderer, Resource::LoongUniformBuffer& basicUniforms, LoongScene& scene, LoongCCamera& camera) = 0;
 
