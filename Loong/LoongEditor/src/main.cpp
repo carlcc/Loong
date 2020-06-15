@@ -69,6 +69,9 @@ int StartApp(int argc, char** argv)
 
 int main(int argc, char** argv)
 {
+    auto listener = Loong::Foundation::Logger::Get().SubscribeLog([](const Loong::Foundation::LogItem& logItem) {
+        std::cout << "[" << logItem.level << "][" << logItem.location << "]: " << logItem.message << std::endl;
+    });
     Loong::App::ScopedDriver appDriver;
 
     auto path = Loong::Foundation::LoongPathUtils::GetParent(argv[0]) + "/Resources";
@@ -79,9 +82,6 @@ int main(int argc, char** argv)
 
     Loong::Resource::ScopedDriver resourceDriver;
 
-    auto listener = Loong::Foundation::Logger::Get().SubscribeLog([](const Loong::Foundation::LogItem& logItem) {
-        std::cout << "[" << logItem.level << "][" << logItem.location << "]: " << logItem.message << std::endl;
-    });
     StartApp(argc, argv);
 
     return 0;

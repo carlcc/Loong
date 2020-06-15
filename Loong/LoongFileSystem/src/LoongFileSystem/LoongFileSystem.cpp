@@ -4,6 +4,7 @@
 
 #include "LoongFileSystem/LoongFileSystem.h"
 #include "LoongFoundation/LoongDefer.h"
+#include "LoongFoundation/LoongLogger.h"
 #include <physfs.h>
 
 namespace Loong::FS {
@@ -20,12 +21,16 @@ bool LoongFileSystem::Uninitialize()
 
 bool LoongFileSystem::MountSearchPath(const std::string& sysPath, const std::string& mountPoint, bool isAppend)
 {
-    return 0 != PHYSFS_mount(sysPath.c_str(), mountPoint.c_str(), int(isAppend));
+    bool ret = 0 != PHYSFS_mount(sysPath.c_str(), mountPoint.c_str(), int(isAppend));
+    LOONG_INFO("Mount '{}' to virtual path '{}' {}", sysPath, mountPoint, ret ? "succeed" : "failed");
+    return ret;
 }
 
 bool LoongFileSystem::UnmountSearchPath(const std::string& sysPath)
 {
-    return 0 != PHYSFS_unmount(sysPath.c_str());
+    bool ret = 0 != PHYSFS_unmount(sysPath.c_str());
+    LOONG_INFO("Umount '{}' {}", sysPath, ret ? "succeed" : "failed");
+    return ret;
 }
 
 bool LoongFileSystem::SetWriteDir(const std::string& sysPath)
