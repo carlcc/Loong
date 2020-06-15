@@ -85,7 +85,7 @@ void LoongEditorScenePanel::Render(const Foundation::LoongClock& clock)
         glReadPixels(static_cast<int>(mouseX), static_cast<int>(mouseY), 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, pixel);
         uint32_t actorId = (pixel[0] << 24u) | (pixel[1] << 16u) | (pixel[2] << 8u) | (pixel[3] << 0u);
 
-        GetEditorContext().SetCurrentSelectedActor(scene->GetChildById(actorId));
+        GetEditorContext().SetCurrentSelectedActor(scene->GetChildByIdRecursive(actorId));
         frameBuffer->Unbind();
     }
 
