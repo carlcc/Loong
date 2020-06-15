@@ -26,13 +26,14 @@
 #include <imgui.h>
 #include <iostream>
 
+#include <ImGuizmo.h>
+
 std::shared_ptr<Loong::App::LoongApp> gApp;
 
 namespace Loong {
 
 class LoongEditor : public Foundation::LoongHasSlots {
 public:
-
     LoongEditor()
     {
         texture_ = Resource::LoongResourceManager::GetTexture("Textures/Loong.jpg");
@@ -70,6 +71,8 @@ public:
 
     void OnUpdate()
     {
+        ImGuizmo::BeginFrame();
+
         clock_.Update();
 
         auto& input = gApp->GetInputManager();
@@ -94,12 +97,47 @@ public:
                 }
             }
 
-            if (auto* cubeActor = scene_->GetChildByName("ActorCube"); cubeActor != nullptr) {
-                cubeActor->GetTransform().Rotate(Math::kUp, clock_.DeltaTime());
-                cubeActor->GetTransform().SetPosition({ (float)std::sin(clock_.ElapsedTime()) * 2.0F, 0.0F, (float)std::cos(clock_.ElapsedTime()) * 2.0F });
-            }
+            // if (auto* cubeActor = scene_->GetChildByName("ActorCube"); cubeActor != nullptr) {
+            //     cubeActor->GetTransform().Rotate(Math::kUp, clock_.DeltaTime());
+            //     cubeActor->GetTransform().SetPosition({ (float)std::sin(clock_.ElapsedTime()) * 2.0F, 0.0F, (float)std::cos(clock_.ElapsedTime()) * 2.0F });
+            // }
         }
         ImGui::End();
+
+        {
+            ImGuizmo::Enable(true);
+
+            int width, height;
+            gApp->GetFramebufferSize(width, height);
+            auto* cameraActor = cameraComponent_->GetOwner();
+            auto& cameraActorTransform = cameraActor->GetTransform();
+            auto& camera = cameraComponent_->GetCamera();
+            camera.UpdateMatrices(width, height, cameraActorTransform.GetWorldPosition(), cameraActorTransform.GetWorldRotation());
+            auto& io = ImGui::GetIO();
+            auto cameraViewMatrix = camera.GetViewMatrix();
+
+            auto* cubeActor = scene_->GetChildByName("ActorCube");
+            auto& cubeTransform = cubeActor->GetTransform();
+            auto cubeTransformMatrix = cubeTransform.GetWorldTransformMatrix();
+            ImGuizmo::SetRect(0, 0, io.DisplaySize.x, io.DisplaySize.y);
+            ImGuizmo::Manipulate(&cameraViewMatrix[0].x, &camera.GetProjectionMatrix()[0].x, ImGuizmo::OPERATION::TRANSLATE, ImGuizmo::MODE::WORLD,
+                &cubeTransformMatrix[0].x);
+
+            Math::Vector3 scale, position;
+            Math::Quat rot;
+            Math::Decompose(cubeTransformMatrix, scale, rot, position);
+            cubeTransform.SetPosition(position);
+            cubeTransform.SetScale(scale);
+            cubeTransform.SetRotation(rot);
+
+
+            ImGuizmo::ViewManipulate(&cameraViewMatrix[0].x, 12, ImVec2(io.DisplaySize.x - 128, 0), ImVec2(128, 128), 0x10101010);
+
+            cameraViewMatrix = Math::Inverse(cameraViewMatrix);
+            Math::Decompose(cameraViewMatrix, scale, rot, position);
+            cameraActorTransform.SetPosition(position);
+            cameraActorTransform.SetRotation(rot);
+        }
     }
 
     void OnRender()

@@ -14,6 +14,9 @@ add_library(imgui STATIC
         imstb_truetype.h
         imgui_stdlib.cpp
         imgui_stdlib.h
+        
+        ImGuizmo.cpp
+        ImGuizmo.h
         )
 
 target_include_directories(imgui
