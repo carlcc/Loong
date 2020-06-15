@@ -14,13 +14,17 @@
 #include "panels/LoongEditorPanel.h"
 #include "panels/LoongEditorScenePanel.h"
 #include "utils/LoongEditorTemplates.h"
+
 #include <imgui.h>
+// We must put ImGuizmo.h after imgui.h
+#include <ImGuizmo.h>
 
 namespace Loong::Editor {
 
 LoongEditor::LoongEditor(Loong::App::LoongApp* app, const std::shared_ptr<LoongEditorContext>& context)
 {
     app_ = app;
+    app->SubscribeBeginFrame(this, &LoongEditor::OnBeginFrame);
     app->SubscribeRender(this, &LoongEditor::OnRender);
     app->SubscribeUpdate(this, &LoongEditor::OnUpdate);
     app->SubscribeLateUpdate(this, &LoongEditor::OnLateUpdate);
@@ -57,14 +61,20 @@ bool LoongEditor::Initialize()
     return true;
 }
 
+void LoongEditor::OnBeginFrame()
+{
+    ImGuizmo::BeginFrame();
+
+    auto& editorClock = GetContext().GetEditorClock();
+    editorClock.Update();
+}
+
 bool showImGuiDemoWindow_ = true;
 void LoongEditor::OnUpdate()
 {
     auto& editorClock = GetContext().GetEditorClock();
-    editorClock.Update();
 
     SetupDockSpace();
-
     if (showImGuiDemoWindow_) {
         ImGui::ShowDemoWindow(&showImGuiDemoWindow_);
     }

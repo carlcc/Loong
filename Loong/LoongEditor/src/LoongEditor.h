@@ -29,6 +29,8 @@ public:
 
     bool Initialize();
 
+    void OnBeginFrame();
+
     void OnUpdate();
 
     void OnRender();
