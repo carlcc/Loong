@@ -89,6 +89,11 @@ public:
             case GLFW_PRESS:
                 self->impl_->input_.SetIsMouseButtonPressed(LoongMouseButton(button));
                 self->impl_->input_.SetIsMouseButtonPressEvent(LoongMouseButton(button));
+                {
+                    double x, y;
+                    glfwGetCursorPos(win, &x, &y);
+                    self->impl_->input_.SetMouseDownPosition(float(x), float(y));
+                }
                 break;
             case GLFW_RELEASE:
                 self->impl_->input_.SetIsMouseButtonReleased(LoongMouseButton(button));
@@ -199,6 +204,8 @@ public:
             ImGui_ImplGlfw_NewFrame();
             ImGui::NewFrame();
 
+            self_->BeginFrameSignal_.emit();
+
             self_->UpdateSignal_.emit();
 
             ImGui::Render();
@@ -208,6 +215,8 @@ public:
             int display_w, display_h;
             GetFramebufferSize(display_w, display_h);
             glViewport(0, 0, display_w, display_h);
+            glClearColor(0.0F, 0.0F, 0.0F, 1.0F);
+            glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
             ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
             self_->LateUpdateSignal_.emit();

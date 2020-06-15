@@ -24,6 +24,11 @@ LoongInput::LoongInput()
     isKeyRepeatEvent_.fill(0);
 }
 
+void LoongInput::SetMouseDownPosition(float x, float y)
+{
+    mouseDownPosition_ = { x, y };
+}
+
 void LoongInput::SetMousePosition(float x, float y)
 {
     mouseDelta_ = Math::Vector2 { x, y } - mousePosition_;

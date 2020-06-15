@@ -65,6 +65,7 @@ public:
     LOONG_DECLARE_SIGNAL(WindowPos, int, int);
     LOONG_DECLARE_SIGNAL(WindowIconify, bool);
     LOONG_DECLARE_SIGNAL(WindowClose);
+    LOONG_DECLARE_SIGNAL(BeginFrame);
     LOONG_DECLARE_SIGNAL(Update);
     LOONG_DECLARE_SIGNAL(Render);
     LOONG_DECLARE_SIGNAL(LateUpdate);

@@ -26,6 +26,7 @@ public:
     bool IsMouseButtonPressEvent(LoongMouseButton button)   const { return isMouseButtonPressEvent_   & (1u << (uint32_t)button % 8); }
     bool IsMouseButtonReleaseEvent(LoongMouseButton button) const { return isMouseButtonReleaseEvent_ & (1u << (uint32_t)button % 8); }
 
+    const Math::Vector2& GetMouseDownPosition() const { return mouseDownPosition_; }
     const Math::Vector2& GetMousePosition() const { return mousePosition_; }
     const Math::Vector2& GetMouseDelta()    const { return mouseDelta_; }
     // clang-format on
@@ -42,6 +43,7 @@ public:
     void SetIsMouseButtonReleased(LoongMouseButton button)     { isMouseButtonPressed_      &= ~(1u << (uint32_t)button % 8); }
     void SetIsMouseButtonPressEvent(LoongMouseButton button)   { isMouseButtonPressEvent_   |= 1u << (uint32_t)button % 8; }
     void SetIsMouseButtonReleaseEvent(LoongMouseButton button) { isMouseButtonReleaseEvent_ |= 1u << (uint32_t)button % 8; }
+    void SetMouseDownPosition(float x, float y);
     void SetMousePosition(float x, float y);
     void SetMousePositionOnly(float x, float y);
     // clang-format on
@@ -58,6 +60,7 @@ private:
     uint8_t isMouseButtonPressEvent_ { 0 };
     uint8_t isMouseButtonReleaseEvent_ { 0 };
 
+    Math::Vector2 mouseDownPosition_ { Math::Zero };
     Math::Vector2 mousePosition_ { Math::Zero };
     Math::Vector2 mouseDelta_ { Math::Zero };
 };
