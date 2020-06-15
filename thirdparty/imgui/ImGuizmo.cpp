@@ -26,10 +26,11 @@
 #endif
 #include "imgui_internal.h"
 #include "ImGuizmo.h"
-#if !defined(_MSC_VER)
-#define _malloca(x) alloca(x)
-#endif
+#if __APPLE__
 #include <stdlib.h>
+#else
+#include <malloc.h>
+#endif
 
 // includes patches for multiview from
 // https://github.com/CedricGuillemet/ImGuizmo/issues/15

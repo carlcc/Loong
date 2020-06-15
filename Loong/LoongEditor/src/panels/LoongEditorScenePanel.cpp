@@ -45,7 +45,7 @@ LoongEditorScenePanel::LoongEditorScenePanel(LoongEditor* editor, const std::str
 
     wireframeShader_ = Resource::LoongResourceManager::GetShader("/Shaders/wireframe.glsl");
     wireframeShader_->Bind();
-    static const Math::Vector4 kWireframeColor { 0.7F, 0.8F, 0.9F, 1.0F };
+    static const Math::Vector4 kWireframeColor { 0.3F, 0.4F, 0.5F, 1.0F };
     wireframeShader_->SetUniformVec4("u_wireColor", kWireframeColor);
     wireframeShader_->Unbind();
 }
@@ -55,7 +55,7 @@ void LoongEditorScenePanel::UpdateImpl(const Foundation::LoongClock& clock)
     LoongEditorRenderPanel::UpdateImpl(clock);
 
     {
-        ImGui::PushClipRect(ImGuiUtils::ToImVec(viewportMin_), ImGuiUtils::ToImVec(viewportMax_), true);
+        ImGuizmo::SetDrawlist();
 
         auto& cameraTransform = cameraActor_->GetTransform();
         auto cameraPos = cameraTransform.GetWorldPosition();
@@ -70,7 +70,7 @@ void LoongEditorScenePanel::UpdateImpl(const Foundation::LoongClock& clock)
             // gizmo
             auto& actorTransform = selectedActor->GetTransform();
             auto actorTransformMatrix = actorTransform.GetWorldTransformMatrix();
-            ImGuizmo::SetRect(viewportMin_.x, viewportMin_.y, viewportWidth_, viewportHeight_);
+            ImGuizmo::SetRect(viewportMin_.x, viewportMin_.y, float(viewportWidth_), float(viewportHeight_));
             ImGuizmo::Manipulate(&cameraViewMatrix[0].x, &renderCamera.GetProjectionMatrix()[0].x,
                 ImGuizmo::OPERATION::ROTATE, ImGuizmo::MODE::LOCAL, &actorTransformMatrix[0].x);
 
@@ -90,8 +90,6 @@ void LoongEditorScenePanel::UpdateImpl(const Foundation::LoongClock& clock)
             cameraTransform.SetPosition(position);
             cameraTransform.SetRotation(rotation);
         }
-
-        ImGui::PopClipRect();
     }
 }
 
@@ -111,7 +109,7 @@ void LoongEditorScenePanel::Render(const Foundation::LoongClock& clock)
 
     auto& inputManager = GetApp().GetInputManager();
     auto& mousePos = inputManager.GetMousePosition();
-    if (inputManager.IsMouseButtonReleaseEvent(Loong::App::LoongMouseButton::kButtonLeft) && inputManager.GetMouseDownPosition() == mousePos) {
+    if (IsFocused() && inputManager.IsMouseButtonReleaseEvent(Loong::App::LoongMouseButton::kButtonLeft) && Math::Distance(inputManager.GetMouseDownPosition(), mousePos) < 4.0F) {
         // Render selecting
         auto* frameBuffer = idPass_->GetFrameBuffer().get();
         frameBuffer->Resize(viewportWidth_, viewportHeight_);
@@ -130,8 +128,14 @@ void LoongEditorScenePanel::Render(const Foundation::LoongClock& clock)
         glReadPixels(static_cast<int>(mouseX), static_cast<int>(mouseY), 1, 1, GL_RGBA, GL_UNSIGNED_BYTE, pixel);
         uint32_t actorId = (pixel[0] << 24u) | (pixel[1] << 16u) | (pixel[2] << 8u) | (pixel[3] << 0u);
 
-        GetEditorContext().SetCurrentSelectedActor(scene->GetChildByIdRecursive(actorId));
         frameBuffer->Unbind();
+        
+        auto* clickedActor = scene->GetChildByIdRecursive(actorId);
+        auto* oldSelectedActor = GetEditorContext().GetCurrentSelectedActor();
+        
+        GetEditorContext().SetCurrentSelectedActor(clickedActor);
+
+
     }
 
     {
