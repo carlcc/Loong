@@ -31,6 +31,9 @@
 #else
 #include <malloc.h>
 #endif
+#if !defined(_MSC_VER)
+#define _malloca(x) alloca(x)
+#endif
 
 // includes patches for multiview from
 // https://github.com/CedricGuillemet/ImGuizmo/issues/15
