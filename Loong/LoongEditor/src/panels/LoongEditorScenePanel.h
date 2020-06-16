@@ -26,6 +26,10 @@ protected:
     void UpdateImpl(const Foundation::LoongClock& clock) override;
 
 private:
+    void UpdateButtons(const Foundation::LoongClock& clock);
+    void UpdateGizmo(const Foundation::LoongClock& clock);
+
+private:
     std::shared_ptr<Core::LoongRenderPassIdPass> idPass_ { nullptr };
     std::shared_ptr<Resource::LoongShader> wireframeShader_ { nullptr };
 };

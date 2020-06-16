@@ -4,6 +4,7 @@
 #include <glad/glad.h>
 
 #include "../LoongEditorContext.h"
+#include "../utils/IconsFontAwesome5.h"
 #include "../utils/ImGuiUtils.h"
 #include "LoongApp/LoongApp.h"
 #include "LoongApp/LoongInput.h"
@@ -53,43 +54,54 @@ LoongEditorScenePanel::LoongEditorScenePanel(LoongEditor* editor, const std::str
 void LoongEditorScenePanel::UpdateImpl(const Foundation::LoongClock& clock)
 {
     LoongEditorRenderPanel::UpdateImpl(clock);
+    UpdateButtons(clock);
+    UpdateGizmo(clock);
+}
+
+void LoongEditorScenePanel::UpdateButtons(const Foundation::LoongClock& clock)
+{
+    auto min = ImGuiUtils::ToVector2(ImGui::GetWindowContentRegionMin());
+    ImGui::SetCursorPos({ min.x + 10.F, min.y + 10.F });
+    ImGui::Button(ICON_FA_ARROWS_ALT "###Translate");
+    ImGui::Button("你###Translate");ImGui::Text("Kanjis: \xe6\x97\xa5\xe6\x9c\xac\xe8\xaa\x9e (nihongo)");
+}
+
+void LoongEditorScenePanel::UpdateGizmo(const Foundation::LoongClock& clock)
+{
+    ImGuizmo::SetDrawlist();
+
+    auto& cameraTransform = cameraActor_->GetTransform();
+    auto cameraPos = cameraTransform.GetWorldPosition();
+    auto cameraRot = cameraTransform.GetWorldRotation();
+    auto& renderCamera = cameraActor_->GetComponent<Core::LoongCCamera>()->GetCamera();
+    renderCamera.UpdateMatrices(viewportWidth_, viewportHeight_, cameraPos, cameraRot);
+    auto cameraViewMatrix = renderCamera.GetViewMatrix();
+
+    Math::Vector3 position {}, scale {};
+    Math::Quat rotation {};
+    if (auto* selectedActor = GetEditorContext().GetCurrentSelectedActor(); selectedActor != nullptr) {
+        // gizmo
+        auto& actorTransform = selectedActor->GetTransform();
+        auto actorTransformMatrix = actorTransform.GetWorldTransformMatrix();
+        ImGuizmo::SetRect(viewportMin_.x, viewportMin_.y, float(viewportWidth_), float(viewportHeight_));
+        ImGuizmo::Manipulate(&cameraViewMatrix[0].x, &renderCamera.GetProjectionMatrix()[0].x,
+            ImGuizmo::OPERATION::ROTATE, ImGuizmo::MODE::LOCAL, &actorTransformMatrix[0].x);
+
+        Math::Decompose(actorTransformMatrix, scale, rotation, position);
+        actorTransform.SetPosition(position);
+        actorTransform.SetRotation(rotation);
+        actorTransform.SetScale(scale);
+    }
 
     {
-        ImGuizmo::SetDrawlist();
+        // The navigating cube at the top-right corner
+        // TODO: Set proper length argument, note, this argument should not be 0
+        ImGuizmo::ViewManipulate(&cameraViewMatrix[0].x, 0.5, ImVec2(viewportMax_.x - 128, viewportMin_.y), ImVec2(128, 128), 0x10101010);
+        auto cameraTransformMatrix = Math::Inverse(cameraViewMatrix);
 
-        auto& cameraTransform = cameraActor_->GetTransform();
-        auto cameraPos = cameraTransform.GetWorldPosition();
-        auto cameraRot = cameraTransform.GetWorldRotation();
-        auto& renderCamera = cameraActor_->GetComponent<Core::LoongCCamera>()->GetCamera();
-        renderCamera.UpdateMatrices(viewportWidth_, viewportHeight_, cameraPos, cameraRot);
-        auto cameraViewMatrix = renderCamera.GetViewMatrix();
-
-        Math::Vector3 position {}, scale {};
-        Math::Quat rotation {};
-        if (auto* selectedActor = GetEditorContext().GetCurrentSelectedActor(); selectedActor != nullptr) {
-            // gizmo
-            auto& actorTransform = selectedActor->GetTransform();
-            auto actorTransformMatrix = actorTransform.GetWorldTransformMatrix();
-            ImGuizmo::SetRect(viewportMin_.x, viewportMin_.y, float(viewportWidth_), float(viewportHeight_));
-            ImGuizmo::Manipulate(&cameraViewMatrix[0].x, &renderCamera.GetProjectionMatrix()[0].x,
-                ImGuizmo::OPERATION::ROTATE, ImGuizmo::MODE::LOCAL, &actorTransformMatrix[0].x);
-
-            Math::Decompose(actorTransformMatrix, scale, rotation, position);
-            actorTransform.SetPosition(position);
-            actorTransform.SetRotation(rotation);
-            actorTransform.SetScale(scale);
-        }
-
-        {
-            // The navigating cube at the top-right corner
-            // TODO: Set proper length argument, note, this argument should not be 0
-            ImGuizmo::ViewManipulate(&cameraViewMatrix[0].x, 0.5, ImVec2(viewportMax_.x - 128, viewportMin_.y), ImVec2(128, 128), 0x10101010);
-            auto cameraTransformMatrix = Math::Inverse(cameraViewMatrix);
-
-            Math::Decompose(cameraTransformMatrix, scale, rotation, position);
-            cameraTransform.SetPosition(position);
-            cameraTransform.SetRotation(rotation);
-        }
+        Math::Decompose(cameraTransformMatrix, scale, rotation, position);
+        cameraTransform.SetPosition(position);
+        cameraTransform.SetRotation(rotation);
     }
 }
 
@@ -129,13 +141,11 @@ void LoongEditorScenePanel::Render(const Foundation::LoongClock& clock)
         uint32_t actorId = (pixel[0] << 24u) | (pixel[1] << 16u) | (pixel[2] << 8u) | (pixel[3] << 0u);
 
         frameBuffer->Unbind();
-        
+
         auto* clickedActor = scene->GetChildByIdRecursive(actorId);
         auto* oldSelectedActor = GetEditorContext().GetCurrentSelectedActor();
-        
+
         GetEditorContext().SetCurrentSelectedActor(clickedActor);
-
-
     }
 
     {
