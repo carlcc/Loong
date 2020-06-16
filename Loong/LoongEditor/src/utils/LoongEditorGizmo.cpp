@@ -44,7 +44,9 @@ void LoongEditorGizmo::Manipulate(Core::LoongActor* targetActor)
 
     Math::Vector3 position {}, scale {};
     Math::Quat rotation {};
-    Math::Decompose(actorTransformMatrix, scale, rotation, position);
+
+    Math::Matrix4 actorLocalTransformMatrx = targetActor->HasParent() ? Math::Inverse(targetActor->GetParent()->GetTransform().GetTransformMatrix()) * actorTransformMatrix : actorTransformMatrix;
+    Math::Decompose(actorLocalTransformMatrx, scale, rotation, position);
     actorTransform.SetPosition(position);
     actorTransform.SetRotation(rotation);
     actorTransform.SetScale(scale);
@@ -67,8 +69,8 @@ void LoongEditorGizmo::ViewManipulate(float targetDistance, const Math::Vector2&
     Math::Decompose(cameraTransformMatrix, scale, rotation, position);
 
     auto& cameraTransform = boundCamera_->GetOwner()->GetTransform();
-    cameraTransform.SetPosition(position);
-    cameraTransform.SetRotation(rotation);
+    cameraTransform.SetWorldPosition(position);
+    cameraTransform.SetWorldRotation(rotation);
 }
 
 }

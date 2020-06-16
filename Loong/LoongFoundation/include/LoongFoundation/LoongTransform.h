@@ -25,9 +25,30 @@ public:
         OnTransformChange();
     }
 
+    void SetWorldPosition(const Math::Vector3& pos)
+    {
+        if (parent_ == nullptr) {
+            position_ = pos;
+        } else {
+            // T_world = T_parent * T_local ====> T_local = T_parent^-1 * T_world
+            position_ = Math::Inverse(parent_->GetWorldTransformMatrix()) * Math::Vector4 { pos, 1.0F };
+        }
+        OnTransformChange();
+    }
+
     void SetRotation(const Math::Quat& rot)
     {
         rotation_ = rot;
+        OnTransformChange();
+    }
+
+    void SetWorldRotation(const Math::Quat& rot)
+    {
+        if (parent_ == nullptr) {
+            rotation_ = rot;
+        } else {
+            rotation_ = Math::Inverse(parent_->GetWorldRotation()) * rot;
+        }
         OnTransformChange();
     }
 
