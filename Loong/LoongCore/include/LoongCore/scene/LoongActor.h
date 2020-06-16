@@ -52,6 +52,17 @@ public:
 
     bool HasParent() const { return parent_ != nullptr; }
 
+    bool IsAncestorOf(const LoongActor* descent) const
+    {
+        while (descent->HasParent()) {
+            descent = descent->GetParent();
+            if (descent == this) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     LoongActor* GetParent() const { return parent_; }
 
     LoongActor* GetRoot()

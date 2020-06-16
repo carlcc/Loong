@@ -51,8 +51,12 @@ void LoongEditorHierarchyPanel::DrawNode(Core::LoongActor* node, Core::LoongActo
     if (ImGui::BeginDragDropTarget()) {
         auto* draggedNode = ImGuiUtils::GetDropData<Core::LoongActor*>(ImGuiUtils::kDragTypeActor);
         if (draggedNode != nullptr) {
-            draggedNode->SetParent(node);
-            LOONG_DEBUG("Reset actor '{}'(ID {})'s parent to '{}'(ID {})", draggedNode->GetName(), draggedNode->GetID(), node->GetName(), node->GetID());
+            if (draggedNode->IsAncestorOf(node)) {
+                LOONG_ERROR("Cannot make an ancestor be its descent's child!");
+            } else {
+                draggedNode->SetParent(node);
+                LOONG_DEBUG("Reset actor '{}'(ID {})'s parent to '{}'(ID {})", draggedNode->GetName(), draggedNode->GetID(), node->GetName(), node->GetID());
+            }
         }
         ImGui::EndDragDropTarget();
     }
