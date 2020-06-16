@@ -11,15 +11,17 @@
 #include "LoongFoundation/LoongLogger.h"
 #include "LoongFoundation/LoongPathUtils.h"
 #include "LoongRenderer/LoongRenderer.h"
+#include "LoongResource/LoongTexture.h"
+#include "LoongResource/loader/LoongTextureLoader.h"
 #include "utils/IconsFontAwesome5.h"
 #include <imgui.h>
 #include <iostream>
 #include <memory>
 
-bool LoadFonts()
+int LoadFonts()
 {
     // load font for ImGui
-    const char* kTextFontPath = "./Fonts/wqymicroheimono.ttf";
+    const char* kTextFontPath = "/Fonts/wqymicroheimono.ttf";
     auto size1 = Loong::FS::LoongFileSystem::GetFileSize(kTextFontPath);
     if (size1 < 0) {
         LOONG_ERROR("Cannot load font file '{}', exit...", kTextFontPath);
@@ -57,21 +59,21 @@ bool LoadFonts()
     //     0x9FAF, // CJK Ideograms
     //     0,
     // };
+    // static ImWchar ranges[] = { 0x20, 0x52f, 0x1ab0, 0x2189, 0x2c60, 0x2e44, 0xa640, 0xab65, 0 };
+    static ImWchar fontAwesomeIconRanges[] = { ICON_MIN_FA, ICON_MAX_FA, 0 };
     ImFontConfig cfg;
-    cfg.MergeMode = true;
-    cfg.FontDataOwnedByAtlas = false;
+    cfg.MergeMode = false;
+    cfg.FontDataOwnedByAtlas = true;
     cfg.PixelSnapH = true;
     cfg.OversampleH = 1; //or 2 is the same
     cfg.OversampleV = 1;
-    static ImWchar ranges[] = { 0x20, 0x52f, 0x1ab0, 0x2189, 0x2c60, 0x2e44, 0xa640, 0xab65, 0 };
-    static ImWchar fontAwesomeIconRanges[] = { ICON_MIN_FA, ICON_MAX_FA, 0 };
-    // ImGui::GetIO().Fonts->AddFontFromMemoryTTF(buffer.data(), int(size1), 12, nullptr, ranges);
-    // ImGui::GetIO().Fonts->AddFontFromMemoryTTF(buffer.data() + size1, int(size2), 12, nullptr, fontAwesomeIconRanges);
-    // ImGui::GetIO().Fonts->AddFontFromMemoryTTF(buffer.data(), int(size1), 16, nullptr, ranges);
-    // ImGui::GetIO().Fonts->AddFontFromMemoryTTF(buffer.data() + size1, int(size2), 16, nullptr, fontAwesomeIconRanges);
-    ImGui::GetIO().Fonts->AddFontDefault();
-    ImGui::GetIO().Fonts->AddFontFromFileTTF(kTextFontPath, 16, nullptr, ImGui::GetIO().Fonts->GetGlyphRangesChineseSimplifiedCommon());
-    return true;
+    auto& io = ImGui::GetIO();
+    ImGui::GetIO().Fonts->AddFontFromMemoryTTF(buffer.data(), int(size1), 16, &cfg, io.Fonts->GetGlyphRangesChineseFull());
+    cfg.MergeMode = true;
+    cfg.FontDataOwnedByAtlas = false;
+    io.Fonts->AddFontFromMemoryTTF(buffer.data() + size1, int(size2), 16, &cfg, fontAwesomeIconRanges);
+
+    return 0;
 }
 
 int StartApp(int argc, char** argv)
@@ -81,7 +83,9 @@ int StartApp(int argc, char** argv)
     config.title = "LoongEditor";
     std::shared_ptr<Loong::App::LoongApp> app = std::make_shared<Loong::App::LoongApp>(config);
 
-    LoadFonts();
+    if (0 != LoadFonts()) {
+        return 1;
+    }
 
     std::shared_ptr<Loong::Editor::LoongEditorContext> context;
     {

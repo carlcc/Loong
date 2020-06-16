@@ -63,7 +63,6 @@ void LoongEditorScenePanel::UpdateButtons(const Foundation::LoongClock& clock)
     auto min = ImGuiUtils::ToVector2(ImGui::GetWindowContentRegionMin());
     ImGui::SetCursorPos({ min.x + 10.F, min.y + 10.F });
     ImGui::Button(ICON_FA_ARROWS_ALT "###Translate");
-    ImGui::Button("你###Translate");ImGui::Text("Kanjis: \xe6\x97\xa5\xe6\x9c\xac\xe8\xaa\x9e (nihongo)");
 }
 
 void LoongEditorScenePanel::UpdateGizmo(const Foundation::LoongClock& clock)
