@@ -4,6 +4,7 @@
 
 #pragma once
 
+#include "../utils/LoongEditorGizmo.h"
 #include "LoongEditorRenderPanel.h"
 
 namespace Loong::Core {
@@ -28,10 +29,13 @@ protected:
 private:
     void UpdateButtons(const Foundation::LoongClock& clock);
     void UpdateGizmo(const Foundation::LoongClock& clock);
+    void UpdateShortcuts(const Foundation::LoongClock& clock);
 
 private:
     std::shared_ptr<Core::LoongRenderPassIdPass> idPass_ { nullptr };
     std::shared_ptr<Resource::LoongShader> wireframeShader_ { nullptr };
+    LoongEditorGizmo gizmo_ {};
+    bool isOverToolButton_ {};
 };
 
 }

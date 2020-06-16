@@ -49,6 +49,8 @@ LoongEditorScenePanel::LoongEditorScenePanel(LoongEditor* editor, const std::str
     static const Math::Vector4 kWireframeColor { 0.3F, 0.4F, 0.5F, 1.0F };
     wireframeShader_->SetUniformVec4("u_wireColor", kWireframeColor);
     wireframeShader_->Unbind();
+
+    gizmo_.SetBoundCamera(cameraActor_->GetComponent<Core::LoongCCamera>());
 }
 
 void LoongEditorScenePanel::UpdateImpl(const Foundation::LoongClock& clock)
@@ -56,52 +58,90 @@ void LoongEditorScenePanel::UpdateImpl(const Foundation::LoongClock& clock)
     LoongEditorRenderPanel::UpdateImpl(clock);
     UpdateButtons(clock);
     UpdateGizmo(clock);
+    UpdateShortcuts(clock);
+}
+
+void LoongEditorScenePanel::UpdateShortcuts(const Foundation::LoongClock& clock)
+{
+    auto& inputManager = GetApp().GetInputManager();
+    if (ImGui::IsWindowHovered() && !inputManager.IsMouseButtonPressed(App::LoongMouseButton::kButtonRight)) {
+        if (inputManager.IsKeyPressEvent(App::LoongKeyCode::kKeyW)) {
+            gizmo_.SetManipulateMode(LoongEditorGizmo::ManipulateMode::kTranslate);
+        }
+        if (inputManager.IsKeyPressEvent(App::LoongKeyCode::kKeyE)) {
+            gizmo_.SetManipulateMode(LoongEditorGizmo::ManipulateMode::kRotate);
+        }
+        if (inputManager.IsKeyPressEvent(App::LoongKeyCode::kKeyR)) {
+            gizmo_.SetManipulateMode(LoongEditorGizmo::ManipulateMode::kScale);
+        }
+    }
+}
+
+bool EditorToolbarButton(const char* text, const char* tooltip, bool active)
+{
+    const auto& style = ImGui::GetStyle();
+    const ImU32 kToolButtonActiveColor = IM_COL32(0x98, 0x23, 0x00, 0xFF);
+    if (active)
+        ImGui::PushStyleColor(ImGuiCol_Button, kToolButtonActiveColor); //style.Colors[ImGuiCol_ButtonActive]);
+    else
+        ImGui::PushStyleColor(ImGuiCol_Button, style.Colors[ImGuiCol_Button]);
+    bool result = ImGui::Button(text);
+    ImGui::PopStyleColor();
+    ImGui::SameLine(0, 0);
+    if (ImGui::IsItemHovered() && tooltip)
+        ImGui::SetTooltip("%s", tooltip);
+    return result;
 }
 
 void LoongEditorScenePanel::UpdateButtons(const Foundation::LoongClock& clock)
 {
     auto min = ImGuiUtils::ToVector2(ImGui::GetWindowContentRegionMin());
+    isOverToolButton_ = false;
     ImGui::SetCursorPos({ min.x + 10.F, min.y + 10.F });
-    ImGui::Button(ICON_FA_ARROWS_ALT "###Translate");
+    if (EditorToolbarButton(ICON_FA_ARROWS_ALT "###Translate", "Translate", gizmo_.GetManipulateMode() == LoongEditorGizmo::ManipulateMode::kTranslate)) {
+        gizmo_.SetManipulateMode(LoongEditorGizmo::ManipulateMode::kTranslate);
+    }
+    isOverToolButton_ |= ImGui::IsItemHovered();
+    if (EditorToolbarButton(ICON_FA_SYNC "###Rotate", "Rotate", gizmo_.GetManipulateMode() == LoongEditorGizmo::ManipulateMode::kRotate)) {
+        gizmo_.SetManipulateMode(LoongEditorGizmo::ManipulateMode::kRotate);
+    }
+    isOverToolButton_ |= ImGui::IsItemHovered();
+    if (EditorToolbarButton(ICON_FA_EXPAND_ARROWS_ALT "###Scale", "Scale", gizmo_.GetManipulateMode() == LoongEditorGizmo::ManipulateMode::kScale)) {
+        gizmo_.SetManipulateMode(LoongEditorGizmo::ManipulateMode::kScale);
+        gizmo_.SetCoordinateMode(LoongEditorGizmo::CoordinateMode::kLocal); // Scale only supports local coordinate
+    }
+    isOverToolButton_ |= ImGui::IsItemHovered();
+
+    ImGui::SameLine(0, 3.f);
+
+    if (EditorToolbarButton(ICON_FA_GLOBE "###WorldSpace", "World Space", gizmo_.GetCoordinateMode() == LoongEditorGizmo::CoordinateMode::kWorld)) {
+        if (gizmo_.GetManipulateMode() != LoongEditorGizmo::ManipulateMode::kScale) { // If gizmo mode is scaling, then do not response
+            gizmo_.SetCoordinateMode(LoongEditorGizmo::CoordinateMode::kWorld);
+        }
+    }
+    isOverToolButton_ |= ImGui::IsItemHovered();
+    if (EditorToolbarButton(ICON_FA_BASEBALL_BALL "###LocalSpace", "Local Space", gizmo_.GetCoordinateMode() == LoongEditorGizmo::CoordinateMode::kLocal)) {
+        gizmo_.SetCoordinateMode(LoongEditorGizmo::CoordinateMode::kLocal);
+    }
+    isOverToolButton_ |= ImGui::IsItemHovered();
 }
 
 void LoongEditorScenePanel::UpdateGizmo(const Foundation::LoongClock& clock)
 {
-    ImGuizmo::SetDrawlist();
+    gizmo_.SetDrawList();
 
+    // We need to udpate camera's matrices first
     auto& cameraTransform = cameraActor_->GetTransform();
     auto cameraPos = cameraTransform.GetWorldPosition();
     auto cameraRot = cameraTransform.GetWorldRotation();
     auto& renderCamera = cameraActor_->GetComponent<Core::LoongCCamera>()->GetCamera();
     renderCamera.UpdateMatrices(viewportWidth_, viewportHeight_, cameraPos, cameraRot);
-    auto cameraViewMatrix = renderCamera.GetViewMatrix();
 
-    Math::Vector3 position {}, scale {};
-    Math::Quat rotation {};
     if (auto* selectedActor = GetEditorContext().GetCurrentSelectedActor(); selectedActor != nullptr) {
-        // gizmo
-        auto& actorTransform = selectedActor->GetTransform();
-        auto actorTransformMatrix = actorTransform.GetWorldTransformMatrix();
-        ImGuizmo::SetRect(viewportMin_.x, viewportMin_.y, float(viewportWidth_), float(viewportHeight_));
-        ImGuizmo::Manipulate(&cameraViewMatrix[0].x, &renderCamera.GetProjectionMatrix()[0].x,
-            ImGuizmo::OPERATION::ROTATE, ImGuizmo::MODE::LOCAL, &actorTransformMatrix[0].x);
-
-        Math::Decompose(actorTransformMatrix, scale, rotation, position);
-        actorTransform.SetPosition(position);
-        actorTransform.SetRotation(rotation);
-        actorTransform.SetScale(scale);
+        gizmo_.SetViewport(viewportMin_, { viewportWidth_, viewportHeight_ });
+        gizmo_.Manipulate(selectedActor);
     }
-
-    {
-        // The navigating cube at the top-right corner
-        // TODO: Set proper length argument, note, this argument should not be 0
-        ImGuizmo::ViewManipulate(&cameraViewMatrix[0].x, 0.5, ImVec2(viewportMax_.x - 128, viewportMin_.y), ImVec2(128, 128), 0x10101010);
-        auto cameraTransformMatrix = Math::Inverse(cameraViewMatrix);
-
-        Math::Decompose(cameraTransformMatrix, scale, rotation, position);
-        cameraTransform.SetPosition(position);
-        cameraTransform.SetRotation(rotation);
-    }
+    gizmo_.ViewManipulate(0.5, { viewportMax_.x - 128, viewportMin_.y }, { 128, 128 }, 0x10101010);
 }
 
 void LoongEditorScenePanel::Render(const Foundation::LoongClock& clock)
@@ -120,7 +160,9 @@ void LoongEditorScenePanel::Render(const Foundation::LoongClock& clock)
 
     auto& inputManager = GetApp().GetInputManager();
     auto& mousePos = inputManager.GetMousePosition();
-    if (IsFocused() && inputManager.IsMouseButtonReleaseEvent(Loong::App::LoongMouseButton::kButtonLeft) && Math::Distance(inputManager.GetMouseDownPosition(), mousePos) < 4.0F) {
+    if (IsFocused() && !isOverToolButton_
+        && inputManager.IsMouseButtonReleaseEvent(Loong::App::LoongMouseButton::kButtonLeft)
+        && Math::Distance(inputManager.GetMouseDownPosition(), mousePos) < 4.0F) {
         // Render selecting
         auto* frameBuffer = idPass_->GetFrameBuffer().get();
         frameBuffer->Resize(viewportWidth_, viewportHeight_);
