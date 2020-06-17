@@ -149,12 +149,20 @@ public:
         if (parent == parent_) {
             return;
         }
+        UpdateWorldCache(); // ensure the worldMatrix_ is valid
         if (parent_ != nullptr) {
             parent_->UnsubscribeTransformChange(this);
         }
         parent_ = parent;
-        // TODO: Calculate a new transform to keep global transform not change?
-        OnTransformChange();
+        {
+            // Calculate new local matrix
+            Math::Matrix4 newLocalMatrix = parent_ ? Math::Inverse(parent_->GetWorldTransformMatrix()) * worldMatrix_
+                                                   : worldMatrix_;
+            Math::Decompose(newLocalMatrix, scale_, rotation_, position_);
+            // although our world transform should not be changed, and our local transform has been recomputed,
+            // but if the parent has a different scale, the result may change, thus, we need to notify the change
+            OnTransformChange();
+        }
         if (parent_ != nullptr) {
             parent_->SubscribeTransformChange(this, &Transform::OnTransformChange);
         }
