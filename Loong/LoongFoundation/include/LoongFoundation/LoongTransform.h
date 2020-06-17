@@ -183,7 +183,7 @@ private:
         if (isWorldDirty_) {
             isWorldDirty_ = false;
             if (parent_ != nullptr) {
-                worldMatrix_ = parent_->GetTransformMatrix() * GetTransformMatrix();
+                worldMatrix_ = parent_->GetWorldTransformMatrix() * GetTransformMatrix();
                 Math::Decompose(worldMatrix_, worldScale_, worldRotation_, worldPosition_);
             } else {
                 worldPosition_ = position_;
