@@ -128,9 +128,12 @@ void LoongEditorScenePanel::UpdateButtons(const Foundation::LoongClock& clock)
 
 void LoongEditorScenePanel::UpdateGizmo(const Foundation::LoongClock& clock)
 {
+    if (viewportHeight_ <= 0 || viewportWidth_ <= 0) {
+        return;
+    }
     gizmo_.SetDrawList();
 
-    // We need to udpate camera's matrices first
+    // We must to udpate camera's matrices first
     auto& cameraTransform = cameraActor_->GetTransform();
     auto cameraPos = cameraTransform.GetWorldPosition();
     auto cameraRot = cameraTransform.GetWorldRotation();
