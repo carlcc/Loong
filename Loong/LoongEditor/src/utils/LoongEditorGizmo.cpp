@@ -42,14 +42,18 @@ void LoongEditorGizmo::Manipulate(Core::LoongActor* targetActor)
     ImGuizmo::Manipulate(&cameraViewMatrix[0].x, &cameraProjMatrix[0].x,
         ImGuizmo::OPERATION(manipulateMode_), ImGuizmo::MODE(coordinateMode_), &actorTransformMatrix[0].x);
 
-    Math::Vector3 position {}, scale {};
-    Math::Quat rotation {};
+    if (ImGuizmo::IsUsing()) {
+        Math::Vector3 position {}, scale {};
+        Math::Quat rotation {};
 
-    Math::Matrix4 actorLocalTransformMatrx = targetActor->HasParent() ? Math::Inverse(targetActor->GetParent()->GetTransform().GetTransformMatrix()) * actorTransformMatrix : actorTransformMatrix;
-    Math::Decompose(actorLocalTransformMatrx, scale, rotation, position);
-    actorTransform.SetPosition(position);
-    actorTransform.SetRotation(rotation);
-    actorTransform.SetScale(scale);
+        auto* parentActor = targetActor->GetParent();
+        Math::Matrix4 actorLocalTransformMatrx = parentActor ? Math::Inverse(parentActor->GetTransform().GetWorldTransformMatrix()) * actorTransformMatrix
+                                                             : actorTransformMatrix;
+        Math::Decompose(actorLocalTransformMatrx, scale, rotation, position);
+        actorTransform.SetPosition(position);
+        actorTransform.SetRotation(rotation);
+        actorTransform.SetScale(scale);
+    }
 }
 
 void LoongEditorGizmo::ViewManipulate(float targetDistance, const Math::Vector2& drawPosition, const Math::Vector2& size, uint32_t backgroundColor)
