@@ -29,6 +29,8 @@ public:
 
     bool IsSphereVisible(const Math::Vector3& center, float radius) const;
 
+    const Math::Vector3* GetPoints() const { return points_; }
+
 private:
     template <Planes i, Planes j>
     struct ij2k {

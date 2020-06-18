@@ -26,6 +26,8 @@ LoongEditorRenderPanel::LoongEditorRenderPanel(LoongEditor* editor, const std::s
     cameraActor_ = Core::LoongScene::CreateActor("SceneViewCamera");
     cameraActor_->AddComponent<Core::LoongCCamera>();
     cameraActor_->AddComponent<LoongEditorSceneCameraController>(editor);
+    cameraActor_->GetTransform().SetWorldPosition({ 2.0F, 2.0f, 2.0F });
+    cameraActor_->GetTransform().LookAt(Math::Zero, Math::kUp);
 
     scenePass_ = std::make_shared<Core::LoongRenderPassScenePass>();
     scenePass_->SetDefaultMaterial(GetEditorContext().GetDefaultMaterial());
