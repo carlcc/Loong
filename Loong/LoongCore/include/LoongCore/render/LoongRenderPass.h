@@ -32,12 +32,18 @@ public:
         Math::Vector3 ub_ViewPos;
         float ub_Time;
     };
+    struct Context {
+        Renderer::LoongRenderer* renderer {nullptr};
+        Resource::LoongUniformBuffer* basicUniforms {nullptr};
+        LoongScene* scene {nullptr};
+        LoongCCamera* camera {nullptr};
+    };
     
     LoongRenderPass();
     virtual ~LoongRenderPass() = default;
 
     std::shared_ptr<Resource::LoongFrameBuffer> GetFrameBuffer() const { return frameBuffer_; }
-    virtual void Render(Renderer::LoongRenderer& renderer, Resource::LoongUniformBuffer& basicUniforms, LoongScene& scene, LoongCCamera& camera) = 0;
+    virtual void Render(const Context& context) = 0;
 
 protected:
     std::shared_ptr<Resource::LoongFrameBuffer> frameBuffer_ {};

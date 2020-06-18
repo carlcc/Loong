@@ -95,7 +95,9 @@ void LoongEditorRenderPanel::RenderSceneForCamera(Core::LoongScene& scene, Core:
     camera.GetCamera().UpdateMatrices(viewportWidth_, viewportHeight_, cameraPos, cameraRot);
 
     auto& context = GetEditorContext();
-    renderPass.Render(context.GetRenderer(), *context.GetUniformBuffer(), scene, camera);
+
+    Core::LoongRenderPass::Context renderCtx { &context.GetRenderer() , context.GetUniformBuffer().get(), &scene, &camera};
+    renderPass.Render(renderCtx);
 }
 
 }

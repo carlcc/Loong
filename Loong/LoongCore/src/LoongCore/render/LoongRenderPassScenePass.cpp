@@ -10,7 +10,7 @@
 
 namespace Loong::Core {
 
-void LoongRenderPassScenePass::Render(Renderer::LoongRenderer& renderer, Resource::LoongUniformBuffer& basicUniforms, LoongScene& scene, LoongCCamera& camera)
+void LoongRenderPassScenePass::Render(const Context& context)
 {
     struct ScenePassDrawable {
         const Math::Matrix4* transform;
@@ -18,6 +18,11 @@ void LoongRenderPassScenePass::Render(Renderer::LoongRenderer& renderer, Resourc
         const Resource::LoongMaterial* material;
         float distance;
     };
+
+    auto& camera = *context.camera;
+    auto& scene = *context.scene;
+    auto& renderer = *context.renderer;
+    auto& basicUniforms = *context.basicUniforms;
 
     UniformBlock ub {};
     ub.ub_ViewPos = camera.GetOwner()->GetTransform().GetWorldPosition();

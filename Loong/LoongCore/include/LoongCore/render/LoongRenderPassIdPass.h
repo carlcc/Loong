@@ -15,7 +15,7 @@ class LoongRenderPassIdPass : public LoongRenderPass {
 public:
     LoongRenderPassIdPass();
 
-    void Render(Renderer::LoongRenderer& renderer, Resource::LoongUniformBuffer& basicUniforms, LoongScene& scene, LoongCCamera& camera) override;
+    void Render(const Context& context) override;
 
     void SetCameraModel(const std::shared_ptr<Resource::LoongGpuModel>& mdl) { cameraModel_ = mdl; }
 

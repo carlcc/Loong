@@ -15,7 +15,7 @@ namespace Loong::Core {
 
 class LoongRenderPassScenePass : public LoongRenderPass {
 public:
-    void Render(Renderer::LoongRenderer& renderer, Resource::LoongUniformBuffer& basicUniforms, LoongScene& scene, LoongCCamera& camera) override;
+    void Render(const Context& context) override;
 
     void SetDefaultMaterial(const std::shared_ptr<Resource::LoongMaterial>& mat) { defaultMaterial_ = mat; }
 

@@ -130,7 +130,6 @@ public:
             cubeTransform.SetScale(scale);
             cubeTransform.SetRotation(rot);
 
-
             ImGuizmo::ViewManipulate(&cameraViewMatrix[0].x, 12, ImVec2(io.DisplaySize.x - 128, 0), ImVec2(128, 128), 0x10101010);
 
             cameraViewMatrix = Math::Inverse(cameraViewMatrix);
@@ -153,7 +152,8 @@ public:
         auto& cameraActorTransform = cameraComponent_->GetOwner()->GetTransform();
         cameraComponent_->GetCamera().UpdateMatrices(width, height, cameraActorTransform.GetWorldPosition(), cameraActorTransform.GetWorldRotation());
 
-        scenePass_->Render(renderer_, basicUniforms_, *scene_, *cameraComponent_);
+        Core::LoongRenderPass::Context renderContext { &renderer_, &basicUniforms_, scene_.get(), cameraComponent_ };
+        scenePass_->Render(renderContext);
     }
 
     void OnPressButton()

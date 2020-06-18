@@ -26,7 +26,7 @@ LoongRenderPassIdPass::LoongRenderPassIdPass()
     sceneIdShader_ = Resource::LoongResourceManager::GetShader("/Shaders/id.glsl");
 }
 
-void LoongRenderPassIdPass::Render(Renderer::LoongRenderer& renderer, Resource::LoongUniformBuffer& basicUniforms, LoongScene& scene, LoongCCamera& camera)
+void LoongRenderPassIdPass::Render(const Context& context)
 {
     struct IdPassDrawable {
         const Math::Matrix4* transform;
@@ -34,6 +34,11 @@ void LoongRenderPassIdPass::Render(Renderer::LoongRenderer& renderer, Resource::
         uint32_t actorId;
         float distance;
     };
+
+    auto& camera = *context.camera;
+    auto& scene = *context.scene;
+    auto& renderer = *context.renderer;
+    auto& basicUniforms = *context.basicUniforms;
 
     UniformBlock ub {};
     ub.ub_ViewPos = camera.GetOwner()->GetTransform().GetWorldPosition();
