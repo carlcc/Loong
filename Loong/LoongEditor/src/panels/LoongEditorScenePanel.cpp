@@ -218,7 +218,7 @@ void LoongEditorScenePanel::Render(const Foundation::LoongClock& clock)
                 ubo.ub_View = camera.GetCamera().GetViewMatrix();
                 ubo.ub_ViewPos = camera.GetOwner()->GetTransform().GetWorldPosition();
                 ubo.ub_Model = selectedActor->GetTransform().GetWorldTransformMatrix();
-                GetEditorContext().GetUniformBuffer()->SetSubData(&ubo, 0);
+                GetEditorContext().GetBasicUniformBuffer()->SetSubData(&ubo, 0);
                 for (auto* mesh : modelRenderer->GetModel()->GetMeshes()) {
                     renderer.Draw(*mesh);
                 }
