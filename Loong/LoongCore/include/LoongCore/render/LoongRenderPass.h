@@ -54,7 +54,7 @@ public:
     struct Context {
         Renderer::LoongRenderer* renderer { nullptr };
         Resource::LoongUniformBuffer* basicUniforms { nullptr }; // Corresponding to UniformUBO struct
-        // Resource::LoongUniformBuffer* lightUniforms { nullptr }; // Corresponding to LightUBO struct
+        Resource::LoongUniformBuffer* lightUniforms { nullptr }; // Corresponding to LightUBO struct
         LoongScene* scene { nullptr };
         LoongCCamera* camera { nullptr };
     };

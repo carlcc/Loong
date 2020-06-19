@@ -41,6 +41,8 @@ public:
 
     std::shared_ptr<Resource::LoongUniformBuffer> GetBasicUniformBuffer() const { return basicUniformBuffer_; }
 
+    std::shared_ptr<Resource::LoongUniformBuffer> GetLightUniformBuffer() const { return lightUniformBuffer_; }
+
     Foundation::LoongClock& GetGameClock() { return gameClock_; }
 
     Foundation::LoongClock& GetEditorClock() { return editorClock_; }
@@ -65,6 +67,7 @@ private:
     std::string projectFile_ {};
     std::string projectDir_ {};
     std::shared_ptr<Resource::LoongUniformBuffer> basicUniformBuffer_ {};
+    std::shared_ptr<Resource::LoongUniformBuffer> lightUniformBuffer_ {};
     std::shared_ptr<Resource::LoongMaterial> defaultMaterial_ { nullptr };
     Foundation::LoongClock gameClock_ {};
     Foundation::LoongClock editorClock_ {};

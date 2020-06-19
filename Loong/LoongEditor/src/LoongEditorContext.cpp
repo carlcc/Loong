@@ -15,11 +15,19 @@ LoongEditorContext::LoongEditorContext(const std::string& projectFile)
 {
     projectFile_ = Foundation::LoongPathUtils::Normalize(projectFile);
     projectDir_ = Foundation::LoongPathUtils::GetParent(projectFile_);
+    {
+        basicUniformBuffer_ = std::make_shared<Resource::LoongUniformBuffer>();
+        Core::LoongRenderPass::BasicUBO ub {};
+        basicUniformBuffer_->BufferData(&ub, 1, Resource::LoongGpuBufferUsage::kStreamDraw);
+        basicUniformBuffer_->SetBindingPoint(0, sizeof(ub));
+    }
+    {
+        lightUniformBuffer_ = std::make_shared<Resource::LoongUniformBuffer>();
+        Core::LoongRenderPass::LightUBO lub {};
+        basicUniformBuffer_->BufferData(&lub, 1, Resource::LoongGpuBufferUsage::kStreamDraw);
+        basicUniformBuffer_->SetBindingPoint(1, sizeof(lub));
+    }
 
-    basicUniformBuffer_ = std::make_shared<Resource::LoongUniformBuffer>();
-    Core::LoongRenderPass::BasicUBO ub {};
-    basicUniformBuffer_->BufferData(&ub, 1, Resource::LoongGpuBufferUsage::kStreamDraw);
-    basicUniformBuffer_->SetBindingPoint(0, sizeof(ub));
     defaultMaterial_ = Resource::LoongResourceManager::GetMaterial("/Materials/Default.lgmtl");
     renderer_.reset(new Renderer::LoongRenderer);
 }
