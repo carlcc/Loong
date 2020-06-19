@@ -54,6 +54,7 @@ public:
     struct Context {
         Renderer::LoongRenderer* renderer { nullptr };
         Resource::LoongUniformBuffer* basicUniforms { nullptr }; // Corresponding to UniformUBO struct
+        // Consider use shader storage buffer, but MacOS's highest GL version is 4.1, which does not support it.
         Resource::LoongUniformBuffer* lightUniforms { nullptr }; // Corresponding to LightUBO struct
         LoongScene* scene { nullptr };
         LoongCCamera* camera { nullptr };

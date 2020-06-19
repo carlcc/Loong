@@ -13,8 +13,12 @@ void LoongMaterial::SetShader(std::shared_ptr<LoongShader> shader)
     shader_ = std::move(shader);
     uniformsData_.clear();
     if (shader_) {
-        auto index = shader_->GetUniformBlockLocation("BasicUBO");
-        shader_->BindUniformBlock(index, 0);
+        if (auto index = shader_->GetUniformBlockLocation("BasicUBO"); index != -1) {
+            shader_->BindUniformBlock(index, 0);
+        }
+        if (auto index = shader_->GetUniformBlockLocation("LightUBO"); index != -1) {
+            shader_->BindUniformBlock(index, 1);
+        }
 
         FillUniform();
     }

@@ -4,6 +4,7 @@
 
 #include "LoongCore/render/LoongRenderPassScenePass.h"
 #include "LoongCore/scene/components/LoongCCamera.h"
+#include "LoongCore/scene/components/LoongCLight.h"
 #include "LoongCore/scene/components/LoongCModelRenderer.h"
 #include "LoongRenderer/LoongRenderer.h"
 #include "LoongResource/LoongMaterial.h"
@@ -93,6 +94,28 @@ void LoongRenderPassScenePass::Render(const Context& context)
     std::sort(transparentDrawables.begin(), transparentDrawables.end(), [](const ScenePassDrawable& a, const ScenePassDrawable& b) -> bool {
         return a.distance > b.distance;
     });
+
+    if (auto* lightUniforms = context.lightUniforms; lightUniforms != nullptr) {
+        LightUBO lightUbo {};
+        int lightsCount = 0;
+        for (auto& light : scene.GetFastAccess().lights_) {
+            if (lightsCount >= kMaxLightCount) {
+                break;
+            }
+            auto& lightInfo = lightUbo.ub_lights[lightsCount++];
+            lightInfo.lightType = float(light->GetType());
+            lightInfo.color = light->GetColor();
+            lightInfo.dir = light->GetOwner()->GetTransform().GetWorldForward();
+            lightInfo.pos = light->GetOwner()->GetTransform().GetWorldPosition();
+            lightInfo.intencity = light->GetIntensity();
+            lightInfo.falloffRadius = light->GetFalloffRadius();
+            lightInfo.innerAngle = light->GetInnerAngle();
+            lightInfo.outerAngle = light->GetOuterAngle();
+        }
+        lightUbo.ub_lightsCount = float(lightsCount);
+
+        lightUniforms->SetSubData(&lightUbo, 0);
+    }
 
     // render
     for (auto& drawable : opaqueDrawables) {
