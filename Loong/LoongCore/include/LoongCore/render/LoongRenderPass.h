@@ -25,20 +25,40 @@ class LoongCCamera;
 
 class LoongRenderPass {
 public:
-    struct UniformBlock {
+    struct BasicUBO {
         Math::Matrix4 ub_Model;
         Math::Matrix4 ub_View;
         Math::Matrix4 ub_Projection;
         Math::Vector3 ub_ViewPos;
         float ub_Time;
     };
-    struct Context {
-        Renderer::LoongRenderer* renderer {nullptr};
-        Resource::LoongUniformBuffer* basicUniforms {nullptr};
-        LoongScene* scene {nullptr};
-        LoongCCamera* camera {nullptr};
+    struct Light {
+        Math::Vector3 pos;
+        float lightType;
+        Math::Vector3 dir;
+        float falloffRadius;
+        Math::Vector3 color;
+        float intencity;
+        float innerAngle;
+        float outerAngle;
+        float padding1_[2];
     };
-    
+
+    static const int kMaxLightCount = 32;
+    struct LightUBO {
+        float ub_lightsCount;
+        float padding1_[3]; // align to vec4
+        Light ub_lights[kMaxLightCount];
+    };
+
+    struct Context {
+        Renderer::LoongRenderer* renderer { nullptr };
+        Resource::LoongUniformBuffer* basicUniforms { nullptr }; // Corresponding to UniformUBO struct
+        // Resource::LoongUniformBuffer* lightUniforms { nullptr }; // Corresponding to LightUBO struct
+        LoongScene* scene { nullptr };
+        LoongCCamera* camera { nullptr };
+    };
+
     LoongRenderPass();
     virtual ~LoongRenderPass() = default;
 

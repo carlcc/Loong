@@ -17,7 +17,7 @@ LoongEditorContext::LoongEditorContext(const std::string& projectFile)
     projectDir_ = Foundation::LoongPathUtils::GetParent(projectFile_);
 
     uniformBuffer_ = std::make_shared<Resource::LoongUniformBuffer>();
-    Core::LoongRenderPass::UniformBlock ub {};
+    Core::LoongRenderPass::BasicUBO ub {};
     uniformBuffer_->BufferData(&ub, 1, Resource::LoongGpuBufferUsage::kStreamDraw);
     uniformBuffer_->SetBindingPoint(0, sizeof(ub));
     defaultMaterial_ = Resource::LoongResourceManager::GetMaterial("/Materials/Default.lgmtl");

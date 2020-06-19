@@ -213,7 +213,7 @@ void LoongEditorScenePanel::Render(const Foundation::LoongClock& clock)
 
                 renderer.SetPolygonMode(Renderer::LoongRenderer::PolygonMode::kLine);
 
-                Core::LoongRenderPass::UniformBlock ubo {};
+                Core::LoongRenderPass::BasicUBO ubo {};
                 ubo.ub_Projection = camera.GetCamera().GetProjectionMatrix();
                 ubo.ub_View = camera.GetCamera().GetViewMatrix();
                 ubo.ub_ViewPos = camera.GetOwner()->GetTransform().GetWorldPosition();

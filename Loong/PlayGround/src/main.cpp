@@ -59,7 +59,7 @@ public:
         cameraTransform.LookAt(Math::Zero, Math::kUp);
         cameraActor->SetParent(scene_.get());
 
-        Core::LoongRenderPass::UniformBlock ubo;
+        Core::LoongRenderPass::BasicUBO ubo;
         basicUniforms_.BufferData(&ubo, 1, Resource::LoongGpuBufferUsage::kStreamDraw); // Note: Must allocate memory first
         basicUniforms_.SetBindingPoint(0, sizeof(ubo));
 

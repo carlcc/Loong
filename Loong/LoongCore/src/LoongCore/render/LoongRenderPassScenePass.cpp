@@ -24,7 +24,7 @@ void LoongRenderPassScenePass::Render(const Context& context)
     auto& renderer = *context.renderer;
     auto& basicUniforms = *context.basicUniforms;
 
-    UniformBlock ub {};
+    BasicUBO ub {};
     ub.ub_ViewPos = camera.GetOwner()->GetTransform().GetWorldPosition();
     ub.ub_Projection = camera.GetCamera().GetProjectionMatrix();
     ub.ub_View = camera.GetCamera().GetViewMatrix();
