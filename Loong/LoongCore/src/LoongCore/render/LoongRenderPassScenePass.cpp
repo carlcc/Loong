@@ -113,6 +113,9 @@ void LoongRenderPassScenePass::Render(const Context& context)
             lightInfo.outerAngle = light->GetOuterAngle();
         }
         lightUbo.ub_lightsCount = float(lightsCount);
+        lightUbo.padding1_[0] = float(lightsCount);
+        lightUbo.padding1_[2] = float(lightsCount);
+        lightUbo.padding1_[1] = float(lightsCount);
 
         lightUniforms->SetSubData(&lightUbo, 0);
     }

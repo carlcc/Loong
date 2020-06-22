@@ -6,6 +6,7 @@
 #include "LoongCore/scene/LoongActor.h"
 #include "LoongCore/scene/LoongScene.h"
 #include "LoongCore/scene/components/LoongCCamera.h"
+#include "LoongCore/scene/components/LoongCLight.h"
 #include "LoongCore/scene/components/LoongCModelRenderer.h"
 #include "LoongFileSystem/Driver.h"
 #include "LoongFileSystem/LoongFileSystem.h"
@@ -41,7 +42,7 @@ public:
 
         auto fireTexture = Resource::LoongResourceManager::GetTexture("Textures/fire.jpg");
         auto material = std::make_shared<Resource::LoongMaterial>();
-        material->SetShaderByFile("Shaders/unlit.glsl");
+        material->SetShaderByFile("Shaders/pbr.glsl");
         material->GetUniformsData()["u_DiffuseMap"] = fireTexture;
 
         auto cubeModel = Resource::LoongResourceManager::GetModel("Models/cube.lgmdl");
@@ -49,6 +50,7 @@ public:
         auto* modelRenderer = actor->AddComponent<Core::LoongCModelRenderer>();
         modelRenderer->SetModel(cubeModel);
         modelRenderer->SetMaterial(0, material);
+        auto* light = actor->AddComponent<Core::LoongCLight>();
 
         actor->SetParent(scene_.get());
 
@@ -58,10 +60,15 @@ public:
         cameraTransform.SetPosition({ 0.0F, 1.0F, 12.0F });
         cameraTransform.LookAt(Math::Zero, Math::kUp);
         cameraActor->SetParent(scene_.get());
+//        cameraActor->AddComponent<Core::LoongCLight>();
 
         Core::LoongRenderPass::BasicUBO ubo;
         basicUniforms_.BufferData(&ubo, 1, Resource::LoongGpuBufferUsage::kStreamDraw); // Note: Must allocate memory first
         basicUniforms_.SetBindingPoint(0, sizeof(ubo));
+
+        Core::LoongRenderPass::LightUBO lubo {};
+        lightUniforms_.BufferData(&lubo, 1, Resource::LoongGpuBufferUsage::kStreamDraw); // Note: Must allocate memory first
+        lightUniforms_.SetBindingPoint(1, sizeof(lubo));
 
         scenePass_ = std::make_shared<Core::LoongRenderPassScenePass>();
 
@@ -97,10 +104,10 @@ public:
                 }
             }
 
-            // if (auto* cubeActor = scene_->GetChildByName("ActorCube"); cubeActor != nullptr) {
-            //     cubeActor->GetTransform().Rotate(Math::kUp, clock_.DeltaTime());
-            //     cubeActor->GetTransform().SetPosition({ (float)std::sin(clock_.ElapsedTime()) * 2.0F, 0.0F, (float)std::cos(clock_.ElapsedTime()) * 2.0F });
-            // }
+            if (auto* cubeActor = scene_->GetChildByName("ActorCube"); cubeActor != nullptr) {
+                cubeActor->GetTransform().Rotate(Math::kUp, clock_.DeltaTime());
+                cubeActor->GetTransform().SetPosition({ (float)std::sin(clock_.ElapsedTime()) * 2.0F, 0.0F, (float)std::cos(clock_.ElapsedTime()) * 2.0F });
+            }
         }
         ImGui::End();
 
@@ -147,12 +154,12 @@ public:
             glEnable(GL_DEPTH_TEST);
             glViewport(0, 0, width, height);
             glClearColor(clearColor_[0], clearColor_[1], clearColor_[2], clearColor_[3]);
-            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
         }
         auto& cameraActorTransform = cameraComponent_->GetOwner()->GetTransform();
         cameraComponent_->GetCamera().UpdateMatrices(width, height, cameraActorTransform.GetWorldPosition(), cameraActorTransform.GetWorldRotation());
 
-        Core::LoongRenderPass::Context renderContext { &renderer_, &basicUniforms_, scene_.get(), cameraComponent_ };
+        Core::LoongRenderPass::Context renderContext { &renderer_, &basicUniforms_, &lightUniforms_, scene_.get(), cameraComponent_ };
         scenePass_->Render(renderContext);
     }
 
@@ -171,6 +178,7 @@ public:
     std::shared_ptr<Core::LoongRenderPassScenePass> scenePass_ { nullptr };
     Renderer::LoongRenderer renderer_;
     Resource::LoongUniformBuffer basicUniforms_;
+    Resource::LoongUniformBuffer lightUniforms_;
 
     std::shared_ptr<Core::LoongScene> scene_ { nullptr };
     Core::LoongCCamera* cameraComponent_ { nullptr };

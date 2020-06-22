@@ -50,6 +50,8 @@ public:
         float padding1_[3]; // align to vec4
         Light ub_lights[kMaxLightCount];
     };
+    static_assert(sizeof(Light) == 16 * sizeof(float));
+    static_assert(sizeof(LightUBO) == kMaxLightCount * sizeof(Light) + 4 * sizeof(float));
 
     struct Context {
         Renderer::LoongRenderer* renderer { nullptr };

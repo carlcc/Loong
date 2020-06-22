@@ -199,6 +199,11 @@ public:
         while (!glfwWindowShouldClose(glfwWindow_)) {
             input_.BeginFrame();
             glfwPollEvents();
+            int display_w, display_h;
+            GetFramebufferSize(display_w, display_h);
+            glViewport(0, 0, display_w, display_h);
+            glClearColor(0.0F, 0.0F, 0.0F, 1.0F);
+            glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
             ImGui_ImplOpenGL3_NewFrame();
             ImGui_ImplGlfw_NewFrame();
@@ -212,11 +217,8 @@ public:
 
             self_->RenderSignal_.emit();
 
-            int display_w, display_h;
             GetFramebufferSize(display_w, display_h);
             glViewport(0, 0, display_w, display_h);
-            glClearColor(0.0F, 0.0F, 0.0F, 1.0F);
-            glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
             ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
             self_->LateUpdateSignal_.emit();

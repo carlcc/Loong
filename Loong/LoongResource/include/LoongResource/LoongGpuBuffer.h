@@ -126,9 +126,9 @@ class LoongUniformBuffer : public LoongGpuBuffer<LoongGpuBufferType::kUniformBuf
 public:
     void SetBindingPoint(uint32_t bindPoint, size_t size)
     {
-        Bind();
+//        Bind();
         glBindBufferRange(GL_UNIFORM_BUFFER, bindPoint, GetID(), 0, size);
-        Unbind();
+//        Unbind();
     }
 };
 
