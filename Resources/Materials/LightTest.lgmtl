@@ -1,21 +1,93 @@
 {
     "shader": "/Shaders/pbr.glsl",
     "params": {
-        "u_Diffuse": {
-            "type": "vec4",
-            "value": "1 1 1 1"
+        "u_ReflectanceMap": {
+            "type": "tex2d",
+            "value": ""
         },
-        "u_TextureTiling": {
-            "type": "vec2",
-            "value": "1 1"
+        "u_ClearCoatRoughness": {
+            "type": "float",
+            "value": "1"
+        },
+        "u_ClearCoat": {
+            "type": "float",
+            "value": "1"
+        },
+        "u_MetallicMap": {
+            "type": "tex2d",
+            "value": "/Textures/rustediron2_metallic.png"
+        },
+        "u_Ao": {
+            "type": "float",
+            "value": "1"
+        },
+        "u_RoughnessMap": {
+            "type": "tex2d",
+            "value": "/Textures/rustediron2_roughness.png"
+        },
+        "u_Reflectance": {
+            "type": "vec3",
+            "value": "1 1 1"
+        },
+        "u_ReflectanceMapMix": {
+            "type": "float",
+            "value": "1"
+        },
+        "u_AlbedoMap": {
+            "type": "tex2d",
+            "value": "/Textures/rustediron2_basecolor.png"
+        },
+        "u_MetallicMix": {
+            "type": "float",
+            "value": "1"
+        },
+        "u_RoughnessMix": {
+            "type": "float",
+            "value": "1"
+        },
+        "u_Metallic": {
+            "type": "float",
+            "value": "1"
+        },
+        "cameraAperture": {
+            "type": "float",
+            "value": "1"
+        },
+        "u_EmissiveMix": {
+            "type": "float",
+            "value": "1"
+        },
+        "u_AlbedoMix": {
+            "type": "float",
+            "value": "1"
         },
         "u_TextureOffset": {
             "type": "vec2",
             "value": "0 0"
         },
-        "u_DiffuseMap": {
-            "type": "tex2d",
-            "value": "/Textures/fire.jpg"
+        "u_TextureTiling": {
+            "type": "vec2",
+            "value": "1 1"
+        },
+        "u_Albedo": {
+            "type": "vec4",
+            "value": "1 1 1 1"
+        },
+        "u_Roughness": {
+            "type": "float",
+            "value": "1"
+        },
+        "u_AoMix": {
+            "type": "float",
+            "value": "1"
+        },
+        "cameraPos": {
+            "type": "vec3",
+            "value": "0 0 0"
+        },
+        "u_Emissive": {
+            "type": "float",
+            "value": "1"
         }
     },
     "state": {
