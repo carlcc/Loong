@@ -3,11 +3,13 @@
 //
 
 #include "LoongEditorContext.h"
+
 #include "LoongCore/render/LoongRenderPass.h"
 #include "LoongFoundation/LoongPathUtils.h"
 #include "LoongRenderer/LoongRenderer.h"
 #include "LoongResource/LoongGpuBuffer.h"
 #include "LoongResource/LoongResourceManager.h"
+#include <memory>
 
 namespace Loong::Editor {
 
@@ -24,12 +26,12 @@ LoongEditorContext::LoongEditorContext(const std::string& projectFile)
     {
         lightUniformBuffer_ = std::make_shared<Resource::LoongUniformBuffer>();
         Core::LoongRenderPass::LightUBO lub {};
-        basicUniformBuffer_->BufferData(&lub, 1, Resource::LoongGpuBufferUsage::kStreamDraw);
-        basicUniformBuffer_->SetBindingPoint(1, sizeof(lub));
+        lightUniformBuffer_->BufferData(&lub, 1, Resource::LoongGpuBufferUsage::kStreamDraw);
+        lightUniformBuffer_->SetBindingPoint(1, sizeof(lub));
     }
 
     defaultMaterial_ = Resource::LoongResourceManager::GetMaterial("/Materials/Default.lgmtl");
-    renderer_.reset(new Renderer::LoongRenderer);
+    renderer_ = std::make_unique<Renderer::LoongRenderer>();
 }
 
 void LoongEditorContext::SetCurrentScene(std::shared_ptr<Core::LoongScene> scene)
