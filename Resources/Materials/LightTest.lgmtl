@@ -47,7 +47,7 @@
         },
         "u_Metallic": {
             "type": "float",
-            "value": "1"
+            "value": "0"
         },
         "cameraAperture": {
             "type": "float",
@@ -60,6 +60,10 @@
         "u_AlbedoMix": {
             "type": "float",
             "value": "1"
+        },
+        "u_NormalMap": {
+            "type": "tex2d",
+            "value": "/Textures/rustediron2_normal.png"
         },
         "u_TextureOffset": {
             "type": "vec2",
@@ -80,10 +84,6 @@
         "u_AoMix": {
             "type": "float",
             "value": "1"
-        },
-        "cameraPos": {
-            "type": "vec3",
-            "value": "0 0 0"
         },
         "u_Emissive": {
             "type": "float",

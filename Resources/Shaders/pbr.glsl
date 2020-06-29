@@ -22,11 +22,17 @@ out VS_OUT
     vec3 WorldNormal;
     vec4 WorldPos;
     vec3 CameraPos;
+    mat3 TBN;
 } vs_out;
 
 void main()
 {
+    vec3 T = normalize(vec3(ub_Model * vec4(v_Tan,   0.0)));
+    vec3 B = normalize(vec3(ub_Model * vec4(v_BiTan, 0.0)));
+    vec3 N = normalize(vec3(ub_Model * vec4(v_Normal,0.0)));
+
     vs_out.Uv = v_Uv;
+    vs_out.TBN = mat3(T, B, N);
     vs_out.WorldNormal = normalize(mat3(transpose(inverse(ub_Model))) * v_Normal.xyz);
     vs_out.WorldPos = ub_Model * vec4(v_Pos, 1.0);
     vs_out.CameraPos = ub_ViewPos;
@@ -44,13 +50,13 @@ uniform vec4        u_Albedo = vec4(1.0, 1.0, 1.0, 1.0);
 uniform sampler2D   u_AlbedoMap;
 uniform float       u_AlbedoMix = 1.0;
 
+uniform sampler2D   u_NormalMap;
+
 uniform float       u_Metallic = 0.0;
 uniform sampler2D   u_MetallicMap;
 uniform float       u_MetallicMix = 1.0;
 
 uniform vec3        u_Reflectance = vec3(1.0, 1.0, 1.0);
-uniform sampler2D   u_ReflectanceMap;
-uniform float       u_ReflectanceMapMix = 1.0;
 
 uniform float       u_Roughness = 1.0;
 uniform sampler2D   u_RoughnessMap;
@@ -82,6 +88,7 @@ in VS_OUT
     vec3 WorldNormal;
     vec4 WorldPos;
     vec3 CameraPos;
+    mat3 TBN;
 } fs_in;
 
 // align to 4*sizeof(float)
@@ -293,7 +300,7 @@ void prepareMaterialInput(out MaterialInput material, out vec2 uv)
     uv = u_TextureOffset + vec2(mod(fs_in.Uv.x * u_TextureTiling.x, 1), mod(fs_in.Uv.y * u_TextureTiling.y, 1));
     material.baseColor = mix(u_Albedo, texture(u_AlbedoMap, uv), u_AlbedoMix).rgb;
     material.metallic = mix(u_Metallic, texture(u_MetallicMap, uv).r, u_MetallicMix);
-    material.reflectance = mix(u_Reflectance, texture(u_ReflectanceMap, uv).rgb, u_ReflectanceMapMix);
+    material.reflectance = u_Reflectance;
     material.roughness = mix(u_Roughness, texture(u_RoughnessMap, uv).r, u_RoughnessMix);
     material.clearCoat = u_ClearCoat;
     material.clearCoatRoughness = u_ClearCoatRoughness;
@@ -301,15 +308,19 @@ void prepareMaterialInput(out MaterialInput material, out vec2 uv)
 
 void main()
 {
-    vec3 worldPos = fs_in.WorldPos.xyz;
-    vec3 n = normalize(fs_in.WorldNormal);
-    vec3 v = normalize(fs_in.CameraPos - worldPos);
-
     MaterialInput material;
     vec2 uv;
     prepareMaterialInput(material, uv);
-    // outColor = vec4(vec3(material.metallic), 1.0);
-    // return;
+
+    vec3 worldPos = fs_in.WorldPos.xyz;
+    vec3 v = normalize(fs_in.CameraPos - worldPos);
+    vec3 n = texture(u_NormalMap, uv).xyz * 2.0 - 1.0;
+    n = normalize(fs_in.TBN * n);
+    // if (n == vec3(0.0)) {
+    //     n = normalize(fs_in.WorldNormal);
+    // } else {
+    //    n = normalize(fs_in.TransposeInverseModel * n);
+    //}
 
     vec3 Lo = vec3(0.0, 0.0, 0.0);
 
