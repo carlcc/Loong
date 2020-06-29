@@ -1,35 +1,47 @@
 {
     "shader": "/Shaders/pbr.glsl",
     "params": {
-        "u_ReflectanceMap": {
+        "cameraAperture": {
+            "type": "float",
+            "value": "1"
+        },
+        "u_TextureTiling": {
+            "type": "vec2",
+            "value": "1 1"
+        },
+        "u_Albedo": {
+            "type": "vec4",
+            "value": "1 1 1 1"
+        },
+        "u_NormalMap": {
             "type": "tex2d",
-            "value": ""
-        },
-        "u_ClearCoatRoughness": {
-            "type": "float",
-            "value": "1"
-        },
-        "u_ClearCoat": {
-            "type": "float",
-            "value": "1"
-        },
-        "u_MetallicMap": {
-            "type": "tex2d",
-            "value": "/Textures/rustediron2_metallic.png"
-        },
-        "u_Ao": {
-            "type": "float",
-            "value": "1"
+            "value": "/Textures/rustediron2_normal.png"
         },
         "u_RoughnessMap": {
             "type": "tex2d",
             "value": "/Textures/rustediron2_roughness.png"
         },
-        "u_Reflectance": {
-            "type": "vec3",
-            "value": "1 1 1"
+        "u_MetallicMap": {
+            "type": "tex2d",
+            "value": "/Textures/rustediron2_metallic.png"
         },
-        "u_ReflectanceMapMix": {
+        "u_TextureOffset": {
+            "type": "vec2",
+            "value": "0 0"
+        },
+        "u_EmissiveMix": {
+            "type": "float",
+            "value": "1"
+        },
+        "u_ClearCoat": {
+            "type": "float",
+            "value": "0"
+        },
+        "u_AlbedoMix": {
+            "type": "float",
+            "value": "1"
+        },
+        "u_Ao": {
             "type": "float",
             "value": "1"
         },
@@ -41,47 +53,27 @@
             "type": "float",
             "value": "1"
         },
-        "u_RoughnessMix": {
-            "type": "float",
-            "value": "1"
+        "u_Reflectance": {
+            "type": "vec3",
+            "value": "1 1 1"
         },
         "u_Metallic": {
             "type": "float",
             "value": "0"
-        },
-        "cameraAperture": {
-            "type": "float",
-            "value": "1"
-        },
-        "u_EmissiveMix": {
-            "type": "float",
-            "value": "1"
-        },
-        "u_AlbedoMix": {
-            "type": "float",
-            "value": "1"
-        },
-        "u_NormalMap": {
-            "type": "tex2d",
-            "value": "/Textures/rustediron2_normal.png"
-        },
-        "u_TextureOffset": {
-            "type": "vec2",
-            "value": "0 0"
-        },
-        "u_TextureTiling": {
-            "type": "vec2",
-            "value": "1 1"
-        },
-        "u_Albedo": {
-            "type": "vec4",
-            "value": "1 1 1 1"
         },
         "u_Roughness": {
             "type": "float",
             "value": "1"
         },
         "u_AoMix": {
+            "type": "float",
+            "value": "1"
+        },
+        "u_ClearCoatRoughness": {
+            "type": "float",
+            "value": "1"
+        },
+        "u_RoughnessMix": {
             "type": "float",
             "value": "1"
         },

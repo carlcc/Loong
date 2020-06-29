@@ -11,6 +11,7 @@
 #include "LoongCore/render/LoongRenderPassScenePass.h"
 #include "LoongCore/scene/LoongScene.h"
 #include "LoongCore/scene/components/LoongCCamera.h"
+#include "LoongCore/scene/components/LoongCLight.h"
 #include "LoongCore/scene/components/LoongCModelRenderer.h"
 #include "LoongFoundation/LoongDefer.h"
 #include "LoongRenderer/LoongRenderer.h"
@@ -38,6 +39,23 @@ LoongEditorMaterialEditorPanel::LoongEditorMaterialEditorPanel(LoongEditor* edit
         previewModel_ = previewActor_->AddComponent<Core::LoongCModelRenderer>();
         previewModel_->SubscribeModelChanged(this, &LoongEditorMaterialEditorPanel::OnPreviewActorModelChanged);
         previewActor_->SetParent(previewScene_.get());
+
+        Math::Vector3 lightPositions[] = {
+            Math::Vector3 { 1.0F, 1.56F, -0.578F } * 2.0F,
+            Math::Vector3 { -1.0F, 1.56F, -0.578F } * 2.0F,
+            Math::Vector3 { 0.0F, 1.56F, 1.56 } * 2.0F,
+            Math::Vector3 { 1.0F, -1.56F, 0.578F } * 2.0F,
+            Math::Vector3 { -1.0F, -1.56F, 0.578F } * 2.0F,
+            Math::Vector3 { 0.0F, -1.56F, -1.56 } * 2.0F,
+        };
+        for (auto lightPosition : lightPositions) {
+            auto* lightActor = Core::LoongScene::CreateActor("PointLight").release();
+            auto* lightComp = lightActor->AddComponent<Core::LoongCLight>();
+            lightComp->SetType(Core::LoongCLight::Type::kTypePoint);
+            lightComp->SetIntensity(10);
+            lightActor->SetParent(previewScene_.get());
+            lightActor->GetTransform().SetPosition(lightPosition);
+        }
     }
 }
 
