@@ -50,11 +50,12 @@ void LoongRenderPassScenePass::Render(const Context& context)
         if (gpuModel == nullptr) {
             continue;
         }
+        auto& materials = modelRenderer->GetMaterials();
         auto& meshes = gpuModel->GetMeshes();
         size_t meshCount = meshes.size();
         for (size_t i = 0; i < meshCount; ++i) {
             drawable.mesh = meshes[i];
-            drawable.material = modelRenderer->GetMaterials()[i].get();
+            drawable.material = materials[i].get();
             if (drawable.material == nullptr || !drawable.material->HasShader()) {
                 drawable.material = defaultMaterial_.get();
                 if (drawable.material == nullptr || !drawable.material->HasShader()) {

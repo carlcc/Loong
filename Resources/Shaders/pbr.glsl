@@ -21,6 +21,7 @@ out VS_OUT
     vec2 Uv;
     vec3 WorldNormal;
     vec4 WorldPos;
+    vec3 CameraPos;
 } vs_out;
 
 void main()
@@ -28,6 +29,7 @@ void main()
     vs_out.Uv = v_Uv;
     vs_out.WorldNormal = normalize(mat3(transpose(inverse(ub_Model))) * v_Normal.xyz);
     vs_out.WorldPos = ub_Model * vec4(v_Pos, 1.0);
+    vs_out.CameraPos = ub_ViewPos;
     gl_Position = ub_Projection * ub_View * vs_out.WorldPos;
 }
 
@@ -69,7 +71,6 @@ uniform vec2        u_TextureTiling = vec2(1.0, 1.0);
 uniform vec2        u_TextureOffset = vec2(0.0, 0.0);
 // material end
 
-uniform vec3        cameraPos = vec3(0.0, 0.0, 0.0);
 uniform float       cameraAperture = 1.0;
 
 
@@ -80,6 +81,7 @@ in VS_OUT
     vec2 Uv;
     vec3 WorldNormal;
     vec4 WorldPos;
+    vec3 CameraPos;
 } fs_in;
 
 // align to 4*sizeof(float)
@@ -301,7 +303,7 @@ void main()
 {
     vec3 worldPos = fs_in.WorldPos.xyz;
     vec3 n = normalize(fs_in.WorldNormal);
-    vec3 v = normalize(cameraPos - worldPos);
+    vec3 v = normalize(fs_in.CameraPos - worldPos);
 
     MaterialInput material;
     vec2 uv;
