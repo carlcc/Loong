@@ -46,21 +46,29 @@ void main()
 #define PI 3.141592653589793238
 
 // material
+#ifdef USE_ALBEDO_MAP
+uniform sampler2D   u_Albedo;
+#else
 uniform vec4        u_Albedo = vec4(1.0, 1.0, 1.0, 1.0);
-uniform sampler2D   u_AlbedoMap;
-uniform float       u_AlbedoMix = 1.0;
+#endif
 
-uniform sampler2D   u_NormalMap;
+#ifdef USE_NORMAL_MAP
+uniform sampler2D   u_Normal;
+#endif
 
+#ifdef USE_MATALLIC_MAP
+uniform sampler2D   u_Metallic;
+#else
 uniform float       u_Metallic = 0.0;
-uniform sampler2D   u_MetallicMap;
-uniform float       u_MetallicMix = 1.0;
+#endif
 
 uniform vec3        u_Reflectance = vec3(1.0, 1.0, 1.0);
 
+#ifdef USE_ROUGHNESS_MAP
+uniform sampler2D   u_Roughness;
+#else
 uniform float       u_Roughness = 1.0;
-uniform sampler2D   u_RoughnessMap;
-uniform float       u_RoughnessMix = 1.0;
+#endif
 
 uniform float       u_Emissive = 1.0;
 uniform sampler2D   u_EmissiveMap;
@@ -298,10 +306,26 @@ vec3 ComputeLight(in vec3 l, in vec3 n, in vec3 v, in Light light, vec2 uv, in M
 void prepareMaterialInput(out MaterialInput material, out vec2 uv)
 {
     uv = u_TextureOffset + vec2(mod(fs_in.Uv.x * u_TextureTiling.x, 1), mod(fs_in.Uv.y * u_TextureTiling.y, 1));
-    material.baseColor = mix(u_Albedo, texture(u_AlbedoMap, uv), u_AlbedoMix).rgb;
-    material.metallic = mix(u_Metallic, texture(u_MetallicMap, uv).r, u_MetallicMix);
+
+#ifdef USE_ALBEDO_MAP
+    material.baseColor = texture(u_Albedo, uv).rgb;
+#else
+    material.baseColor = u_Albedo.rgb;
+#endif
+
+#ifdef USE_MATALLIC_MAP
+    material.metallic = texture(u_Metallic, uv);
+#else
+    material.metallic = u_Metallic;
+#endif
+
     material.reflectance = u_Reflectance;
-    material.roughness = mix(u_Roughness, texture(u_RoughnessMap, uv).r, u_RoughnessMix);
+
+#ifdef USE_ROUGHNESS_MAP
+    material.roughness = texture(u_Roughness, uv).r;
+#else
+    material.roughness = u_Roughness;
+#endif
     material.clearCoat = u_ClearCoat;
     material.clearCoatRoughness = u_ClearCoatRoughness;
 }
@@ -314,8 +338,13 @@ void main()
 
     vec3 worldPos = fs_in.WorldPos.xyz;
     vec3 v = normalize(fs_in.CameraPos - worldPos);
-    vec3 n = texture(u_NormalMap, uv).xyz * 2.0 - 1.0;
+
+#ifdef USE_NORMAL_MAP
+    vec3 n = texture(u_Normal, uv).xyz * 2.0 - 1.0;
     n = normalize(fs_in.TBN * n);
+#else
+    vec3 n = fs_in.WorldNormal;
+#endif
     // if (n == vec3(0.0)) {
     //     n = normalize(fs_in.WorldNormal);
     // } else {
