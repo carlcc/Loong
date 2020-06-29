@@ -5,6 +5,12 @@ import os
 from enum import Enum
 
 
+def underscore_to_camel(text, is_first_lower = False):
+    ret = "".join(map(lambda s: s[0].upper() + s[1:], text.lower().split('_')))
+    if is_first_lower:
+        ret = ret[0].lower() + ret[1:]
+    return ret
+
 class ParsingStage(Enum):
     NONE = 0
     VERTEX_SHADER = 1
@@ -12,7 +18,6 @@ class ParsingStage(Enum):
 
 
 class ShaderParser:
-
     def __init__(self, input_file_path, cpp_file_path, h_file_path):
         self._parsing_stage = ParsingStage.NONE
         self._input_file_path = input_file_path
@@ -24,7 +29,7 @@ class ShaderParser:
 
         self._vertex_shader_sources = []
         self._fragment_shader_sources = []
-        self._definitions = []
+        self._definitions = set()
 
     def close(self):
         if self._shader_file is not None:
@@ -57,7 +62,59 @@ class ShaderParser:
 
             stripped_line = line.strip()
             if stripped_line.startswith("#ifdef "):
-                self._definitions.append(stripped_line.split()[1])
+                self._definitions.add(stripped_line.split()[1])
+
+    def generate(self):
+        self._generate_cpp_file()
+        self._generate_h_file()
+
+    def _generate_h_file(self):
+        output_file = self._h_file
+        output_file.write("#include <string>\n")
+        output_file.write("namespace Loong::Resource {\n")
+        output_file.write("\n")
+        output_file.write("class LoongRuntimeShaderCode {\n")
+        output_file.write("public:\n")
+        output_file.write("\tstd::string vertexShader;\n")
+        output_file.write("\tstd::string fragmentShader;\n")
+        output_file.write("};\n")
+        output_file.write("\n")
+        output_file.write("class LoongRuntimeShader {\n")
+        output_file.write("public:\n")
+        for definition in self._definitions:
+            camel_def = underscore_to_camel(definition, False)
+            low_camel_def = underscore_to_camel(definition, True)
+            output_file.write("\tvoid Set{}(bool b) {{ {}_ = b; }}\n".format(camel_def, low_camel_def))
+            output_file.write("\tbool Is{}() {{ return {}_; }}\n".format(camel_def, low_camel_def))
+            output_file.write("\n")
+
+        output_file.write("\tLoongRuntimeShaderCode GenerateShaderSources() const;\n")
+
+        output_file.write("private:\n")
+        for definition in self._definitions:
+            low_camel_def = underscore_to_camel(definition, True)
+            output_file.write("\tbool {}_ {{false}};\n".format(low_camel_def))
+
+        output_file.write("};\n")
+        output_file.write("\n")
+        output_file.write("}\n")
+
+        pass
+
+    def _generate_cpp_file(self):
+        output_file = self._cpp_file
+        output_file.write('#include "LoongResource/LoongRuntimeShader.h"\n')
+        output_file.write("\n")
+        output_file.write("namespace Loong::Resource {\n")
+        output_file.write("\n")
+        output_file.write("LoongRuntimeShaderCode LoongRuntimeShader::GenerateShaderSources() const\n")
+        output_file.write("{\n")
+        output_file.write("\tLoongRuntimeShaderCode code {};\n")
+        output_file.write('\tcode.vertexShader = R"({})";\n'.format("".join(self._vertex_shader_sources)))
+        output_file.write("\treturn code;\n")
+        output_file.write("}\n")
+        output_file.write("\n")
+        output_file.write("}\n")
 
     def print(self):
         print(self._vertex_shader_sources)
@@ -79,6 +136,7 @@ def main():
 
     parse = ShaderParser(input_file_path, cpp_file_path, h_file_path)
     parse.parse_shader_file_to_cpp()
+    parse.generate()
     parse.print()
     parse.close()
 
