@@ -5,11 +5,12 @@ import os
 from enum import Enum
 
 
-def underscore_to_camel(text, is_first_lower = False):
+def underscore_to_camel(text, is_first_lower=False):
     ret = "".join(map(lambda s: s[0].upper() + s[1:], text.lower().split('_')))
     if is_first_lower:
         ret = ret[0].lower() + ret[1:]
     return ret
+
 
 class ParsingStage(Enum):
     NONE = 0
@@ -70,6 +71,8 @@ class ShaderParser:
 
     def _generate_h_file(self):
         output_file = self._h_file
+        output_file.write("#pragma once\n")
+        output_file.write("#include <cstdint>\n")
         output_file.write("#include <string>\n")
         output_file.write("namespace Loong::Resource {\n")
         output_file.write("\n")
@@ -81,21 +84,28 @@ class ShaderParser:
         output_file.write("\n")
         output_file.write("class LoongRuntimeShader {\n")
         output_file.write("public:\n")
+        def_mask_bit = 0
         for definition in self._definitions:
             camel_def = underscore_to_camel(definition, False)
             low_camel_def = underscore_to_camel(definition, True)
-            output_file.write("\tvoid Set{}(bool b) {{ {}_ = b; }}\n".format(camel_def, low_camel_def))
-            output_file.write("\tbool Is{}() {{ return {}_; }}\n".format(camel_def, low_camel_def))
+            output_file.write(
+                "\tvoid Set{}(bool b) {{ if (b) {{ defMask_ |= (1u<<{}u); }} else {{ defMask_ &= ~(1u<<{}u); }} }}\n"
+                    .format(camel_def, def_mask_bit, def_mask_bit))
+            output_file.write("\tbool Is{}() const {{ return defMask_ & (1u<<{}u); }}\n".format(camel_def, def_mask_bit))
             output_file.write("\n")
+            def_mask_bit += 1
 
+        output_file.write("\tuint32_t GetDefinitionMask() const { return defMask_; }\n")
         output_file.write("\tLoongRuntimeShaderCode GenerateShaderSources() const;\n")
 
         output_file.write("private:\n")
-        for definition in self._definitions:
-            low_camel_def = underscore_to_camel(definition, True)
-            output_file.write("\tbool {}_ {{false}};\n".format(low_camel_def))
+        output_file.write("\tuint32_t defMask_{0};\n")
 
         output_file.write("};\n")
+        output_file.write("\n")
+        output_file.write("inline bool operator<(const LoongRuntimeShader& a, const LoongRuntimeShader& b) {\n")
+        output_file.write("\t return a.GetDefinitionMask() < b.GetDefinitionMask();\n")
+        output_file.write("}\n")
         output_file.write("\n")
         output_file.write("}\n")
 
@@ -110,7 +120,23 @@ class ShaderParser:
         output_file.write("LoongRuntimeShaderCode LoongRuntimeShader::GenerateShaderSources() const\n")
         output_file.write("{\n")
         output_file.write("\tLoongRuntimeShaderCode code {};\n")
-        output_file.write('\tcode.vertexShader = R"({})";\n'.format("".join(self._vertex_shader_sources)))
+
+        output_file.write('\tcode.vertexShader = R"({})";\n'.format(self._vertex_shader_sources[0]))
+        for definition in self._definitions:
+            camel_def = underscore_to_camel(definition, False)
+            output_file.write(
+                '\tif (Is{}()) {{ code.vertexShader += "#define {}\\n"; }}\n'.format(camel_def, definition))
+        output_file.write('\tcode.vertexShader += R"({})";\n'.format("".join(self._vertex_shader_sources[1:])))
+        output_file.write("\n")
+
+        output_file.write('\tcode.fragmentShader = R"({})";\n'.format(self._fragment_shader_sources[0]))
+        for definition in self._definitions:
+            camel_def = underscore_to_camel(definition, False)
+            output_file.write(
+                '\tif (Is{}()) {{ code.fragmentShader += "#define {}\\n"; }}\n'.format(camel_def, definition))
+        output_file.write('\tcode.fragmentShader += R"({})";\n'.format("".join(self._fragment_shader_sources[1:])))
+        output_file.write("\n")
+
         output_file.write("\treturn code;\n")
         output_file.write("}\n")
         output_file.write("\n")
