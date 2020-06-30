@@ -10,6 +10,7 @@
 #include "LoongFoundation/LoongLogger.h"
 #include "LoongResource/LoongGpuModel.h"
 #include "LoongResource/LoongMaterial.h"
+#include "LoongResource/LoongRuntimeShader.h"
 #include "LoongResource/LoongShader.h"
 #include "LoongResource/LoongTexture.h"
 #include "LoongResource/loader/LoongMaterialLoader.h"
@@ -23,6 +24,7 @@ namespace Loong::Resource {
 static std::map<std::string, std::weak_ptr<LoongTexture>> gLoadedTextures;
 static std::map<std::string, std::weak_ptr<LoongGpuModel>> gLoadedModels;
 static std::map<std::string, std::weak_ptr<LoongShader>> gLoadedShaders;
+static std::map<LoongRuntimeShader, std::weak_ptr<LoongShader>> gLoadedRuntimesShaders;
 static std::map<std::string, std::weak_ptr<LoongMaterial>> gLoadedMaterials;
 
 bool LoongResourceManager::Initialize()
@@ -35,6 +37,7 @@ void LoongResourceManager::Uninitialize()
     gLoadedTextures.clear();
     gLoadedModels.clear();
     gLoadedShaders.clear();
+    gLoadedRuntimesShaders.clear();
     gLoadedMaterials.clear();
 }
 
@@ -220,6 +223,40 @@ std::shared_ptr<LoongShader> LoongResourceManager::GetShader(const std::string& 
 
     gLoadedShaders.insert({ path, spShaderProgram });
     LOONG_TRACE("Load shader '{}' succeed", path);
+    return spShaderProgram;
+}
+
+std::shared_ptr<LoongShader> LoongResourceManager::GetRuntimeShader(const LoongRuntimeShader& rs)
+{
+    auto it = gLoadedRuntimesShaders.find(rs);
+    if (it != gLoadedRuntimesShaders.end()) {
+        auto sp = it->second.lock();
+        assert(sp != nullptr);
+        return sp;
+    }
+
+    LoongRuntimeShaderCode code = rs.GenerateShaderSources();
+
+    LOONG_TRACE("Load runtime shader with mask '{}'", rs.GetDefinitionMask());
+    std::vector<std::pair<uint32_t, const std::string&>> shaderSources;
+    // clang-format off
+    if (!code.vertexShader.empty())   shaderSources.emplace_back(GL_VERTEX_SHADER,   code.vertexShader);
+    if (!code.fragmentShader.empty()) shaderSources.emplace_back(GL_FRAGMENT_SHADER, code.fragmentShader);
+    // clang-format on
+
+    uint32_t program = CreateProgram("[RuntimeShader]", shaderSources);
+    if (program == 0) {
+        return nullptr;
+    }
+    auto* shaderProgram = new LoongShader(program, "");
+    std::shared_ptr<LoongShader> spShaderProgram(shaderProgram, [rs](LoongShader* m) {
+        gLoadedRuntimesShaders.erase(rs);
+        delete m;
+    });
+    assert(spShaderProgram != nullptr);
+
+    gLoadedRuntimesShaders.insert({ rs, spShaderProgram });
+    LOONG_TRACE("Load shader runtime shader with mask '{}' succeed", rs.GetDefinitionMask());
     return spShaderProgram;
 }
 

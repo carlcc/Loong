@@ -136,11 +136,65 @@ void LoongEditorMaterialEditorPanel::UpdateProperies(const Foundation::LoongCloc
     }
 
     ImGui::Columns(2, nullptr);
-    ImGui::Text("File");
+    ImGui::Text("Material Type");
     ImGui::NextColumn();
-    ImGui::InputText("", &materialFileFullPath_, ImGuiInputTextFlags_ReadOnly);
+
+    const char* kMaterialNames[] = {
+        "Custom", "Generated"
+    };
+    auto materialType = int(currentMaterial_->GetType());
+    const char* currentName = kMaterialNames[materialType];
+    if (ImGui::BeginCombo("###Type", currentName, ImGuiComboFlags_None)) {
+        int i = 0;
+        for (const auto* option : kMaterialNames) {
+            const bool isSelected = option == currentName;
+            if (ImGui::Selectable(option, isSelected)) {
+                // is changed
+                auto newValue = std::make_any<std::string>(option);
+                currentMaterial_->SetType(Resource::LoongMaterial::Type(i));
+                currentMaterial_->SetShader(nullptr);
+                materialType = i;
+            }
+            // Set the initial focus when opening the combo (scrolling + keyboard navigation focus)
+            if (isSelected) {
+                ImGui::SetItemDefaultFocus();
+            }
+            ++i;
+        }
+        ImGui::EndCombo();
+    }
     ImGui::NextColumn();
+
+    if (materialType == int(Resource::LoongMaterial::Type::kCustom)) {
+        ImGui::Text("File");
+        ImGui::NextColumn();
+        ImGui::InputText("", &materialFileFullPath_, ImGuiInputTextFlags_ReadOnly);
+        ImGui::NextColumn();
+    } else {
+        if (currentMaterial_->GetShader() == nullptr) {
+            currentMaterial_->ResetRuntimeShader();
+        }
+        auto AddOption = [this](const char* optionName, bool (Resource::LoongRuntimeShader::*getter)() const, void (Resource::LoongRuntimeShader::*setter)(bool)) {
+            ImGui::Text("%s", optionName);
+            ImGui::NextColumn();
+            {
+                ImGuiUtils::ScopedId scopedId(optionName);
+                auto& cfg = currentMaterial_->GetRuntimeShaderConfig();
+                bool b = (cfg.*getter)();
+                if (ImGui::Checkbox("", &b)) {
+                    (cfg.*setter)(b);
+                    currentMaterial_->ResetRuntimeShader();
+                }
+            }
+            ImGui::NextColumn();
+        };
+        AddOption("Use Albedo Map", &Resource::LoongRuntimeShader::IsUseAlbedoMap, &Resource::LoongRuntimeShader::SetUseAlbedoMap);
+        AddOption("Use Metallic Map", &Resource::LoongRuntimeShader::IsUseMatallicMap, &Resource::LoongRuntimeShader::SetUseMatallicMap);
+        AddOption("Use Normal Map", &Resource::LoongRuntimeShader::IsUseNormalMap, &Resource::LoongRuntimeShader::SetUseNormalMap);
+        AddOption("Use Roughness Map", &Resource::LoongRuntimeShader::IsUseRoughnessMap, &Resource::LoongRuntimeShader::SetUseRoughnessMap);
+    }
     ImGui::Columns(1, nullptr);
+
     {
         if (ImGui::Button("Restore")) {
             *currentMaterial_ = *materialBackUp_;
@@ -175,7 +229,7 @@ void LoongEditorMaterialEditorPanel::UpdateProperies(const Foundation::LoongCloc
 
         auto currentShader = currentMaterial_->GetShader();
         ImGui::Columns(2, nullptr);
-        {
+        if (materialType == int(Resource::LoongMaterial::Type::kCustom)) {
             ImGui::Text("Shader");
             ImGui::NextColumn();
             std::string currentShaderPath = currentShader == nullptr ? "" : currentShader->GetPath();

@@ -6,6 +6,7 @@
 
 #include "LoongFoundation/LoongLogger.h"
 #include "LoongResource/LoongPipelineFixedState.h"
+#include "LoongResource/LoongRuntimeShader.h"
 #include "LoongResource/LoongTexture.h"
 #include <any>
 #include <map>
@@ -18,9 +19,20 @@ class LoongTexture;
 
 class LoongMaterial {
 public:
+    enum class Type {
+        kCustom,
+        kRuntimeGenerated,
+    };
+
+    void SetType(Type type) { type_ = type; }
+
+    Type GetType() const { return type_; }
+
     void SetShader(std::shared_ptr<LoongShader> shader);
 
     void SetShaderByFile(const std::string& shaderFile);
+
+    void ResetRuntimeShader();
 
     std::shared_ptr<LoongShader> GetShader() const { return shader_; }
 
@@ -89,6 +101,10 @@ public:
 
     void SetPath(const std::string& path) { path_ = path; }
 
+    LoongRuntimeShader& GetRuntimeShaderConfig() { return runtimeShaderCfg_; }
+
+    const LoongRuntimeShader& GetRuntimeShaderConfig() const { return runtimeShaderCfg_; }
+
 private:
     void FillUniform();
 
@@ -105,6 +121,8 @@ private:
     bool colorWriting_ { true };
     int gpuInstances_ { 1 };
     std::string path_ {};
+    LoongRuntimeShader runtimeShaderCfg_ {}; // valid if type_ == kRuntimeGenerated
+    Type type_ { Type::kCustom };
 };
 
 }

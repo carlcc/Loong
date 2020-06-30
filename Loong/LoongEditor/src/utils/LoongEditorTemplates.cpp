@@ -33,9 +33,10 @@ void FillActorMenu(Core::LoongActor* actor, Core::LoongScene* scene, LoongEditor
     bool isRootActor = actor != nullptr && !actor->HasParent();
 
     if (ImGui::MenuItem("Add Empty Child###0", nullptr, false, isActorSelected)) {
-        editor->AddEndFrameTask([actor]() {
+        editor->AddEndFrameTask([actor, editor]() {
             auto* newActor = Core::LoongScene::CreateActor("New Actor").release();
             newActor->SetParent(actor);
+            editor->GetContext().SetCurrentSelectedActor(newActor);
             assert(actor != nullptr);
             LOONG_DEBUG("Create child(ID {}) for actor {}(ID {})", newActor->GetID(), actor->GetName(), actor->GetID());
         });
@@ -74,23 +75,25 @@ void FillActorMenu(Core::LoongActor* actor, Core::LoongScene* scene, LoongEditor
         };
         for (const auto& info : kBuiltinModelInfos) {
             if (ImGui::MenuItem(info.menuName)) {
-                editor->AddEndFrameTask([actor, &actorName = info.actorName, &path = info.modelPath]() {
+                editor->AddEndFrameTask([actor, editor, &actorName = info.actorName, &path = info.modelPath]() {
                     auto* newActor = Core::LoongScene::CreateActor("").release();
                     newActor->SetName(actorName + std::to_string(newActor->GetID()));
                     newActor->SetParent(actor);
                     auto* modelRenderer = newActor->AddComponent<Core::LoongCModelRenderer>();
                     modelRenderer->SetModel(Resource::LoongResourceManager::GetModel(path));
+                    editor->GetContext().SetCurrentSelectedActor(newActor);
                     LOONG_DEBUG("Create child(ID {}) for actor {}(ID {})", newActor->GetID(), actor->GetName(), actor->GetID());
                 });
             }
         }
         ImGui::Separator();
         if (ImGui::MenuItem("Camera")) {
-            editor->AddEndFrameTask([actor]() {
+            editor->AddEndFrameTask([actor, editor]() {
                 auto* newActor = Core::LoongScene::CreateActor("").release();
                 newActor->SetName("Camera " + std::to_string(newActor->GetID()));
                 newActor->SetParent(actor);
                 newActor->AddComponent<Core::LoongCCamera>();
+                editor->GetContext().SetCurrentSelectedActor(newActor);
                 LOONG_DEBUG("Create child(ID {}) for actor {}(ID {})", newActor->GetID(), actor->GetName(), actor->GetID());
             });
         }

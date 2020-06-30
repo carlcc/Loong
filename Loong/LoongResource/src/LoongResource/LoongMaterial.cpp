@@ -34,6 +34,13 @@ void LoongMaterial::SetShaderByFile(const std::string& shaderFile)
     }
 }
 
+void LoongMaterial::ResetRuntimeShader()
+{
+    auto shader = LoongResourceManager::GetRuntimeShader(runtimeShaderCfg_);
+    assert(shader != nullptr);
+    SetShader(shader);
+}
+
 void LoongMaterial::Bind(LoongTexture* emptyTexture) const
 {
     if (!HasShader())
