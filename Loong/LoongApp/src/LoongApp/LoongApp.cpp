@@ -272,8 +272,21 @@ public:
 
     void SetMouseMode(MouseMode b)
     {
+        auto oldMode = GetMouseMode();
+        if (oldMode == b) {
+            return;
+        }
         int modes[] = { GLFW_CURSOR_NORMAL, GLFW_CURSOR_HIDDEN, GLFW_CURSOR_DISABLED };
         glfwSetInputMode(glfwWindow_, GLFW_CURSOR, modes[b]);
+        if (oldMode == LoongApp::MouseMode::kDisabled && b == LoongApp::MouseMode::kNormal) {
+            // from hidden to normal. Since the mouse pos while it was disabled does not equals to our latest mouse pos.
+            // We need to reset the mouse pos and clear the mouse delta
+            double x, y;
+            glfwGetCursorPos(glfwWindow_, &x, &y);
+            // set mouse position twice to clear the delta to Zero
+            input_.SetMousePosition(float(x), float(y));
+            input_.SetMousePosition(float(x), float(y));
+        }
     }
 
     void GetWindowSize(int& width, int& height) const
