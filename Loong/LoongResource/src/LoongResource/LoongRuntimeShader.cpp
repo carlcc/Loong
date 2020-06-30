@@ -1,6 +1,19 @@
-#shader vertex
-#version 330 core
+#include "LoongResource/LoongRuntimeShader.h"
 
+namespace Loong::Resource {
+
+LoongRuntimeShaderCode LoongRuntimeShader::GenerateShaderSources() const
+{
+    LoongRuntimeShaderCode code {};
+    code.vertexShader = R"(#version 330 core
+)";
+    if (IsUseMatallicMap()) { code.vertexShader += "#define USE_MATALLIC_MAP\n"; }
+    if (IsUseRoughnessMap()) { code.vertexShader += "#define USE_ROUGHNESS_MAP\n"; }
+    if (IsUseEmissiveMap()) { code.vertexShader += "#define USE_EMISSIVE_MAP\n"; }
+    if (IsUseAlbedoMap()) { code.vertexShader += "#define USE_ALBEDO_MAP\n"; }
+    if (IsUseAoMap()) { code.vertexShader += "#define USE_AO_MAP\n"; }
+    if (IsUseNormalMap()) { code.vertexShader += "#define USE_NORMAL_MAP\n"; }
+    code.vertexShader += R"(
 layout (location = 0) in vec3 v_Pos;
 layout (location = 1) in vec2 v_Uv;
 layout (location = 2) in vec3 v_Normal;
@@ -39,9 +52,17 @@ void main()
     gl_Position = ub_Projection * ub_View * vs_out.WorldPos;
 }
 
-#shader fragment
-#version 330 core
+)";
 
+    code.fragmentShader = R"(#version 330 core
+)";
+    if (IsUseMatallicMap()) { code.fragmentShader += "#define USE_MATALLIC_MAP\n"; }
+    if (IsUseRoughnessMap()) { code.fragmentShader += "#define USE_ROUGHNESS_MAP\n"; }
+    if (IsUseEmissiveMap()) { code.fragmentShader += "#define USE_EMISSIVE_MAP\n"; }
+    if (IsUseAlbedoMap()) { code.fragmentShader += "#define USE_ALBEDO_MAP\n"; }
+    if (IsUseAoMap()) { code.fragmentShader += "#define USE_AO_MAP\n"; }
+    if (IsUseNormalMap()) { code.fragmentShader += "#define USE_NORMAL_MAP\n"; }
+    code.fragmentShader += R"(
 #define MAX_LIGHT_COUNT 32
 #define PI 3.141592653589793238
 
@@ -157,7 +178,7 @@ float V_SmithGGXCorrelated(float NoV, float NoL, float a)
     float GGXV = NoL * sqrt((-NoV * a2 + NoV) * NoV + a2);
     return 0.5 / (GGXV + GGXL);
 
-    // We can optimize this visibility function by using an approximation after noticing that all the terms 
+    // We can optimize this visibility function by using an approximation after noticing that all the terms
     // under the square roots are squares and that all the terms are in the [0..1] range:
     //                                                              0.5
     // V_SmithGGXCorrelated(v, l, a) = ----------------------------------------------------
@@ -202,7 +223,7 @@ vec3 F_SchlickRoughness(float VoH, vec3 F0, float roughness)
 {
     vec3 r = vec3(1.0 - roughness, 1.0 - roughness, 1.0 - roughness);
     return F0 + (max(r, F0) - F0) * pow(1.0 - VoH, 5.0);
-}   
+}
 
 float Fd_Lambert()
 {
@@ -249,7 +270,7 @@ vec3 BRDF(
     float metallic = material.metallic;
     vec3 baseColor = material.baseColor;
     vec3 diffuseColor = (1.0 - metallic) * baseColor;
-    vec3 reflectance = material.reflectance; 
+    vec3 reflectance = material.reflectance;
     vec3 f0 = mix(0.16 * reflectance * reflectance, baseColor, metallic);
 
     float D = D_GGX(NoH, a);
@@ -271,7 +292,7 @@ vec3 BRDF(
     float Vc = V_Kelemen(NoH);
     float Fc = F_Schlick(NoH, 0.04) * material.clearCoat;
     float Frc = Dc * Vc * Fc;
-// 
+//
     return (Fd + Fr) * (1.0 - Fc) + Frc;
     // apply lighting...
 }
@@ -380,4 +401,9 @@ void main()
     float gamma = 1/2.2;
     Lo = pow(Lo, vec3(gamma,gamma,gamma)); // gama correction
     outColor = vec4(Lo, 1.0);
+})";
+
+    return code;
+}
+
 }
