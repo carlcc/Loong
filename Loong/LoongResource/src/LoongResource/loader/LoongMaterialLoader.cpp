@@ -121,11 +121,69 @@ std::shared_ptr<LoongMaterial> LoongMaterialLoader::Create(const std::string& fi
     }
     material->SetPath(filePath);
 
-    auto shaderIt = root.FindMember("shader");
-    if (shaderIt == root.MemberEnd() || !shaderIt->value.IsString()) {
-        LOONG_ERROR("Parse material file '{}' failed: Has no shader", filePath);
+    auto typeIt = root.FindMember("type");
+    if (typeIt == root.MemberEnd() || !typeIt->value.IsString()) {
+        LOONG_ERROR("Parse material file '{}' warning: No type field found, assuming 'custom'", filePath);
+        material->SetType(LoongMaterial::Type::kCustom);
     } else {
-        material->SetShaderByFile(shaderIt->value.GetString());
+        std::string typeString = typeIt->value.GetString();
+        if (typeString == "custom") {
+            material->SetType(LoongMaterial::Type::kCustom);
+        } else if (typeString == "generated") {
+            material->SetType(LoongMaterial::Type::kRuntimeGenerated);
+        } else {
+            LOONG_ERROR("Parse material file '{}' error: Unknown type field '{}'", filePath, typeString);
+            return nullptr;
+        }
+    }
+
+    if (material->GetType() == LoongMaterial::Type::kCustom) {
+        auto shaderIt = root.FindMember("shader");
+        if (shaderIt == root.MemberEnd() || !shaderIt->value.IsString()) {
+            LOONG_ERROR("Parse material file '{}' failed: Has no shader", filePath);
+        } else {
+            material->SetShaderByFile(shaderIt->value.GetString());
+        }
+    } else if (material->GetType() == LoongMaterial::Type::kRuntimeGenerated) {
+        auto defIt = root.FindMember("defs");
+        if (defIt == root.MemberEnd()) {
+            // do nothing
+        } else if (!defIt->value.IsObject()) {
+            LOONG_ERROR("Parse material file '{}' failed: 'def' field is not an object", filePath);
+            return nullptr;
+        } else {
+            auto memberIt = defIt->value.MemberBegin();
+            auto memberEnd = defIt->value.MemberEnd();
+            auto& cfg = material->GetRuntimeShaderConfig();
+            for (; memberIt != memberEnd; ++memberIt) {
+                auto& valueObj = memberIt->value;
+                if (!valueObj.IsBool()) {
+                    LOONG_ERROR("Parse material file '{}' failed: 'def' object's fields should be bool", filePath);
+                    return nullptr;
+                }
+                std::string defName = memberIt->name.GetString();
+                bool defValue = valueObj.GetBool();
+
+                if (defName == "UseAlbedoMap") {
+                    cfg.SetUseAlbedoMap(defValue);
+                } else if (defName == "UseMetallicMap") {
+                    cfg.SetUseMatallicMap(defValue);
+                } else if (defName == "UseRoughnessMap") {
+                    cfg.SetUseRoughnessMap(defValue);
+                } else if (defName == "UseNormalMap") {
+                    cfg.SetUseNormalMap(defValue);
+                } else if (defName == "UseAoMap") {
+                    cfg.SetUseAoMap(defValue);
+                } else if (defName == "UseEmissiveMap") {
+                    cfg.SetUseEmissiveMap(defValue);
+                } else {
+                    LOONG_WARNING("Parse material file '{}' failed: 'def' object's fields '{}' is unknown, ignore", filePath, defName);
+                }
+            }
+            material->ResetRuntimeShader();
+        }
+    } else {
+        assert(false);
     }
 
     auto rendererStateIt = root.FindMember("state");
@@ -229,12 +287,53 @@ bool LoongMaterialLoader::Write(const std::string& filePath, const LoongMaterial
 
     rapidjson::Document root(rapidjson::kObjectType);
     auto& allocator = root.GetAllocator();
+
+    {
+        std::string typeString;
+        switch (material->GetType()) {
+        case LoongMaterial::Type::kCustom:
+            typeString = "custom";
+            break;
+        case LoongMaterial::Type::kRuntimeGenerated:
+            typeString = "generated";
+            break;
+        default:
+            assert(false);
+        }
+        rapidjson::Value typeValue(typeString.c_str(), allocator);
+        root.AddMember("type", typeValue, allocator);
+    }
+
     if (auto shader = material->GetShader(); shader != nullptr) {
-        rapidjson::Value tmp(shader->GetPath().c_str(), allocator);
-        root.AddMember("shader", tmp, allocator);
+
+        switch (material->GetType()) {
+        case LoongMaterial::Type::kCustom: {
+            rapidjson::Value tmp(shader->GetPath().c_str(), allocator);
+            root.AddMember("shader", tmp, allocator);
+            break;
+        }
+        case LoongMaterial::Type::kRuntimeGenerated: {
+            rapidjson::Value defs(rapidjson::kObjectType);
+            rapidjson::Value tmp(rapidjson::kTrueType);
+            auto& cfg = material->GetRuntimeShaderConfig();
+
+            defs.AddMember("UseAlbedoMap", cfg.IsUseAlbedoMap(), allocator);
+            defs.AddMember("UseMetallicMap", cfg.IsUseMatallicMap(), allocator);
+            defs.AddMember("UseRoughnessMap", cfg.IsUseRoughnessMap(), allocator);
+            defs.AddMember("UseNormalMap", cfg.IsUseNormalMap(), allocator);
+            defs.AddMember("UseAoMap", cfg.IsUseAoMap(), allocator);
+            defs.AddMember("UseEmissiveMap", cfg.IsUseEmissiveMap(), allocator);
+
+            root.AddMember("defs", defs, allocator);
+            break;
+        }
+        default:
+            assert(false);
+        }
 
         if (auto& uniformInfo = shader->GetUniformInfo(); !uniformInfo.empty()) {
             rapidjson::Value params(rapidjson::kObjectType);
+            rapidjson::Value tmp;
 
             auto& uniformData = material->GetUniformsData();
             for (auto& info : uniformInfo) {
