@@ -70,10 +70,13 @@ uniform sampler2D   u_Roughness;
 uniform float       u_Roughness = 1.0;
 #endif
 
+#ifdef USE_EMISSIVE
 #ifdef USE_EMISSIVE_MAP
 uniform sampler2D   u_Emissive;
 #else
-uniform float       u_Emissive = 1.0;
+uniform vec3        u_Emissive = vec3(0.0);
+#endif
+uniform float       u_EmissiveFactor = 1.0;
 #endif
 
 #ifdef USE_AO_MAP
@@ -227,8 +230,13 @@ struct MaterialInput {
     float metallic;
     vec3 reflectance;
     float roughness;
+#ifdef USE_EMISSIVE
+    vec3 emissive;
+    float emissiveFactor;
+#endif
     float clearCoat;
     float clearCoatRoughness;
+    
 };
 
 vec3 BRDF(
@@ -307,12 +315,23 @@ vec3 ComputeLight(in vec3 l, in vec3 n, in vec3 v, in Light light, vec2 uv, in M
     }
 }
 
+vec3 SRGB2Linear(vec3 i)
+{
+    return pow(i, vec3(2.2, 2.2, 2.2));
+}
+
+vec3 Linear2SRGB(vec3 i)
+{
+    float gamma = 1/2.2;
+    return pow(i, vec3(gamma,gamma,gamma));
+}
+
 void prepareMaterialInput(out MaterialInput material, out vec2 uv)
 {
     uv = u_TextureOffset + vec2(mod(fs_in.Uv.x * u_TextureTiling.x, 1), mod(fs_in.Uv.y * u_TextureTiling.y, 1));
 
 #ifdef USE_ALBEDO_MAP
-    material.baseColor = texture(u_Albedo, uv).rgb;
+    material.baseColor = SRGB2Linear(texture(u_Albedo, uv).rgb);
 #else
     material.baseColor = u_Albedo.rgb;
 #endif
@@ -332,6 +351,15 @@ void prepareMaterialInput(out MaterialInput material, out vec2 uv)
 #endif
     material.clearCoat = u_ClearCoat;
     material.clearCoatRoughness = u_ClearCoatRoughness;
+
+#ifdef USE_EMISSIVE
+#ifdef USE_EMISSIVE_MAP
+    material.emissive = SRGB2Linear(texture(u_Emissive, uv).rgb);
+#else
+    material.emissive = SRGB2Linear(u_Emissive);
+#endif
+    material.emissiveFactor = u_EmissiveFactor;
+#endif
 }
 
 void main()
@@ -376,8 +404,10 @@ void main()
             Lo += contrib * attenuation;
         }
     }
+#ifdef USE_EMISSIVE
+    Lo += material.emissive * material.emissiveFactor;
+#endif
     Lo *= cameraAperture;
-    float gamma = 1/2.2;
-    Lo = pow(Lo, vec3(gamma,gamma,gamma)); // gama correction
+    Lo = Linear2SRGB(Lo); // gama correction
     outColor = vec4(Lo, 1.0);
 }

@@ -174,6 +174,8 @@ std::shared_ptr<LoongMaterial> LoongMaterialLoader::Create(const std::string& fi
                     cfg.SetUseNormalMap(defValue);
                 } else if (defName == "UseAoMap") {
                     cfg.SetUseAoMap(defValue);
+                } else if (defName == "UseEmissive") {
+                    cfg.SetUseEmissive(defValue);
                 } else if (defName == "UseEmissiveMap") {
                     cfg.SetUseEmissiveMap(defValue);
                 } else {
@@ -322,6 +324,7 @@ bool LoongMaterialLoader::Write(const std::string& filePath, const LoongMaterial
             defs.AddMember("UseRoughnessMap", cfg.IsUseRoughnessMap(), allocator);
             defs.AddMember("UseNormalMap", cfg.IsUseNormalMap(), allocator);
             defs.AddMember("UseAoMap", cfg.IsUseAoMap(), allocator);
+            defs.AddMember("UseEmissive", cfg.IsUseEmissive(), allocator);
             defs.AddMember("UseEmissiveMap", cfg.IsUseEmissiveMap(), allocator);
 
             root.AddMember("defs", defs, allocator);

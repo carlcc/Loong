@@ -4,16 +4,17 @@ namespace Loong::Resource {
 
 LoongRuntimeShaderCode LoongRuntimeShader::GenerateShaderSources() const
 {
-    LoongRuntimeShaderCode code {};
-    code.vertexShader = R"(#version 330 core
+	LoongRuntimeShaderCode code {};
+	code.vertexShader = R"(#version 330 core
 )";
-    if (IsUseMatallicMap()) { code.vertexShader += "#define USE_MATALLIC_MAP\n"; }
-    if (IsUseRoughnessMap()) { code.vertexShader += "#define USE_ROUGHNESS_MAP\n"; }
-    if (IsUseEmissiveMap()) { code.vertexShader += "#define USE_EMISSIVE_MAP\n"; }
-    if (IsUseAlbedoMap()) { code.vertexShader += "#define USE_ALBEDO_MAP\n"; }
-    if (IsUseAoMap()) { code.vertexShader += "#define USE_AO_MAP\n"; }
-    if (IsUseNormalMap()) { code.vertexShader += "#define USE_NORMAL_MAP\n"; }
-    code.vertexShader += R"(
+	if (IsUseAoMap()) { code.vertexShader += "#define USE_AO_MAP\n"; }
+	if (IsUseMatallicMap()) { code.vertexShader += "#define USE_MATALLIC_MAP\n"; }
+	if (IsUseEmissiveMap()) { code.vertexShader += "#define USE_EMISSIVE_MAP\n"; }
+	if (IsUseEmissive()) { code.vertexShader += "#define USE_EMISSIVE\n"; }
+	if (IsUseNormalMap()) { code.vertexShader += "#define USE_NORMAL_MAP\n"; }
+	if (IsUseAlbedoMap()) { code.vertexShader += "#define USE_ALBEDO_MAP\n"; }
+	if (IsUseRoughnessMap()) { code.vertexShader += "#define USE_ROUGHNESS_MAP\n"; }
+	code.vertexShader += R"(
 layout (location = 0) in vec3 v_Pos;
 layout (location = 1) in vec2 v_Uv;
 layout (location = 2) in vec3 v_Normal;
@@ -54,15 +55,16 @@ void main()
 
 )";
 
-    code.fragmentShader = R"(#version 330 core
+	code.fragmentShader = R"(#version 330 core
 )";
-    if (IsUseMatallicMap()) { code.fragmentShader += "#define USE_MATALLIC_MAP\n"; }
-    if (IsUseRoughnessMap()) { code.fragmentShader += "#define USE_ROUGHNESS_MAP\n"; }
-    if (IsUseEmissiveMap()) { code.fragmentShader += "#define USE_EMISSIVE_MAP\n"; }
-    if (IsUseAlbedoMap()) { code.fragmentShader += "#define USE_ALBEDO_MAP\n"; }
-    if (IsUseAoMap()) { code.fragmentShader += "#define USE_AO_MAP\n"; }
-    if (IsUseNormalMap()) { code.fragmentShader += "#define USE_NORMAL_MAP\n"; }
-    code.fragmentShader += R"(
+	if (IsUseAoMap()) { code.fragmentShader += "#define USE_AO_MAP\n"; }
+	if (IsUseMatallicMap()) { code.fragmentShader += "#define USE_MATALLIC_MAP\n"; }
+	if (IsUseEmissiveMap()) { code.fragmentShader += "#define USE_EMISSIVE_MAP\n"; }
+	if (IsUseEmissive()) { code.fragmentShader += "#define USE_EMISSIVE\n"; }
+	if (IsUseNormalMap()) { code.fragmentShader += "#define USE_NORMAL_MAP\n"; }
+	if (IsUseAlbedoMap()) { code.fragmentShader += "#define USE_ALBEDO_MAP\n"; }
+	if (IsUseRoughnessMap()) { code.fragmentShader += "#define USE_ROUGHNESS_MAP\n"; }
+	code.fragmentShader += R"(
 #define MAX_LIGHT_COUNT 32
 #define PI 3.141592653589793238
 
@@ -91,10 +93,13 @@ uniform sampler2D   u_Roughness;
 uniform float       u_Roughness = 1.0;
 #endif
 
+#ifdef USE_EMISSIVE
 #ifdef USE_EMISSIVE_MAP
 uniform sampler2D   u_Emissive;
 #else
-uniform float       u_Emissive = 1.0;
+uniform vec3        u_Emissive = vec3(0.0);
+#endif
+uniform float       u_EmissiveFactor = 1.0;
 #endif
 
 #ifdef USE_AO_MAP
@@ -178,7 +183,7 @@ float V_SmithGGXCorrelated(float NoV, float NoL, float a)
     float GGXV = NoL * sqrt((-NoV * a2 + NoV) * NoV + a2);
     return 0.5 / (GGXV + GGXL);
 
-    // We can optimize this visibility function by using an approximation after noticing that all the terms
+    // We can optimize this visibility function by using an approximation after noticing that all the terms 
     // under the square roots are squares and that all the terms are in the [0..1] range:
     //                                                              0.5
     // V_SmithGGXCorrelated(v, l, a) = ----------------------------------------------------
@@ -223,7 +228,7 @@ vec3 F_SchlickRoughness(float VoH, vec3 F0, float roughness)
 {
     vec3 r = vec3(1.0 - roughness, 1.0 - roughness, 1.0 - roughness);
     return F0 + (max(r, F0) - F0) * pow(1.0 - VoH, 5.0);
-}
+}   
 
 float Fd_Lambert()
 {
@@ -248,8 +253,13 @@ struct MaterialInput {
     float metallic;
     vec3 reflectance;
     float roughness;
+#ifdef USE_EMISSIVE
+    vec3 emissive;
+    float emissiveFactor;
+#endif
     float clearCoat;
     float clearCoatRoughness;
+    
 };
 
 vec3 BRDF(
@@ -270,7 +280,7 @@ vec3 BRDF(
     float metallic = material.metallic;
     vec3 baseColor = material.baseColor;
     vec3 diffuseColor = (1.0 - metallic) * baseColor;
-    vec3 reflectance = material.reflectance;
+    vec3 reflectance = material.reflectance; 
     vec3 f0 = mix(0.16 * reflectance * reflectance, baseColor, metallic);
 
     float D = D_GGX(NoH, a);
@@ -292,7 +302,7 @@ vec3 BRDF(
     float Vc = V_Kelemen(NoH);
     float Fc = F_Schlick(NoH, 0.04) * material.clearCoat;
     float Frc = Dc * Vc * Fc;
-//
+// 
     return (Fd + Fr) * (1.0 - Fc) + Frc;
     // apply lighting...
 }
@@ -328,12 +338,23 @@ vec3 ComputeLight(in vec3 l, in vec3 n, in vec3 v, in Light light, vec2 uv, in M
     }
 }
 
+vec3 SRGB2Linear(vec3 i)
+{
+    return pow(i, vec3(2.2, 2.2, 2.2));
+}
+
+vec3 Linear2SRGB(vec3 i)
+{
+    float gamma = 1/2.2;
+    return pow(i, vec3(gamma,gamma,gamma));
+}
+
 void prepareMaterialInput(out MaterialInput material, out vec2 uv)
 {
     uv = u_TextureOffset + vec2(mod(fs_in.Uv.x * u_TextureTiling.x, 1), mod(fs_in.Uv.y * u_TextureTiling.y, 1));
 
 #ifdef USE_ALBEDO_MAP
-    material.baseColor = texture(u_Albedo, uv).rgb;
+    material.baseColor = SRGB2Linear(texture(u_Albedo, uv).rgb);
 #else
     material.baseColor = u_Albedo.rgb;
 #endif
@@ -353,6 +374,15 @@ void prepareMaterialInput(out MaterialInput material, out vec2 uv)
 #endif
     material.clearCoat = u_ClearCoat;
     material.clearCoatRoughness = u_ClearCoatRoughness;
+
+#ifdef USE_EMISSIVE
+#ifdef USE_EMISSIVE_MAP
+    material.emissive = SRGB2Linear(texture(u_Emissive, uv).rgb);
+#else
+    material.emissive = SRGB2Linear(u_Emissive);
+#endif
+    material.emissiveFactor = u_EmissiveFactor;
+#endif
 }
 
 void main()
@@ -397,13 +427,15 @@ void main()
             Lo += contrib * attenuation;
         }
     }
+#ifdef USE_EMISSIVE
+    Lo += material.emissive * material.emissiveFactor;
+#endif
     Lo *= cameraAperture;
-    float gamma = 1/2.2;
-    Lo = pow(Lo, vec3(gamma,gamma,gamma)); // gama correction
+    Lo = Linear2SRGB(Lo); // gama correction
     outColor = vec4(Lo, 1.0);
 })";
 
-    return code;
+	return code;
 }
 
 }

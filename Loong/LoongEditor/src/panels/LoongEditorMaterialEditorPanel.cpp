@@ -192,6 +192,8 @@ void LoongEditorMaterialEditorPanel::UpdateProperies(const Foundation::LoongCloc
         AddOption("Use Metallic Map", &Resource::LoongRuntimeShader::IsUseMatallicMap, &Resource::LoongRuntimeShader::SetUseMatallicMap);
         AddOption("Use Normal Map", &Resource::LoongRuntimeShader::IsUseNormalMap, &Resource::LoongRuntimeShader::SetUseNormalMap);
         AddOption("Use Roughness Map", &Resource::LoongRuntimeShader::IsUseRoughnessMap, &Resource::LoongRuntimeShader::SetUseRoughnessMap);
+        AddOption("Use Emissive", &Resource::LoongRuntimeShader::IsUseEmissive, &Resource::LoongRuntimeShader::SetUseEmissive);
+        AddOption("Use Emissive Map", &Resource::LoongRuntimeShader::IsUseEmissiveMap, &Resource::LoongRuntimeShader::SetUseEmissiveMap);
     }
     ImGui::Columns(1, nullptr);
 
