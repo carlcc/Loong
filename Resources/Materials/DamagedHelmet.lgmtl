@@ -1,13 +1,54 @@
 {
-    "shader": "/Shaders/unlit.glsl",
+    "type": "generated",
+    "defs": {
+        "UseAlbedoMap": true,
+        "UseMetallicMap": true,
+        "UseRoughnessMap": true,
+        "UseNormalMap": true,
+        "UseAoMap": false,
+        "UseEmissive": true,
+        "UseEmissiveMap": true
+    },
     "params": {
-        "u_Diffuse": {
-            "type": "vec4",
-            "value": "1 1 1 1"
+        "cameraAperture": {
+            "type": "float",
+            "value": "1"
         },
-        "u_DiffuseMap": {
+        "u_Albedo": {
             "type": "tex2d",
             "value": "/Textures/DamagedHelmet_0.jpg"
+        },
+        "u_ClearCoat": {
+            "type": "float",
+            "value": "0"
+        },
+        "u_ClearCoatRoughness": {
+            "type": "float",
+            "value": "1"
+        },
+        "u_Emissive": {
+            "type": "tex2d",
+            "value": "/Textures/DamagedHelmet_4.jpg"
+        },
+        "u_EmissiveFactor": {
+            "type": "float",
+            "value": "1"
+        },
+        "u_Metallic": {
+            "type": "tex2d",
+            "value": "/Textures/DamagedHelmet_1_2..jpg"
+        },
+        "u_Normal": {
+            "type": "tex2d",
+            "value": "/Textures/DamagedHelmet_2.jpg"
+        },
+        "u_Reflectance": {
+            "type": "vec3",
+            "value": "1 1 1"
+        },
+        "u_Roughness": {
+            "type": "tex2d",
+            "value": "/Textures/DamagedHelmet_1_1..jpg"
         },
         "u_TextureOffset": {
             "type": "vec2",
