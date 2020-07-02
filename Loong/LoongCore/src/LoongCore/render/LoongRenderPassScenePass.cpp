@@ -7,6 +7,7 @@
 #include "LoongCore/scene/components/LoongCLight.h"
 #include "LoongCore/scene/components/LoongCModelRenderer.h"
 #include "LoongRenderer/LoongRenderer.h"
+#include "LoongResource/LoongGpuMesh.h"
 #include "LoongResource/LoongMaterial.h"
 
 namespace Loong::Core {
@@ -55,7 +56,7 @@ void LoongRenderPassScenePass::Render(const Context& context)
         size_t meshCount = meshes.size();
         for (size_t i = 0; i < meshCount; ++i) {
             drawable.mesh = meshes[i];
-            drawable.material = materials[i].get();
+            drawable.material = materials[drawable.mesh->GetMaterialIndex()].get();
             if (drawable.material == nullptr || !drawable.material->HasShader()) {
                 drawable.material = defaultMaterial_.get();
                 if (drawable.material == nullptr || !drawable.material->HasShader()) {
