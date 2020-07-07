@@ -81,19 +81,19 @@ int main(int argc, char* argv[])
 
         if (outputFormat == "jpg" || outputFormat == ".jpg") {
             if (0 == stbi_write_jpg(Foundation::Format("{}_{}.{}", outputPathWithoutExt, channel, ".jpg").c_str(), width, height, 1, tmpData, 10)) {
-                return false;
+                return -2;
             }
         } else if (outputFormat == "png" || outputFormat == ".png") {
             if (0 == stbi_write_png(Foundation::Format("{}_{}.{}", outputPathWithoutExt, channel, ".png").c_str(), width, height, 1, tmpData, 0)) {
-                return false;
+                return -2;
             }
         } else if (outputFormat == "bmp" || outputFormat == ".bmp") {
             if (0 == stbi_write_bmp(Foundation::Format("{}_{}.{}", outputPathWithoutExt, channel, ".bmp").c_str(), width, height, 1, tmpData)) {
-                return false;
+                return -2;
             }
         } else if (outputFormat == "tga" || outputFormat == ".tga") {
             if (0 == stbi_write_tga(Foundation::Format("{}_{}.{}", outputPathWithoutExt, channel, ".tga").c_str(), width, height, 1, tmpData)) {
-                return false;
+                return -2;
             }
         } else {
             abort(); // This should not happen, since we have checked options
