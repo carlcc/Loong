@@ -99,14 +99,20 @@ std::shared_ptr<LoongTexture> LoongTextureLoader::CreateColor(uint8_t data[4], b
     }
 }
 
-std::shared_ptr<LoongTexture> LoongTextureLoader::CreateFromMemory(uint8_t* data, uint32_t width, uint32_t height, bool generateMipmap, const std::function<void(const std::string&)>& onDestroy)
+std::shared_ptr<LoongTexture> LoongTextureLoader::CreateFromMemory(uint8_t* data, uint32_t width, uint32_t height, bool generateMipmap, const std::function<void(const std::string&)>& onDestroy, int channelCount)
 {
+    auto imageFormat = ChannelCountToGLTextureFormat(channelCount);
+    if (imageFormat == -1) {
+        LOONG_WARNING("Cannot crate texture from memory: Unknown format");
+        return {};
+    }
+
     GLuint textureID;
     glGenTextures(1, &textureID);
 
     glBindTexture(GL_TEXTURE_2D, textureID);
 
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, width, height, 0, imageFormat, GL_UNSIGNED_BYTE, data);
 
     if (generateMipmap) {
         glGenerateMipmap(GL_TEXTURE_2D);

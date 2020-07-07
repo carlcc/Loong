@@ -10,6 +10,7 @@ namespace Loong::Asset {
 
 class LoongImage {
 public:
+    LoongImage() = default;
     explicit LoongImage(const std::string& path);
     LoongImage(const LoongImage&) = delete;
     LoongImage(LoongImage&& i) noexcept
@@ -28,6 +29,10 @@ public:
     }
 
     ~LoongImage();
+
+    bool Load(const std::string& path);
+
+    bool LoadFromPhysicalPath(const std::string& path);
 
     LoongImage& operator=(const LoongImage&) = delete;
     LoongImage& operator=(LoongImage&& i) noexcept
@@ -57,6 +62,9 @@ public:
     bool operator!() const { return buffer_ == nullptr; }
 
     explicit operator bool() const { return buffer_ != nullptr; }
+
+private:
+    void Clear();
 
 private:
     char* buffer_ { nullptr };

@@ -34,12 +34,9 @@ public:
         std::any defaultValue;
     };
 
-private:
+public:
     // Note: This construct will take over the ownship
     explicit LoongShader(GLuint id, const std::string& path);
-    friend class LoongResourceManager;
-
-public:
     LoongShader(const LoongShader&) = delete;
     LoongShader(LoongShader&& s) noexcept;
     LoongShader& operator=(const LoongShader&) = delete;

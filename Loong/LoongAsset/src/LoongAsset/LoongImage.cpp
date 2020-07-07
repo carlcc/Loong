@@ -13,9 +13,7 @@
 #endif
 
 #define STB_IMAGE_IMPLEMENTATION
-#define STB_IMAGE_WRITE_IMPLEMENTATION
 #include "stb_image.h"
-#include "stb_image_write.h"
 
 #ifdef _MSC_VER
 #pragma warning(pop)
@@ -25,10 +23,28 @@ namespace Loong::Asset {
 
 LoongImage::LoongImage(const std::string& path)
 {
+    Load(path);
+}
+
+LoongImage::~LoongImage()
+{
+    Clear();
+}
+
+void LoongImage::FlipVertically()
+{
+    if (!*this) {
+        return;
+    }
+    stbi__vertical_flip(buffer_, width_, height_, channelCount_);
+}
+
+bool LoongImage::Load(const std::string& path)
+{
     int64_t fileSize = FS::LoongFileSystem::GetFileSize(path);
     if (fileSize <= 0) {
         LOONG_ERROR("Failed to load image '{}': Wrong file size", path);
-        return;
+        return false;
     }
     std::vector<uint8_t> buffer(fileSize);
     assert(FS::LoongFileSystem::LoadFileContent(path, buffer.data(), fileSize) == fileSize);
@@ -42,9 +58,24 @@ LoongImage::LoongImage(const std::string& path)
         channelCount_ = 0;
     }
     path_ = path;
+    return true;
 }
 
-LoongImage::~LoongImage()
+bool LoongImage::LoadFromPhysicalPath(const std::string& path)
+{
+    LOONG_TRACE("Load image '{}' to '0x{:0X}'", path, intptr_t(this));
+    buffer_ = reinterpret_cast<char*>(stbi_load(path.c_str(), &width_, &height_, &channelCount_, 0));
+    if (buffer_ == nullptr) {
+        LOONG_ERROR("Failed to load image '{}'", path);
+        width_ = 0;
+        height_ = 0;
+        channelCount_ = 0;
+    }
+    path_ = path;
+    return true;
+}
+
+void LoongImage::Clear()
 {
     LOONG_TRACE("Release image '0x{:0X}'", intptr_t(this));
     if (buffer_ != nullptr) {
@@ -54,14 +85,6 @@ LoongImage::~LoongImage()
         height_ = 0;
         channelCount_ = 0;
     }
-}
-
-void LoongImage::FlipVertically()
-{
-    if (!*this) {
-        return;
-    }
-    stbi__vertical_flip(buffer_, width_, height_, channelCount_);
 }
 
 }
