@@ -181,6 +181,7 @@ void LoongEditor::OnUpdateMainMenuBar()
             }
             ImGui::EndMenu();
         }
+        ImGui::Text("FrameRate: %.1f", ImGui::GetIO().Framerate);
 
         ImGui::EndMenuBar();
     }
