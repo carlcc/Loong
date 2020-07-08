@@ -293,28 +293,28 @@ void LoongEditorMaterialEditorPanel::UpdateProperies(const Foundation::LoongCloc
                     }
                     case Resource::LoongShader::UniformType::kUniformFloat: {
                         float v = value.type() == typeid(float) ? std::any_cast<float>(value) : 0.0F;
-                        if (ImGui::DragFloat("", &v, 0.1F)) {
+                        if (ImGui::DragFloat("", &v, 0.01F)) {
                             value = v;
                         }
                         break;
                     }
                     case Resource::LoongShader::UniformType::kUniformFloatVec2: {
                         Math::Vector2 v = value.type() == typeid(Math::Vector2) ? std::any_cast<Math::Vector2>(value) : Math::Zero;
-                        if (ImGui::DragFloat2("", &v.x, 0.1F)) {
+                        if (ImGui::DragFloat2("", &v.x, 0.01F)) {
                             value = v;
                         }
                         break;
                     }
                     case Resource::LoongShader::UniformType::kUniformFloatVec3: {
                         Math::Vector3 v = value.type() == typeid(Math::Vector3) ? std::any_cast<Math::Vector3>(value) : Math::Zero;
-                        if (ImGui::DragFloat3("", &v.x, 0.1F)) {
+                        if (ImGui::DragFloat3("", &v.x, 0.01F)) {
                             value = v;
                         }
                         break;
                     }
                     case Resource::LoongShader::UniformType::kUniformFloatVec4: {
                         Math::Vector4 v = value.type() == typeid(Math::Vector4) ? std::any_cast<Math::Vector4>(value) : Math::Zero;
-                        if (ImGui::DragFloat4("", &v.x, 0.1F)) {
+                        if (ImGui::DragFloat4("", &v.x, 0.01F)) {
                             value = v;
                         }
                         break;

@@ -87,6 +87,30 @@ void FillActorMenu(Core::LoongActor* actor, Core::LoongScene* scene, LoongEditor
             }
         }
         ImGui::Separator();
+        struct BuiltinLightInfo {
+            const char* menuName;
+            std::string actorName;
+            Core::LoongCLight::Type type;
+        };
+        static BuiltinLightInfo kBuiltinLightInfos[] = {
+            { "Directional Light", "DirectionalLight ", Core::LoongCLight::Type::kTypeDirectional},
+            { "Point Light", "PointLight ", Core::LoongCLight::Type::kTypePoint},
+            { "Spot Light", "SpotLight ", Core::LoongCLight::Type::kTypeSpot},
+        };
+        for (const auto& info : kBuiltinLightInfos) {
+            if (ImGui::MenuItem(info.menuName)) {
+                editor->AddEndFrameTask([actor, editor, &actorName = info.actorName, type = info.type]() {
+                    auto* newActor = Core::LoongScene::CreateActor("").release();
+                    newActor->SetName(actorName + std::to_string(newActor->GetID()));
+                    newActor->SetParent(actor);
+                    auto* light = newActor->AddComponent<Core::LoongCLight>();
+                    light->SetType(type);
+                    editor->GetContext().SetCurrentSelectedActor(newActor);
+                    LOONG_DEBUG("Create child(ID {}) for actor {}(ID {})", newActor->GetID(), actor->GetName(), actor->GetID());
+                });
+            }
+        }
+        ImGui::Separator();
         if (ImGui::MenuItem("Camera")) {
             editor->AddEndFrameTask([actor, editor]() {
                 auto* newActor = Core::LoongScene::CreateActor("").release();
