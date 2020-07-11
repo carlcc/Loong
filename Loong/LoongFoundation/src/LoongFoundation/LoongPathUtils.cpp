@@ -141,7 +141,7 @@ std::string_view LoongPathUtils::GetFileExtension(std::string_view fileName)
 {
     auto index = fileName.rfind('.');
     if (index == std::string_view::npos) {
-        return fileName;
+        return "";
     }
     return fileName.substr(index);
 }
