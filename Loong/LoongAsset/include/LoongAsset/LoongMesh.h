@@ -16,7 +16,7 @@ namespace Loong::Asset {
 class LoongMesh {
 public:
     LoongMesh() = default;
-    LoongMesh(std::vector<LoongVertex>&& vertices, std::vector<uint32_t> indices, uint32_t materialIndex);
+    LoongMesh(std::vector<LoongVertex>&& vertices, std::vector<uint32_t>&& indices, uint32_t materialIndex);
     virtual ~LoongMesh() = default;
     const std::vector<LoongVertex>& GetVertices() const { return vertices_; }
     const std::vector<uint32_t>& GetIndices() const { return indices_; }

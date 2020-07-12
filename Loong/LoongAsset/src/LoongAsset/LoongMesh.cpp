@@ -7,7 +7,7 @@
 
 namespace Loong::Asset {
 
-LoongMesh::LoongMesh(std::vector<LoongVertex>&& vertices, std::vector<uint32_t> indices, uint32_t materialIndex)
+LoongMesh::LoongMesh(std::vector<LoongVertex>&& vertices, std::vector<uint32_t>&& indices, uint32_t materialIndex)
     : vertices_(std::move(vertices))
     , indices_(std::move(indices))
     , materialIndex_(materialIndex)
