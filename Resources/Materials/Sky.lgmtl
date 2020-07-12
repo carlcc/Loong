@@ -1,0 +1,18 @@
+{
+    "type": "custom",
+    "shader": "/Shaders/sky.glsl",
+    "params": {
+        "u_Panorama": {
+            "type": "tex2d",
+            "value": "/Textures/Solid.png"
+        }
+    },
+    "state": {
+        "blend": false,
+        "backCulling": true,
+        "frontCulling": false,
+        "depthTest": true,
+        "depthWriting": true,
+        "colorWriting": true
+    }
+}

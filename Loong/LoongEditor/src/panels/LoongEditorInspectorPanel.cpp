@@ -11,6 +11,7 @@
 #include "LoongCore/scene/components/LoongCCamera.h"
 #include "LoongCore/scene/components/LoongCLight.h"
 #include "LoongCore/scene/components/LoongCModelRenderer.h"
+#include "LoongCore/scene/components/LoongCSky.h"
 #include "inspector/LoongEditorInspector.h"
 #include <imgui.h>
 #include <imgui_stdlib.h>
@@ -79,6 +80,9 @@ void LoongEditorInspectorPanel::UpdateImpl(const Foundation::LoongClock& clock)
             }
             if (auto* model = dynamic_cast<Core::LoongCModelRenderer*>(component.get()); model != nullptr) {
                 LoongEditorInspector::Inspect(model);
+            }
+            if (auto* sky = dynamic_cast<Core::LoongCSky*>(component.get()); sky != nullptr) {
+                LoongEditorInspector::Inspect(sky);
             }
         }
     }

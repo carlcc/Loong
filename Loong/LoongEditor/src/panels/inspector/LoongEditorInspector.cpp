@@ -8,6 +8,7 @@
 #include "LoongCore/scene/components/LoongCCamera.h"
 #include "LoongCore/scene/components/LoongCLight.h"
 #include "LoongCore/scene/components/LoongCModelRenderer.h"
+#include "LoongCore/scene/components/LoongCSky.h"
 #include "LoongFoundation/LoongTransform.h"
 #include "LoongRenderer/LoongLight.h"
 #include "LoongResource/LoongMaterial.h"
@@ -241,6 +242,46 @@ void LoongEditorInspector::Inspect(Core::LoongCModelRenderer* model)
     }
 
     ImGui::PopID();
+    ImGui::Columns(1, nullptr);
+}
+
+void LoongEditorInspector::Inspect(Core::LoongCSky* sky)
+{
+    assert(sky != nullptr);
+    const ImVec2 kPreviewSize { 80.F, 80.F };
+
+    ImGuiUtils::ScopedId id(sky);
+
+    using TextureRef = std::shared_ptr<Resource::LoongTexture>;
+    auto mat = sky->GetSkyMaterial();
+
+    ImGui::Columns(2, nullptr, true);
+
+    ImGui::Text("Material");
+    ImGui::NextColumn();
+    std::string currentMaterialPath = mat == nullptr ? "" : mat->GetPath();
+    ImGui::InputText("", &currentMaterialPath, ImGuiInputTextFlags_ReadOnly);
+    
+    if (ImGui::BeginDragDropTarget()) {
+        auto* node = ImGuiUtils::GetDropData<LoongFileTreeNode*>(ImGuiUtils::kDragTypeMaterialFile);
+        if (node != nullptr) {
+            auto fullPath = node->GetFullPath();
+            auto newMaterial = Resource::LoongResourceManager::GetMaterial(fullPath);
+            if (newMaterial != nullptr) {
+                sky->SetSkyMaterial(newMaterial);
+            } else {
+                LOONG_ERROR("Cannot set material to '{}', which is not a valid material file", fullPath);
+            }
+        }
+        ImGui::EndDragDropTarget();
+    }
+    ImGui::SameLine();
+    if (ImGui::Button("X")) {
+        sky->SetSkyMaterial(nullptr);
+    }
+    
+    ImGui::NextColumn();
+
     ImGui::Columns(1, nullptr);
 }
 

@@ -6,9 +6,11 @@
 #include "LoongCore/scene/components/LoongCCamera.h"
 #include "LoongCore/scene/components/LoongCLight.h"
 #include "LoongCore/scene/components/LoongCModelRenderer.h"
+#include "LoongCore/scene/components/LoongCSky.h"
 #include "LoongRenderer/LoongRenderer.h"
 #include "LoongResource/LoongGpuMesh.h"
 #include "LoongResource/LoongMaterial.h"
+#include "LoongResource/LoongResourceManager.h"
 
 namespace Loong::Core {
 
@@ -138,6 +140,21 @@ void LoongRenderPassScenePass::Render(const Context& context)
         renderer.ApplyStateMask(drawable.material->GenerateStateMask());
 
         renderer.Draw(*drawable.mesh);
+    }
+
+    // Sky
+    if (auto* sky = scene.GetComponent<Core::LoongCSky>(); sky != nullptr) {
+        auto material = sky->GetSkyMaterial();
+        if (material != nullptr) {
+            ub.ub_Model = sky->GetOwner()->GetTransform().GetTransformMatrix();
+            basicUniforms.SetSubData(&ub, 0);
+            material->Bind(nullptr);
+            renderer.ApplyStateMask(material->GenerateStateMask());
+
+            renderer.SetDepthAlgorithm(Renderer::LoongRenderer::ComparisonAlgorithm::kLessEqual);
+            renderer.Draw(*Resource::LoongResourceManager::GetSkyboxMesh());
+            renderer.SetDepthAlgorithm(Renderer::LoongRenderer::ComparisonAlgorithm::kLess);
+        }
     }
 }
 

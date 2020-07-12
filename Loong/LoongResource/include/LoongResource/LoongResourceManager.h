@@ -11,6 +11,7 @@ namespace Loong::Resource {
 
 class LoongTexture;
 class LoongGpuModel;
+class LoongGpuMesh;
 class LoongShader;
 class LoongMaterial;
 class LoongRuntimeShader;
@@ -32,6 +33,8 @@ public:
     static std::shared_ptr<LoongShader> GetRuntimeShader(const LoongRuntimeShader& rs);
 
     static std::shared_ptr<LoongMaterial> GetMaterial(const std::string& path);
+
+    static std::shared_ptr<LoongGpuMesh> GetSkyboxMesh();
 };
 
 }

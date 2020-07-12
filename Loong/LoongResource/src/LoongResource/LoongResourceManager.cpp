@@ -4,10 +4,12 @@
 
 #include "LoongResource/LoongResourceManager.h"
 #include "LoongAsset/LoongImage.h"
+#include "LoongAsset/LoongMesh.h"
 #include "LoongAsset/LoongModel.h"
 #include "LoongAsset/LoongShaderCode.h"
 #include "LoongFoundation/LoongDefer.h"
 #include "LoongFoundation/LoongLogger.h"
+#include "LoongResource/LoongGpuMesh.h"
 #include "LoongResource/LoongGpuModel.h"
 #include "LoongResource/LoongMaterial.h"
 #include "LoongResource/LoongRuntimeShader.h"
@@ -26,6 +28,7 @@ static std::map<std::string, std::weak_ptr<LoongGpuModel>> gLoadedModels;
 static std::map<std::string, std::weak_ptr<LoongShader>> gLoadedShaders;
 static std::map<LoongRuntimeShader, std::weak_ptr<LoongShader>> gLoadedRuntimesShaders;
 static std::map<std::string, std::weak_ptr<LoongMaterial>> gLoadedMaterials;
+static std::shared_ptr<LoongGpuMesh> gSkyBoxMesh;
 
 bool LoongResourceManager::Initialize()
 {
@@ -39,6 +42,7 @@ void LoongResourceManager::Uninitialize()
     gLoadedShaders.clear();
     gLoadedRuntimesShaders.clear();
     gLoadedMaterials.clear();
+    gSkyBoxMesh = nullptr;
 }
 
 std::shared_ptr<LoongTexture> LoongResourceManager::GetTexture(const std::string& path)
@@ -282,6 +286,65 @@ std::shared_ptr<LoongMaterial> LoongResourceManager::GetMaterial(const std::stri
         LOONG_ERROR("Load material '{}' failed", path);
     }
     return material;
+}
+
+std::shared_ptr<LoongGpuMesh> LoongResourceManager::GetSkyboxMesh()
+{
+    if (gSkyBoxMesh == nullptr) {
+        std::vector<Asset::LoongVertex> vertices {
+            { Math::Vector3 { -1.0f, 1.0f, -1.0f }, Math::Vector2 {}, Math::Vector3 {}, Math::Vector3 {}, Math::Vector3 {} },
+            { Math::Vector3 { -1.0f, -1.0f, -1.0f }, Math::Vector2 {}, Math::Vector3 {}, Math::Vector3 {}, Math::Vector3 {} },
+            { Math::Vector3 { 1.0f, -1.0f, -1.0f }, Math::Vector2 {}, Math::Vector3 {}, Math::Vector3 {}, Math::Vector3 {} },
+            { Math::Vector3 { 1.0f, -1.0f, -1.0f }, Math::Vector2 {}, Math::Vector3 {}, Math::Vector3 {}, Math::Vector3 {} },
+            { Math::Vector3 { 1.0f, 1.0f, -1.0f }, Math::Vector2 {}, Math::Vector3 {}, Math::Vector3 {}, Math::Vector3 {} },
+            { Math::Vector3 { -1.0f, 1.0f, -1.0f }, Math::Vector2 {}, Math::Vector3 {}, Math::Vector3 {}, Math::Vector3 {} },
+
+            { Math::Vector3 { -1.0f, -1.0f, 1.0f }, Math::Vector2 {}, Math::Vector3 {}, Math::Vector3 {}, Math::Vector3 {} },
+            { Math::Vector3 { -1.0f, -1.0f, -1.0f }, Math::Vector2 {}, Math::Vector3 {}, Math::Vector3 {}, Math::Vector3 {} },
+            { Math::Vector3 { -1.0f, 1.0f, -1.0f }, Math::Vector2 {}, Math::Vector3 {}, Math::Vector3 {}, Math::Vector3 {} },
+            { Math::Vector3 { -1.0f, 1.0f, -1.0f }, Math::Vector2 {}, Math::Vector3 {}, Math::Vector3 {}, Math::Vector3 {} },
+            { Math::Vector3 { -1.0f, 1.0f, 1.0f }, Math::Vector2 {}, Math::Vector3 {}, Math::Vector3 {}, Math::Vector3 {} },
+            { Math::Vector3 { -1.0f, -1.0f, 1.0f }, Math::Vector2 {}, Math::Vector3 {}, Math::Vector3 {}, Math::Vector3 {} },
+
+            { Math::Vector3 { 1.0f, -1.0f, -1.0f }, Math::Vector2 {}, Math::Vector3 {}, Math::Vector3 {}, Math::Vector3 {} },
+            { Math::Vector3 { 1.0f, -1.0f, 1.0f }, Math::Vector2 {}, Math::Vector3 {}, Math::Vector3 {}, Math::Vector3 {} },
+            { Math::Vector3 { 1.0f, 1.0f, 1.0f }, Math::Vector2 {}, Math::Vector3 {}, Math::Vector3 {}, Math::Vector3 {} },
+            { Math::Vector3 { 1.0f, 1.0f, 1.0f }, Math::Vector2 {}, Math::Vector3 {}, Math::Vector3 {}, Math::Vector3 {} },
+            { Math::Vector3 { 1.0f, 1.0f, -1.0f }, Math::Vector2 {}, Math::Vector3 {}, Math::Vector3 {}, Math::Vector3 {} },
+            { Math::Vector3 { 1.0f, -1.0f, -1.0f }, Math::Vector2 {}, Math::Vector3 {}, Math::Vector3 {}, Math::Vector3 {} },
+
+            { Math::Vector3 { -1.0f, -1.0f, 1.0f }, Math::Vector2 {}, Math::Vector3 {}, Math::Vector3 {}, Math::Vector3 {} },
+            { Math::Vector3 { -1.0f, 1.0f, 1.0f }, Math::Vector2 {}, Math::Vector3 {}, Math::Vector3 {}, Math::Vector3 {} },
+            { Math::Vector3 { 1.0f, 1.0f, 1.0f }, Math::Vector2 {}, Math::Vector3 {}, Math::Vector3 {}, Math::Vector3 {} },
+            { Math::Vector3 { 1.0f, 1.0f, 1.0f }, Math::Vector2 {}, Math::Vector3 {}, Math::Vector3 {}, Math::Vector3 {} },
+            { Math::Vector3 { 1.0f, -1.0f, 1.0f }, Math::Vector2 {}, Math::Vector3 {}, Math::Vector3 {}, Math::Vector3 {} },
+            { Math::Vector3 { -1.0f, -1.0f, 1.0f }, Math::Vector2 {}, Math::Vector3 {}, Math::Vector3 {}, Math::Vector3 {} },
+
+            { Math::Vector3 { -1.0f, 1.0f, -1.0f }, Math::Vector2 {}, Math::Vector3 {}, Math::Vector3 {}, Math::Vector3 {} },
+            { Math::Vector3 { 1.0f, 1.0f, -1.0f }, Math::Vector2 {}, Math::Vector3 {}, Math::Vector3 {}, Math::Vector3 {} },
+            { Math::Vector3 { 1.0f, 1.0f, 1.0f }, Math::Vector2 {}, Math::Vector3 {}, Math::Vector3 {}, Math::Vector3 {} },
+            { Math::Vector3 { 1.0f, 1.0f, 1.0f }, Math::Vector2 {}, Math::Vector3 {}, Math::Vector3 {}, Math::Vector3 {} },
+            { Math::Vector3 { -1.0f, 1.0f, 1.0f }, Math::Vector2 {}, Math::Vector3 {}, Math::Vector3 {}, Math::Vector3 {} },
+            { Math::Vector3 { -1.0f, 1.0f, -1.0f }, Math::Vector2 {}, Math::Vector3 {}, Math::Vector3 {}, Math::Vector3 {} },
+
+            { Math::Vector3 { -1.0f, -1.0f, -1.0f }, Math::Vector2 {}, Math::Vector3 {}, Math::Vector3 {}, Math::Vector3 {} },
+            { Math::Vector3 { -1.0f, -1.0f, 1.0f }, Math::Vector2 {}, Math::Vector3 {}, Math::Vector3 {}, Math::Vector3 {} },
+            { Math::Vector3 { 1.0f, -1.0f, -1.0f }, Math::Vector2 {}, Math::Vector3 {}, Math::Vector3 {}, Math::Vector3 {} },
+            { Math::Vector3 { 1.0f, -1.0f, -1.0f }, Math::Vector2 {}, Math::Vector3 {}, Math::Vector3 {}, Math::Vector3 {} },
+            { Math::Vector3 { -1.0f, -1.0f, 1.0f }, Math::Vector2 {}, Math::Vector3 {}, Math::Vector3 {}, Math::Vector3 {} },
+            { Math::Vector3 { 1.0f, -1.0f, 1.0f }, Math::Vector2 {}, Math::Vector3 {}, Math::Vector3 {}, Math::Vector3 {} },
+        };
+        std::vector<uint32_t> indices {
+            0, 1, 2, 3, 4, 5, 6, 7, 8, 9,
+            10, 11, 12, 13, 14, 15, 16, 17, 18, 19,
+            20, 21, 22, 23, 24, 25, 26, 27, 28, 29,
+            30, 31, 32, 33, 34, 35
+        };
+        Asset::LoongMesh mesh(std::move(vertices), std::move(indices), 0);
+        gSkyBoxMesh = std::make_shared<LoongGpuMesh>(mesh);
+    }
+
+    return gSkyBoxMesh;
 }
 
 }

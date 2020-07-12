@@ -12,6 +12,7 @@
 #include "LoongCore/scene/components/LoongCCamera.h"
 #include "LoongCore/scene/components/LoongCLight.h"
 #include "LoongCore/scene/components/LoongCModelRenderer.h"
+#include "LoongCore/scene/components/LoongCSky.h"
 #include "LoongResource/LoongResourceManager.h"
 #include <imgui.h>
 
@@ -41,7 +42,7 @@ void FillActorMenu(Core::LoongActor* actor, Core::LoongScene* scene, LoongEditor
             LOONG_DEBUG("Create child(ID {}) for actor {}(ID {})", newActor->GetID(), actor->GetName(), actor->GetID());
         });
     }
-    if (ImGui::BeginMenu("Add Component###1", isActorSelected && !isRootActor)) {
+    if (ImGui::BeginMenu("Add Component###1", isActorSelected)) {
         using CComponent = Core::LoongComponent;
         using Actor = Core::LoongActor;
         static std::vector<std::pair<const char*, std::function<CComponent*(Actor*)>>> kComponentCreatorMap = {
@@ -53,6 +54,13 @@ void FillActorMenu(Core::LoongActor* actor, Core::LoongScene* scene, LoongEditor
             ImGui::PushID((void*)name);
             if (ImGui::MenuItem(name)) {
                 creator(actor);
+            }
+            ImGui::PopID();
+        }
+        {
+            ImGui::PushID((void*)"Sky");
+            if (ImGui::MenuItem("Sky")) {
+                actor->AddComponent<Core::LoongCSky>();
             }
             ImGui::PopID();
         }
@@ -93,9 +101,9 @@ void FillActorMenu(Core::LoongActor* actor, Core::LoongScene* scene, LoongEditor
             Core::LoongCLight::Type type;
         };
         static BuiltinLightInfo kBuiltinLightInfos[] = {
-            { "Directional Light", "DirectionalLight ", Core::LoongCLight::Type::kTypeDirectional},
-            { "Point Light", "PointLight ", Core::LoongCLight::Type::kTypePoint},
-            { "Spot Light", "SpotLight ", Core::LoongCLight::Type::kTypeSpot},
+            { "Directional Light", "DirectionalLight ", Core::LoongCLight::Type::kTypeDirectional },
+            { "Point Light", "PointLight ", Core::LoongCLight::Type::kTypePoint },
+            { "Spot Light", "SpotLight ", Core::LoongCLight::Type::kTypeSpot },
         };
         for (const auto& info : kBuiltinLightInfos) {
             if (ImGui::MenuItem(info.menuName)) {
