@@ -43,16 +43,6 @@ void main()
     vec3 dir = normalize(fs_in.TexPos);
 	vec2 uv = vec2(atan(dir.z, dir.x), acos(dir.y));
 	uv /= vec2( 2 * PI, -PI);
-    // if (dir.x < 0 && abs(dir.z) <= 0.1) {
-    //     uv.x = 0.5;
-    // }
-    if (abs(fs_in.TexPos.x +1) < 0.0001 && abs(fs_in.TexPos.z) < 0.001) {
-        if (fs_in.TexPos.z > 0) {
-   outColor = texture(u_Panorama, uv);
-        } else {
-   outColor = texture(u_Panorama, uv);
-        }
-        return;
-    }
-   outColor = texture(u_Panorama, uv);
+    uv.x -= 0.25;
+    outColor = textureLod(u_Panorama, uv, 0);
 }
