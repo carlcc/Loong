@@ -52,14 +52,15 @@ void FillActorMenu(Core::LoongActor* actor, Core::LoongScene* scene, LoongEditor
         };
         for (auto& [name, creator] : kComponentCreatorMap) {
             ImGui::PushID((void*)name);
-            if (ImGui::MenuItem(name)) {
+            if (ImGui::MenuItem(name, nullptr, false, !isRootActor)) {
                 creator(actor);
             }
             ImGui::PopID();
         }
+        ImGui::Separator();
         {
             ImGui::PushID((void*)"Sky");
-            if (ImGui::MenuItem("Sky")) {
+            if (ImGui::MenuItem("Sky", nullptr, false, isRootActor)) {
                 actor->AddComponent<Core::LoongCSky>();
             }
             ImGui::PopID();

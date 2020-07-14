@@ -126,7 +126,7 @@ int main(int argc, char** argv)
 
     auto path = Loong::Foundation::LoongPathUtils::GetParent(argv[0]) + "/Resources";
     Loong::FS::ScopedDriver fsDriver(argv[0]);
-    Loong::FS::LoongFileSystem::MountSearchPath("/Users/chenchen02/gitrepo/Loong/Resources");
+    Loong::FS::LoongFileSystem::MountSearchPath(path);
     path = Loong::Foundation::LoongPathUtils::Normalize(argv[0]) + "/../../Resources";
     Loong::FS::LoongFileSystem::MountSearchPath(path);
 
