@@ -36,7 +36,8 @@ static void ProcessMaterials(const struct aiScene* scene, std::vector<std::strin
     }
 }
 
-static void ProcessMesh(const void* transform, const struct aiMesh* mesh, const struct aiScene* scene, std::vector<Asset::LoongVertex>& outVertices, std::vector<uint32_t>& outIndices, std::vector<Asset::LoongMesh::Bone>& bones)
+static void ProcessMesh(const void* transform, const struct aiMesh* mesh, const struct aiScene* scene,
+    std::vector<Asset::LoongVertex>& outVertices, std::vector<uint32_t>& outIndices, std::vector<Asset::LoongMesh::BoneInfo>& boneInfos)
 {
     aiMatrix4x4 meshTransformation = *reinterpret_cast<const aiMatrix4x4*>(transform);
 
@@ -64,15 +65,27 @@ static void ProcessMesh(const void* transform, const struct aiMesh* mesh, const 
             outIndices.push_back(face.mIndices[indexID]);
     }
 
-    bones.resize(mesh->mNumBones);
-    for (uint32_t i = 0; i < mesh->mNumBones; ++i) {
-        auto* aiBone_ = mesh->mBones[i];
-        auto& lgBone = bones[i];
-        lgBone.name = aiBone_->mName.C_Str();
-        lgBone.weights.resize(aiBone_->mNumWeights);
-        for (uint32_t j = 0; j < aiBone_->mNumWeights; ++j) {
-            lgBone.weights[j].vertexId = aiBone_->mWeights[i].mVertexId;
-            lgBone.weights[j].weight = aiBone_->mWeights[i].mWeight;
+    if (mesh->mNumBones > 0) {
+        auto AddWeigth = [](Asset::LoongMesh::BoneInfo& boneInfo, uint32_t boneId, float weight) -> bool {
+            for (int i = 0; i < 4; ++i) {
+                if (boneInfo.boneWeights[i] == 0.0F) {
+                    boneInfo.boneIndices[i] = boneId;
+                    boneInfo.boneWeights[i] = weight;
+                    return true;
+                }
+            }
+            LOONG_ERROR("LoongModel support at most 4 bones for a certain vertex, but more than 4 bones were found");
+            return false;
+        };
+
+        boneInfos.resize(outVertices.size());
+        for (uint32_t i = 0; i < mesh->mNumBones; ++i) {
+            auto* aiBone_ = mesh->mBones[i];
+            for (uint32_t j = 0; j < aiBone_->mNumWeights; ++j) {
+                auto vertexId = aiBone_->mWeights[j].mVertexId;
+                // TODO: Should we abort if it returns false?
+                AddWeigth(boneInfos[vertexId], boneId, aiBone_->mWeights[j].mWeight);
+            }
         }
     }
 }
@@ -86,11 +99,12 @@ static void ProcessNode(const void* transform, const struct aiNode* node, const 
         aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
 
         std::vector<Asset::LoongVertex> vertices;
-        std::vector<Asset::LoongMesh::Bone> bones;
+        std::vector<Asset::LoongMesh::BoneInfo> boneInfos;
         std::vector<uint32_t> indices;
-        ProcessMesh(&nodeTransformation, mesh, scene, vertices, indices, bones);
+        ProcessMesh(&nodeTransformation, mesh, scene, vertices, indices, boneInfos);
 
-        meshes.push_back(new Asset::LoongMesh(std::move(vertices), std::move(indices), std::move(bones), mesh->mMaterialIndex)); // The model will handle mesh destruction
+        // The model will handle mesh destruction
+        meshes.push_back(new Asset::LoongMesh(std::move(vertices), std::move(indices), std::move(boneInfos), mesh->mMaterialIndex));
     }
 
     // Then do the same for each of its children

@@ -92,6 +92,22 @@ struct LoongArchiver<Math::Vector4, Stream> {
 };
 
 template <class Stream>
+struct LoongArchiver<Math::IVector3, Stream> {
+    bool operator()(Math::IVector3& t, Stream& stream)
+    {
+        return stream(&t, sizeof(t));
+    }
+};
+
+template <class Stream>
+struct LoongArchiver<Math::IVector4, Stream> {
+    bool operator()(Math::IVector4& t, Stream& stream)
+    {
+        return stream(&t, sizeof(t));
+    }
+};
+
+template <class Stream>
 struct LoongArchiver<std::string, Stream> {
     bool operator()(std::string& t, Stream& stream)
     {

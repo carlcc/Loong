@@ -59,8 +59,12 @@ public:
         Math::Matrix4 offset;
     };
 
+    const Math::Matrix4& GetInverseMatrix() const { return inverseMatrix_;  }
+
 private:
     Node* root_ { nullptr };
+    // This is the inverse of the root node, used to transform the skeleton to model space
+    Math::Matrix4 inverseMatrix_ {};
 };
 
 class LoongAnimation {

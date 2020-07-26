@@ -16,23 +16,17 @@ namespace Loong::Asset {
 
 class LoongMesh {
 public:
-    struct Bone {
-        struct Weight {
-            uint32_t vertexId;
-            float weight;
-
-            template <class Archive>
-            bool Serialize(Archive& archive) { return archive(vertexId, weight); }
-        };
-        std::string name;
-        std::vector<Weight> weights;
+    // Each of this struct's instance is a vertex attribute
+    struct BoneInfo {
+        Math::IVector4 boneIndices { 0 };
+        Math::Vector4 boneWeights { 0.0F };
 
         template <class Archive>
-        bool Serialize(Archive& archive) { return archive(name, weights); }
+        bool Serialize(Archive& archive) { return archive(boneIndices, boneWeights); }
     };
 
     LoongMesh() = default;
-    LoongMesh(std::vector<LoongVertex>&& vertices, std::vector<uint32_t>&& indices, std::vector<Bone>&& bones, uint32_t materialIndex);
+    LoongMesh(std::vector<LoongVertex>&& vertices, std::vector<uint32_t>&& indices, std::vector<BoneInfo>&& bones, uint32_t materialIndex);
     virtual ~LoongMesh() = default;
     const std::vector<LoongVertex>& GetVertices() const { return vertices_; }
     const std::vector<uint32_t>& GetIndices() const { return indices_; }
@@ -49,7 +43,7 @@ private:
 protected:
     std::vector<LoongVertex> vertices_;
     std::vector<uint32_t> indices_;
-    std::vector<Bone> bones_;
+    std::vector<BoneInfo> bones_;
     uint32_t materialIndex_ { 0 };
     Math::AABB aabb_ {};
 };
