@@ -300,7 +300,7 @@ int Convert()
         frameBuffer.Bind();
         shaderProgram->Bind();
         vao.Bind();
-        glClearColor(0.5, 0.6, 0.7, 1.0);
+        glClearColor(0.5F, 0.6F, 0.7F, 1.0F);
         glViewport(0, 0, flags.outWidth, flags.outHeight);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
