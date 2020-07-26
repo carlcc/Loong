@@ -1,12 +1,13 @@
 #include "Flags.h"
 #include "LoongFoundation/LoongLogger.h"
+#include "ModelExport.h"
+#include "SkeletonExport.h"
+#include "TextureExport.h"
 #include <assimp/Importer.hpp>
 #include <assimp/matrix4x4.h>
 #include <assimp/postprocess.h>
 #include <assimp/scene.h>
 #include <iostream>
-#include "ModelExport.h"
-#include "TextureExport.h"
 
 namespace Loong::AssetConverter {
 
@@ -41,13 +42,20 @@ int Convert()
     auto inputFile = Flags::Get().inputFile;
     const aiScene* scene = import.ReadFile(inputFile, modelParserFlags);
 
-    if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) {
-        LOONG_ERROR("Load model '{}' failed!", inputFile);
+    // Don't check `scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE`, e.g.
+    // Those files which only contain animations is "incomplete"
+    if (!scene || !scene->mRootNode) {
+        LOONG_ERROR("Load asset '{}' failed!", inputFile);
         return false;
     }
 
     if (!ExportModelFiles(scene)) {
         LOONG_ERROR("Export models failed!");
+        return 1;
+    }
+
+    if (!ExportSkeletonFiles(scene)) {
+        LOONG_ERROR("Export skeletons failed!");
         return 1;
     }
 

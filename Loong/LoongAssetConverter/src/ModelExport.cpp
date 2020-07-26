@@ -36,7 +36,7 @@ static void ProcessMaterials(const struct aiScene* scene, std::vector<std::strin
     }
 }
 
-static void ProcessMesh(const void* transform, const struct aiMesh* mesh, const struct aiScene* scene, std::vector<Asset::LoongVertex>& outVertices, std::vector<uint32_t>& outIndices)
+static void ProcessMesh(const void* transform, const struct aiMesh* mesh, const struct aiScene* scene, std::vector<Asset::LoongVertex>& outVertices, std::vector<uint32_t>& outIndices, std::vector<Asset::LoongMesh::Bone>& bones)
 {
     aiMatrix4x4 meshTransformation = *reinterpret_cast<const aiMatrix4x4*>(transform);
 
@@ -63,6 +63,18 @@ static void ProcessMesh(const void* transform, const struct aiMesh* mesh, const 
         for (size_t indexID = 0; indexID < 3; ++indexID)
             outIndices.push_back(face.mIndices[indexID]);
     }
+
+    bones.resize(mesh->mNumBones);
+    for (uint32_t i = 0; i < mesh->mNumBones; ++i) {
+        auto* aiBone_ = mesh->mBones[i];
+        auto& lgBone = bones[i];
+        lgBone.name = aiBone_->mName.C_Str();
+        lgBone.weights.resize(aiBone_->mNumWeights);
+        for (uint32_t j = 0; j < aiBone_->mNumWeights; ++j) {
+            lgBone.weights[j].vertexId = aiBone_->mWeights[i].mVertexId;
+            lgBone.weights[j].weight = aiBone_->mWeights[i].mWeight;
+        }
+    }
 }
 
 static void ProcessNode(const void* transform, const struct aiNode* node, const struct aiScene* scene, std::vector<Asset::LoongMesh*>& meshes)
@@ -74,10 +86,11 @@ static void ProcessNode(const void* transform, const struct aiNode* node, const 
         aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
 
         std::vector<Asset::LoongVertex> vertices;
+        std::vector<Asset::LoongMesh::Bone> bones;
         std::vector<uint32_t> indices;
-        ProcessMesh(&nodeTransformation, mesh, scene, vertices, indices);
+        ProcessMesh(&nodeTransformation, mesh, scene, vertices, indices, bones);
 
-        meshes.push_back(new Asset::LoongMesh(std::move(vertices), std::move(indices), mesh->mMaterialIndex)); // The model will handle mesh destruction
+        meshes.push_back(new Asset::LoongMesh(std::move(vertices), std::move(indices), std::move(bones), mesh->mMaterialIndex)); // The model will handle mesh destruction
     }
 
     // Then do the same for each of its children
