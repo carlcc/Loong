@@ -13,6 +13,8 @@ set(GLM_INCLUDE_DIR ${CMAKE_CURRENT_LIST_DIR}/thirdparty/glm/include)
 set(CMAKE_CXX_STANDARD 17)
 
 if (MSVC)
+    add_compile_options("$<$<C_COMPILER_ID:MSVC>:/utf-8>")
+    add_compile_options("$<$<CXX_COMPILER_ID:MSVC>:/utf-8>")
 else()
     add_compile_options("-Wall")
 endif()
