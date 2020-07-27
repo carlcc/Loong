@@ -37,7 +37,8 @@ static void ProcessMaterials(const struct aiScene* scene, std::vector<std::strin
 }
 
 static void ProcessMesh(const void* transform, const struct aiMesh* mesh, const struct aiScene* scene,
-    std::vector<Asset::LoongVertex>& outVertices, std::vector<uint32_t>& outIndices, std::vector<Asset::LoongMesh::BoneInfo>& boneInfos)
+    std::vector<Asset::LoongVertex>& outVertices, std::vector<uint32_t>& outIndices,
+    std::vector<Asset::LoongMesh::BoneBinding>& boneInfos, Asset::LoongMesh::BoneNameToIndexMap& boneNameToIndexMap)
 {
     aiMatrix4x4 meshTransformation = *reinterpret_cast<const aiMatrix4x4*>(transform);
 
@@ -66,7 +67,7 @@ static void ProcessMesh(const void* transform, const struct aiMesh* mesh, const 
     }
 
     if (mesh->mNumBones > 0) {
-        auto AddWeigth = [](Asset::LoongMesh::BoneInfo& boneInfo, uint32_t boneId, float weight) -> bool {
+        auto AddWeigth = [](Asset::LoongMesh::BoneBinding& boneInfo, uint32_t boneId, float weight) -> bool {
             for (int i = 0; i < 4; ++i) {
                 if (boneInfo.boneWeights[i] == 0.0F) {
                     boneInfo.boneIndices[i] = boneId;
@@ -78,13 +79,27 @@ static void ProcessMesh(const void* transform, const struct aiMesh* mesh, const 
             return false;
         };
 
+        assert(boneNameToIndexMap.empty());
+        uint32_t boneIndexCounter = 0;
+        uint32_t boneId = 0;
+
         boneInfos.resize(outVertices.size());
         for (uint32_t i = 0; i < mesh->mNumBones; ++i) {
             auto* aiBone_ = mesh->mBones[i];
+            std::string boneName = aiBone_->mName.C_Str();
+            auto it = boneNameToIndexMap.find(boneName);
+            if (it == boneNameToIndexMap.end()) {
+                boneId = boneIndexCounter++;
+                boneNameToIndexMap.insert({ boneName, boneId });
+            } else {
+                boneId = it->second;
+            }
+
             for (uint32_t j = 0; j < aiBone_->mNumWeights; ++j) {
                 auto vertexId = aiBone_->mWeights[j].mVertexId;
+                float weight = aiBone_->mWeights[j].mWeight;
                 // TODO: Should we abort if it returns false?
-                AddWeigth(boneInfos[vertexId], boneId, aiBone_->mWeights[j].mWeight);
+                AddWeigth(boneInfos[vertexId], boneId, weight);
             }
         }
     }
@@ -99,12 +114,13 @@ static void ProcessNode(const void* transform, const struct aiNode* node, const 
         aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
 
         std::vector<Asset::LoongVertex> vertices;
-        std::vector<Asset::LoongMesh::BoneInfo> boneInfos;
         std::vector<uint32_t> indices;
-        ProcessMesh(&nodeTransformation, mesh, scene, vertices, indices, boneInfos);
+        std::vector<Asset::LoongMesh::BoneBinding> boneInfos;
+        Asset::LoongMesh::BoneNameToIndexMap boneNameToIndexMap;
+        ProcessMesh(&nodeTransformation, mesh, scene, vertices, indices, boneInfos, boneNameToIndexMap);
 
         // The model will handle mesh destruction
-        meshes.push_back(new Asset::LoongMesh(std::move(vertices), std::move(indices), std::move(boneInfos), mesh->mMaterialIndex));
+        meshes.push_back(new Asset::LoongMesh(std::move(vertices), std::move(indices), std::move(boneInfos), std::move(boneNameToIndexMap), mesh->mMaterialIndex));
     }
 
     // Then do the same for each of its children

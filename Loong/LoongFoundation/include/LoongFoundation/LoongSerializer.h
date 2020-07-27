@@ -179,6 +179,53 @@ struct LoongArchiver<std::vector<T>, Stream, false> {
     }
 };
 
+template <class K, class V, class Stream>
+struct LoongArchiver<std::map<K, V>, Stream, false> {
+    bool operator()(std::map<K, V>& mp, Stream& stream)
+    {
+        static_assert(!std::is_pointer_v<K>, "Key of a map should not be a pointer");
+        static_assert(!std::is_pointer_v<V>, "Value of a map should not be a pointer");
+        if constexpr (std::is_base_of_v<LoongArchiveOutputStream, Stream>) {
+            if (mp.size() > std::numeric_limits<uint32_t>::max()) {
+                // TODO: LOG
+                return false;
+            }
+            auto size = uint32_t(mp.size());
+            if (!LoongArchiver<uint32_t, Stream>()(size, stream)) {
+                return false;
+            }
+            for (auto& entry : mp) {
+                if (!LoongArchiver<K, Stream>()(const_cast<K&>(entry.first), stream)) {
+                    return false;
+                }
+                if (!LoongArchiver<V, Stream>()(entry.second, stream)) {
+                    return false;
+                }
+            }
+            return true;
+        } else if constexpr (std::is_base_of_v<LoongArchiveInputStream, Stream>) {
+            uint32_t size;
+            if (!LoongArchiver<uint32_t, Stream>()(size, stream)) {
+                return false;
+            }
+            for (uint32_t i = 0; i < size; ++i) {
+                K k;
+                V v;
+                if (!LoongArchiver<K, Stream>()(k, stream)) {
+                    return false;
+                }
+                if (!LoongArchiver<V, Stream>()(v, stream)) {
+                    return false;
+                }
+                mp.insert({ std::move(k), std::move(v) });
+            }
+            return true;
+        } else {
+            static_assert(std::is_base_of_v<LoongArchiveOutputStream, Stream>);
+        }
+    }
+};
+
 template <class T, class Stream>
 bool Serialize(T& t, Stream& s)
 {
