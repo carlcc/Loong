@@ -3,6 +3,7 @@
 #include "ModelExport.h"
 #include "SkeletonExport.h"
 #include "TextureExport.h"
+#include "AnimationExport.h"
 #include <assimp/Importer.hpp>
 #include <assimp/matrix4x4.h>
 #include <assimp/postprocess.h>
@@ -10,12 +11,6 @@
 #include <iostream>
 
 namespace Loong::AssetConverter {
-
-bool ExportAnimationFiles(const aiScene* scene)
-{
-
-    return true;
-}
 
 bool ExportMaterialFiles(const aiScene* scene)
 {

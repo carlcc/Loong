@@ -8,11 +8,11 @@
 namespace Loong::Asset {
 
 LoongMesh::LoongMesh(std::vector<LoongVertex>&& vertices, std::vector<uint32_t>&& indices, std::vector<BoneBinding>&& bones,
-    BoneNameToIndexMap&& boneNameToIndex, uint32_t materialIndex)
+    BoneInfoMap&& boneInfoMap, uint32_t materialIndex)
     : vertices_(std::move(vertices))
     , indices_(std::move(indices))
     , bones_(std::move(bones))
-    , boneNameToIndex_(std::move(boneNameToIndex))
+    , boneInfoMap_(std::move(boneInfoMap))
     , materialIndex_(materialIndex)
 {
     UpdateAABB();

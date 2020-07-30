@@ -7,7 +7,6 @@
 #pragma warning(disable : 4996)
 #endif
 
-#include "ModelExport.h"
 #include "Flags.h"
 #include "LoongAsset/LoongMesh.h"
 #include "LoongAsset/LoongModel.h"
@@ -16,6 +15,8 @@
 #include "LoongFoundation/LoongMath.h"
 #include "LoongFoundation/LoongPathUtils.h"
 #include "LoongFoundation/LoongSerializer.h"
+#include "ModelExport.h"
+#include "Utils.h"
 #include <assimp/matrix4x4.h>
 #include <assimp/postprocess.h>
 #include <assimp/scene.h>
@@ -38,7 +39,7 @@ static void ProcessMaterials(const struct aiScene* scene, std::vector<std::strin
 
 static void ProcessMesh(const void* transform, const struct aiMesh* mesh, const struct aiScene* scene,
     std::vector<Asset::LoongVertex>& outVertices, std::vector<uint32_t>& outIndices,
-    std::vector<Asset::LoongMesh::BoneBinding>& boneInfos, Asset::LoongMesh::BoneNameToIndexMap& boneNameToIndexMap)
+    std::vector<Asset::LoongMesh::BoneBinding>& boneInfos, Asset::LoongMesh::BoneInfoMap& boneInfoMap)
 {
     aiMatrix4x4 meshTransformation = *reinterpret_cast<const aiMatrix4x4*>(transform);
 
@@ -79,7 +80,7 @@ static void ProcessMesh(const void* transform, const struct aiMesh* mesh, const 
             return false;
         };
 
-        assert(boneNameToIndexMap.empty());
+        assert(boneInfoMap.empty());
         uint32_t boneIndexCounter = 0;
         uint32_t boneId = 0;
 
@@ -87,12 +88,12 @@ static void ProcessMesh(const void* transform, const struct aiMesh* mesh, const 
         for (uint32_t i = 0; i < mesh->mNumBones; ++i) {
             auto* aiBone_ = mesh->mBones[i];
             std::string boneName = aiBone_->mName.C_Str();
-            auto it = boneNameToIndexMap.find(boneName);
-            if (it == boneNameToIndexMap.end()) {
+            auto it = boneInfoMap.find(boneName);
+            if (it == boneInfoMap.end()) {
                 boneId = boneIndexCounter++;
-                boneNameToIndexMap.insert({ boneName, boneId });
+                boneInfoMap.insert({ boneName, { boneId, AiMatrix2LoongMatrix(aiBone_->mOffsetMatrix) } });
             } else {
-                boneId = it->second;
+                boneId = it->second.index;
             }
 
             for (uint32_t j = 0; j < aiBone_->mNumWeights; ++j) {
@@ -116,11 +117,11 @@ static void ProcessNode(const void* transform, const struct aiNode* node, const 
         std::vector<Asset::LoongVertex> vertices;
         std::vector<uint32_t> indices;
         std::vector<Asset::LoongMesh::BoneBinding> boneInfos;
-        Asset::LoongMesh::BoneNameToIndexMap boneNameToIndexMap;
-        ProcessMesh(&nodeTransformation, mesh, scene, vertices, indices, boneInfos, boneNameToIndexMap);
+        Asset::LoongMesh::BoneInfoMap boneInfoMap;
+        ProcessMesh(&nodeTransformation, mesh, scene, vertices, indices, boneInfos, boneInfoMap);
 
         // The model will handle mesh destruction
-        meshes.push_back(new Asset::LoongMesh(std::move(vertices), std::move(indices), std::move(boneInfos), std::move(boneNameToIndexMap), mesh->mMaterialIndex));
+        meshes.push_back(new Asset::LoongMesh(std::move(vertices), std::move(indices), std::move(boneInfos), std::move(boneInfoMap), mesh->mMaterialIndex));
     }
 
     // Then do the same for each of its children
@@ -157,20 +158,7 @@ bool ExportModelFiles(const aiScene* scene)
 
     Asset::LoongModel model(std::move(meshes), std::move(materials));
 
-    struct FileOutputStream : public Foundation::LoongArchiveOutputStream {
-        explicit FileOutputStream(FILE* fout)
-            : fout_(fout)
-        {
-        }
-        bool operator()(void* d, size_t l)
-        {
-            return fwrite(d, l, 1, fout_) == 1;
-        }
-
-    private:
-        FILE* fout_ { nullptr };
-    };
-    FileOutputStream outputStream(ofs);
+    Foundation::LoongArchiveFileOutputStream outputStream(ofs);
 
     return Foundation::Serialize(model, outputStream);
 }

@@ -341,8 +341,8 @@ std::shared_ptr<LoongGpuMesh> LoongResourceManager::GetSkyboxMesh()
             30, 31, 32, 33, 34, 35
         };
         std::vector<Asset::LoongMesh::BoneBinding> bones;
-        Asset::LoongMesh::BoneNameToIndexMap nameToIndexMap;
-        Asset::LoongMesh mesh(std::move(vertices), std::move(indices), std::move(bones), std::move(nameToIndexMap), 0);
+        Asset::LoongMesh::BoneInfoMap boneInfoMap;
+        Asset::LoongMesh mesh(std::move(vertices), std::move(indices), std::move(bones), std::move(boneInfoMap), 0);
         gSkyBoxMesh = std::make_shared<LoongGpuMesh>(mesh);
     }
 

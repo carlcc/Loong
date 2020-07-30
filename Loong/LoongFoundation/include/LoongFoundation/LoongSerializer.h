@@ -1,6 +1,7 @@
 #pragma once
 
 #include "LoongFoundation/LoongMath.h"
+#include <cstdio>
 
 // TODO: This is absolutely not a portable serializer, we should rewrite it in the future
 namespace Loong::Foundation {
@@ -9,6 +10,19 @@ namespace Loong::Foundation {
 class LoongArchiveOutputStream {
 };
 class LoongArchiveInputStream {
+};
+struct LoongArchiveFileOutputStream : public LoongArchiveOutputStream {
+    explicit LoongArchiveFileOutputStream(FILE* fout)
+        : fout_(fout)
+    {
+    }
+    bool operator()(void* d, size_t l)
+    {
+        return fwrite(d, l, 1, fout_) == 1;
+    }
+
+private:
+    FILE* fout_ { nullptr };
 };
 
 template <class T, class Stream, bool isPod = std::is_pod_v<T>>
@@ -117,14 +131,20 @@ struct LoongArchiver<std::string, Stream> {
                 return false;
             }
             auto size = uint32_t(t.length());
-            return LoongArchiver<uint32_t, Stream>()(size, stream) && stream(t.data(), t.length());
+            if (!LoongArchiver<uint32_t, Stream>()(size, stream)) {
+                return false;
+            }
+            if (size > 0) {
+                return stream(t.data(), t.length());
+            }
+            return true;
         } else if constexpr (std::is_base_of_v<LoongArchiveInputStream, Stream>) {
             uint32_t size;
             if (!LoongArchiver<uint32_t, Stream>()(size, stream)) {
                 return false;
             }
             t.resize(size);
-            return stream(t.data(), t.length());
+            return size > 0 ? stream(t.data(), t.length()) : true;
         } else {
             static_assert(std::is_base_of_v<LoongArchiveOutputStream, Stream>);
         }
