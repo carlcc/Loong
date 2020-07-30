@@ -113,6 +113,8 @@ public:
     {
         std::transform(std::begin(s), std::end(s), std::begin(s), [](char c) -> int { return std::toupper(c); });
     }
+
+    static std::string ReplaceAll(const std::string_view str, const std::string_view from, const std::string_view to);
 };
 
 }

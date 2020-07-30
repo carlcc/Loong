@@ -2,6 +2,7 @@
 
 #include "LoongFoundation/LoongMath.h"
 #include <cstdio>
+#include <map>
 
 // TODO: This is absolutely not a portable serializer, we should rewrite it in the future
 namespace Loong::Foundation {
