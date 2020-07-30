@@ -51,10 +51,10 @@ bool ExportSkeletonFiles(const aiScene* scene)
     outputPath = Foundation::LoongPathUtils::Normalize(outputPath);
 
     Asset::LoongSkeleton::Node root;
-    Asset::LoongSkeleton skeleton(std::move(root));
     if (!ParseSkeleton(scene->mRootNode, root)) {
         return false;
     }
+    Asset::LoongSkeleton skeleton(std::move(root));
 
     FILE* ofs = fopen(outputPath.c_str(), "wb");
     if (ofs == nullptr) {
