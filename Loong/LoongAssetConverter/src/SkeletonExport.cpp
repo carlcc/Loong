@@ -8,8 +8,7 @@
 
 #include "SkeletonExport.h"
 #include "Flags.h"
-#include "LoongAsset/LoongMesh.h"
-#include "LoongAsset/LoongModel.h"
+#include "LoongAsset/LoongSkeleton.h"
 #include "LoongFoundation/LoongDefer.h"
 #include "LoongFoundation/LoongLogger.h"
 #include "LoongFoundation/LoongMath.h"
@@ -24,65 +23,14 @@
 
 namespace Loong::AssetConverter {
 
-class LoongSkeleton {
-public:
-    struct Node {
-        ~Node()
-        {
-            for (auto* node : children) {
-                delete node;
-            }
-        }
-        std::string name {};
-        std::vector<Node*> children {};
-        Math::Matrix4 transform {};
-
-        template <class Archive>
-        bool Serialize(Archive& archive) { return archive(name, children, transform); }
-    };
-
-    LoongSkeleton() = default;
-
-    // Note: this function will take over the ownship
-    LoongSkeleton(Node* root)
-        : root_(root)
-        , inverseMatrix_()
-    {
-    }
-
-    ~LoongSkeleton()
-    {
-        delete root_;
-    }
-
-    const Math::Matrix4& GetInverseMatrix() const { return inverseMatrix_; }
-
-    template <class Archive>
-    bool Serialize(Archive& archive) { return archive(root_, inverseMatrix_); }
-
-private:
-    Node* root_ { nullptr };
-    // This is the inverse of the root node's transform, used to transform the skeleton to model space
-    Math::Matrix4 inverseMatrix_ {};
-};
-
-class LoongAnimation {
-public:
-};
-
-class LoongAnimationEvaluator {
-public:
-};
-
-bool ParseSkeleton(const aiNode* aiRootNode, LoongSkeleton::Node* rootNode)
+bool ParseSkeleton(const aiNode* aiRootNode, Asset::LoongSkeleton::Node& rootNode)
 {
-    rootNode->name = aiRootNode->mName.C_Str();
-    rootNode->transform = AiMatrix2LoongMatrix(aiRootNode->mTransformation);
+    rootNode.name = aiRootNode->mName.C_Str();
+    rootNode.transform = AiMatrix2LoongMatrix(aiRootNode->mTransformation);
 
-    rootNode->children.resize(aiRootNode->mNumChildren);
-    for (size_t i = 0; i < rootNode->children.size(); ++i) {
-        auto& child = rootNode->children[i];
-        child = new LoongSkeleton::Node;
+    rootNode.children.resize(aiRootNode->mNumChildren);
+    for (size_t i = 0; i < rootNode.children.size(); ++i) {
+        auto& child = rootNode.children[i];
 
         if (!ParseSkeleton(aiRootNode->mChildren[i], child)) {
             return false;
@@ -102,8 +50,8 @@ bool ExportSkeletonFiles(const aiScene* scene)
     std::string outputPath = flags.outputDir + '/' + flags.modelPath + '/' + outputFileName;
     outputPath = Foundation::LoongPathUtils::Normalize(outputPath);
 
-    LoongSkeleton::Node* root = new LoongSkeleton::Node;
-    LoongSkeleton skeleton(root);
+    Asset::LoongSkeleton::Node root;
+    Asset::LoongSkeleton skeleton(std::move(root));
     if (!ParseSkeleton(scene->mRootNode, root)) {
         return false;
     }

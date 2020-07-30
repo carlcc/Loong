@@ -7,13 +7,13 @@
 #endif
 
 #include "Flags.h"
-#include "LoongAsset/LoongMesh.h"
-#include "LoongAsset/LoongModel.h"
+#include "LoongAsset/LoongAnimationClip.h"
 #include "LoongFoundation/LoongDefer.h"
 #include "LoongFoundation/LoongLogger.h"
 #include "LoongFoundation/LoongMath.h"
 #include "LoongFoundation/LoongPathUtils.h"
 #include "LoongFoundation/LoongSerializer.h"
+#include "LoongFoundation/LoongStringUtils.h"
 #include "SkeletonExport.h"
 #include "Utils.h"
 #include <assimp/matrix4x4.h>
@@ -24,35 +24,8 @@
 
 namespace Loong::AssetConverter {
 
-class LoongAnimation {
-public:
-    struct Channel {
-        std::string nodeName {};
-        std::vector<float> positionKeyTimes {};
-        std::vector<Math::Vector3> positionKeys {};
-        std::vector<float> rotationKeyTimes {};
-        std::vector<Math::Quat> rotationKeys {};
-        std::vector<float> scaleKeyTimes {};
-        std::vector<Math::Vector3> scaleKeys {};
 
-        template <class Archive>
-        bool Serialize(Archive& archive)
-        {
-            return archive(nodeName, positionKeyTimes, positionKeys, rotationKeyTimes,
-                rotationKeys, scaleKeyTimes, scaleKeys);
-        }
-    };
-
-    template <class Archive>
-    bool Serialize(Archive& archive) { return archive(name, duration, ticksPerSecond, channels); }
-
-    std::string name {};
-    float duration { 0.0F };
-    float ticksPerSecond { 0.0F };
-    std::vector<Channel> channels {};
-};
-
-bool ParseChannel(const aiNodeAnim* aiChannel, LoongAnimation::Channel* channel)
+bool ParseChannel(const aiNodeAnim* aiChannel, Asset::LoongAnimationClip::Channel* channel)
 {
     channel->nodeName = aiChannel->mNodeName.C_Str();
 
@@ -60,7 +33,7 @@ bool ParseChannel(const aiNodeAnim* aiChannel, LoongAnimation::Channel* channel)
     channel->positionKeyTimes.resize(aiChannel->mNumPositionKeys);
     for (uint32_t i = 0; i < aiChannel->mNumPositionKeys; ++i) {
         auto& value = aiChannel->mPositionKeys[i].mValue;
-        channel->positionKeyTimes[i] = aiChannel->mPositionKeys[i].mTime;
+        channel->positionKeyTimes[i] = float(aiChannel->mPositionKeys[i].mTime);
         channel->positionKeys[i] = { value.x, value.y, value.z };
     }
 
@@ -68,7 +41,7 @@ bool ParseChannel(const aiNodeAnim* aiChannel, LoongAnimation::Channel* channel)
     channel->rotationKeyTimes.resize(aiChannel->mNumRotationKeys);
     for (uint32_t i = 0; i < aiChannel->mNumRotationKeys; ++i) {
         auto& value = aiChannel->mRotationKeys[i].mValue;
-        channel->rotationKeyTimes[i] = aiChannel->mRotationKeys[i].mTime;
+        channel->rotationKeyTimes[i] = float(aiChannel->mRotationKeys[i].mTime);
         channel->rotationKeys[i] = { value.x, value.y, value.z, value.w };
     }
 
@@ -76,16 +49,17 @@ bool ParseChannel(const aiNodeAnim* aiChannel, LoongAnimation::Channel* channel)
     channel->scaleKeyTimes.resize(aiChannel->mNumScalingKeys);
     for (uint32_t i = 0; i < aiChannel->mNumScalingKeys; ++i) {
         auto& value = aiChannel->mScalingKeys[i].mValue;
-        channel->scaleKeyTimes[i] = aiChannel->mScalingKeys[i].mTime;
+        channel->scaleKeyTimes[i] = float(aiChannel->mScalingKeys[i].mTime);
         channel->scaleKeys[i] = { value.x, value.y, value.z };
     }
+    return true;
 }
 
-bool ParseAnimation(const aiAnimation* aiAnim, LoongAnimation* anim)
+bool ParseAnimation(const aiAnimation* aiAnim, Asset::LoongAnimationClip* anim)
 {
     anim->name = aiAnim->mName.C_Str();
-    anim->duration = aiAnim->mDuration;
-    anim->ticksPerSecond = aiAnim->mTicksPerSecond;
+    anim->duration = float(aiAnim->mDuration);
+    anim->ticksPerSecond = float(aiAnim->mTicksPerSecond);
     anim->channels.resize(aiAnim->mNumChannels);
 
     for (uint32_t i = 0; i < aiAnim->mNumChannels; ++i) {
@@ -105,12 +79,12 @@ bool ExportAnimationFiles(const aiScene* scene)
     std::string outputFileNameWithoutExt = fileName.substr(0, fileName.length() - extension.length());
 
     for (uint32_t i = 0; i < scene->mNumAnimations; ++i) {
-
+        std::string animationName = Foundation::LoongStringUtils::ReplaceAll(scene->mAnimations[i]->mName.C_Str(), " ", "_");
         std::string outputPath = flags.outputDir + '/' + flags.modelPath + '/'
-            + outputFileNameWithoutExt + "_" + scene->mAnimations[i]->mName.C_Str() + ".lganim";
+            + outputFileNameWithoutExt + "_" + animationName + ".lganim";
         outputPath = Foundation::LoongPathUtils::Normalize(outputPath);
 
-        LoongAnimation animation;
+        Asset::LoongAnimationClip animation;
         if (!ParseAnimation(scene->mAnimations[i], &animation)) {
             return false;
         }
