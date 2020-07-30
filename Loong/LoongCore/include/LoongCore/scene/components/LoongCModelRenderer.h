@@ -10,6 +10,9 @@
 #include <memory>
 #include <vector>
 
+namespace Loong::Asset {
+class LoongSkeleton;
+}
 namespace Loong::Resource {
 class LoongMaterial;
 };
@@ -53,6 +56,17 @@ public:
 
     std::shared_ptr<Resource::LoongGpuModel> GetModel() const { return model_; }
 
+    void SetSkeleton(std::shared_ptr<Asset::LoongSkeleton> skeleton)
+    {
+        if (skeleton_ != skeleton) {
+            auto oldSkeleton = skeleton_;
+            skeleton_ = std::move(skeleton);
+            SkeletonChangedSignal_.emit(skeleton_.get(), oldSkeleton.get());
+        }
+    }
+
+    std::shared_ptr<Asset::LoongSkeleton> GetSkeleton() const { return skeleton_; }
+
     const std::vector<MaterialRef>& GetMaterials() const
     {
         return materials_;
@@ -68,9 +82,11 @@ public:
     CullMode GetCullMode() const { return cullMode_; }
 
     LOONG_DECLARE_SIGNAL(ModelChanged, Resource::LoongGpuModel*, Resource::LoongGpuModel*); // new model, old model
+    LOONG_DECLARE_SIGNAL(SkeletonChanged, Asset::LoongSkeleton*, Asset::LoongSkeleton*); // new skeleton, old skeleton
 
 private:
     std::shared_ptr<Resource::LoongGpuModel> model_ { nullptr };
+    std::shared_ptr<Asset::LoongSkeleton> skeleton_ { nullptr };
     std::vector<MaterialRef> materials_ {};
     CullMode cullMode_ { CullMode::kCullModel };
 };
