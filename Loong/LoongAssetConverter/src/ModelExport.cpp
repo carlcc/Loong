@@ -36,13 +36,28 @@ static void ProcessMaterials(const struct aiScene* scene, std::vector<std::strin
     }
 }
 
+inline Math::Matrix4 AiMatrix2LoongMatrix(const aiMatrix4x4& matrix)
+{
+    // aiMatrix4x4 is row major, while our Matrix4 is column major
+    return Math::Matrix4(
+        matrix.a1, matrix.b1, matrix.c1, matrix.d1,
+        matrix.a2, matrix.b2, matrix.c2, matrix.d2,
+        matrix.a3, matrix.b3, matrix.c3, matrix.d3,
+        matrix.a4, matrix.b4, matrix.c4, matrix.d4);
+}
+
+inline Math::Vector3 AiVector2LoongVector(const aiVector3D& v)
+{
+    return { v.x, v.y, v.z };
+}
+
 static void ProcessMesh(const void* transform, const struct aiMesh* mesh, const struct aiScene* scene, std::vector<Asset::LoongVertex>& outVertices, std::vector<uint32_t>& outIndices)
 {
     aiMatrix4x4 meshTransformation = *reinterpret_cast<const aiMatrix4x4*>(transform);
-
+    Math::Matrix3 rotTransform(Math::Transpose(Math::Inverse(AiMatrix2LoongMatrix(meshTransformation))));
     for (uint32_t i = 0; i < mesh->mNumVertices; ++i) {
         aiVector3D position = meshTransformation * mesh->mVertices[i];
-        aiVector3D normal = meshTransformation * (mesh->mNormals ? mesh->mNormals[i] : aiVector3D(0.0f, 0.0f, 0.0f));
+        Math::Vector3 normal = rotTransform * AiVector2LoongVector(mesh->mNormals ? mesh->mNormals[i] : aiVector3D(0.0f, 0.0f, 0.0f));
         aiVector3D texCoords = mesh->mTextureCoords[0] ? mesh->mTextureCoords[0][i] : aiVector3D(0.0f, 0.0f, 0.0f);
         aiVector3D tangent = mesh->mTangents ? meshTransformation * mesh->mTangents[i] : aiVector3D(0.0f, 0.0f, 0.0f);
         aiVector3D bitangent = mesh->mBitangents ? meshTransformation * mesh->mBitangents[i] : aiVector3D(0.0f, 0.0f, 0.0f);
