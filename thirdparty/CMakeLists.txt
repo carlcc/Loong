@@ -1,5 +1,4 @@
 
-set(CMAKE_CXX_STANDARD 17)
 set(GLFW_BUILD_DOCS OFF)
 set(GLFW_BUILD_TESTS OFF)
 set(GLFW_BUILD_EXAMPLES OFF)
@@ -10,6 +9,7 @@ add_subdirectory(physfs EXCLUDE_FROM_ALL)
 add_subdirectory(imgui EXCLUDE_FROM_ALL)
 add_subdirectory(glad EXCLUDE_FROM_ALL)
 
+add_subdirectory(DiligentCore EXCLUDE_FROM_ALL)
 
 # Assimp is so big! Build shared library
 # and only enable some formats
