@@ -1,6 +1,7 @@
 add_subdirectory(LoongFoundation)
 add_subdirectory(LoongApp)
 add_subdirectory(LoongFileSystem)
+add_subdirectory(LoongRHI)
 add_subdirectory(LoongAsset)
 add_subdirectory(LoongResource)
 add_subdirectory(LoongRenderer)

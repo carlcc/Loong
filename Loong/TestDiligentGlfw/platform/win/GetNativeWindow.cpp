@@ -5,7 +5,7 @@
 
 Diligent::NativeWindow GetNativeWindow(GLFWwindow* window)
 {
-    NativeWindow nativeWindow {};
+    Diligent::NativeWindow nativeWindow {};
     nativeWindow.hWnd = glfwGetWin32Window(window);
     return nativeWindow;
 }

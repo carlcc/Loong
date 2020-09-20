@@ -6,6 +6,7 @@
 #include "LoongApp/LoongInput.h"
 #include "LoongFoundation/LoongSigslotHelper.h"
 
+struct GLFWwindow;
 namespace Loong::App {
 
 class LoongApp {
@@ -57,6 +58,8 @@ public:
 
     void GetFrameBufferSize(int& width, int& height) const;
 
+    GLFWwindow* GetGlfwWindow() const;
+
     LOONG_DECLARE_SIGNAL(FrameBufferResize, int, int);
     LOONG_DECLARE_SIGNAL(WindowResize, int, int);
     LOONG_DECLARE_SIGNAL(KeyBoard, LoongKeyCode, LoongInputAction, int);
@@ -69,6 +72,7 @@ public:
     LOONG_DECLARE_SIGNAL(Update);
     LOONG_DECLARE_SIGNAL(Render);
     LOONG_DECLARE_SIGNAL(LateUpdate);
+    LOONG_DECLARE_SIGNAL(Present);
 
 private:
     class Impl;

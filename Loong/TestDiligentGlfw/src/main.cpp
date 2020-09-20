@@ -29,19 +29,12 @@
 #if D3D11_SUPPORTED
 #include <EngineFactoryD3D11.h>
 #endif
-
 #if D3D12_SUPPORTED
 #include <EngineFactoryD3D12.h>
 #endif
-
-#if GL_SUPPORTED || GLES_SUPPORTED
-#include <EngineFactoryOpenGL.h>
-#endif
-
 #if VULKAN_SUPPORTED
 #include <EngineFactoryVk.h>
 #endif
-
 #if METAL_SUPPORTED
 #include <EngineFactoryMtl.h>
 #endif
@@ -517,11 +510,11 @@ public:
             return false;
         }
 
-        glfwSetWindowSizeCallback(glfwWindow_, [](GLFWwindow* w, int width, int height) {
-            DiligentTest* t = (DiligentTest*)glfwGetWindowUserPointer(w);
-            t->swapChain_->Resize(width, height);
-            std::cout << "Window size" << std::endl;
-        });
+        // glfwSetWindowSizeCallback(glfwWindow_, [](GLFWwindow* w, int width, int height) {
+        //     DiligentTest* t = (DiligentTest*)glfwGetWindowUserPointer(w);
+        //     t->swapChain_->Resize(width, height);
+        //     std::cout << "Window size" << std::endl;
+        // });
         glfwSetFramebufferSizeCallback(glfwWindow_, [](GLFWwindow* w, int width, int height) {
             DiligentTest* t = (DiligentTest*)glfwGetWindowUserPointer(w);
             t->swapChain_->Resize(width, height);
