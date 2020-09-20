@@ -7,9 +7,8 @@ add_subdirectory(glfw EXCLUDE_FROM_ALL)
 add_subdirectory(physfs EXCLUDE_FROM_ALL)
 
 add_subdirectory(imgui EXCLUDE_FROM_ALL)
+set_property(TARGET imgui PROPERTY CXX_STANDARD 17)
 add_subdirectory(glad EXCLUDE_FROM_ALL)
-
-add_subdirectory(DiligentCore EXCLUDE_FROM_ALL)
 
 # Assimp is so big! Build shared library
 # and only enable some formats
@@ -78,3 +77,7 @@ INTERFACE
 add_subdirectory(rapidjson)
 
 add_subdirectory(nativefiledialog)
+
+# Do not support opengl
+set(DILIGENT_NO_OPENGL ON)
+add_subdirectory(DiligentCore EXCLUDE_FROM_ALL)
