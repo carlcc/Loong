@@ -4,14 +4,14 @@
 
 #include <glad/glad.h>
 
-#include "LoongApp/LoongWindow.h"
+#include "LoongWindow/LoongWindow.h"
 #include "LoongFoundation/LoongLogger.h"
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
 #include <GLFW/glfw3.h>
 #include <imgui.h>
 
-namespace Loong::App {
+namespace Loong::Window {
 
 class LoongWindow::Impl {
 public:

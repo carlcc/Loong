@@ -9,8 +9,8 @@
 #include "stb_image_write.h"
 
 #include "Flags.h"
-#include "LoongApp/Driver.h"
-#include "LoongApp/LoongWindow.h"
+#include "LoongWindow/Driver.h"
+#include "LoongWindow/LoongWindow.h"
 #include "LoongAsset/LoongImage.h"
 #include "LoongFoundation/LoongDefer.h"
 #include "LoongFoundation/LoongLogger.h"
@@ -232,12 +232,12 @@ std::shared_ptr<Resource::LoongShader> CreateShader()
 
 int Convert()
 {
-    Loong::App::ScopedDriver appDriver;
+    Loong::Window::ScopedDriver appDriver;
     Loong::Resource::ScopedDriver resourceDriver;
 
-    Loong::App::LoongWindow::WindowConfig cfg;
+    Loong::Window::LoongWindow::WindowConfig cfg;
     cfg.visible = 0;
-    Loong::App::LoongWindow app(cfg);
+    Loong::Window::LoongWindow app(cfg);
 
     auto& flags = Flags::Get();
 

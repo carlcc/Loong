@@ -1,10 +1,10 @@
 #include "glad/glad.h"
 
-#include "LoongApp/Driver.h"
+#include "LoongWindow/Driver.h"
 #include "LoongFileSystem/Driver.h"
 #include "LoongResource/Driver.h"
 
-#include "LoongApp/LoongWindow.h"
+#include "LoongWindow/LoongWindow.h"
 #include "LoongEditor.h"
 #include "LoongEditorContext.h"
 #include "LoongEditorProjectManager.h"
@@ -79,9 +79,9 @@ int LoadFonts()
 int StartApp(int argc, char** argv)
 {
 
-    Loong::App::LoongWindow::WindowConfig config {};
+    Loong::Window::LoongWindow::WindowConfig config {};
     config.title = "LoongEditor";
-    std::shared_ptr<Loong::App::LoongWindow> window = std::make_shared<Loong::App::LoongWindow>(config);
+    std::shared_ptr<Loong::Window::LoongWindow> window = std::make_shared<Loong::Window::LoongWindow>(config);
 
     if (0 != LoadFonts()) {
         return 1;
@@ -122,7 +122,7 @@ int main(int argc, char** argv)
     auto listener = Loong::Foundation::Logger::Get().SubscribeLog([](const Loong::Foundation::LogItem& logItem) {
         std::cout << "[" << logItem.level << "][" << logItem.location << "]: " << logItem.message << std::endl;
     });
-    Loong::App::ScopedDriver appDriver;
+    Loong::Window::ScopedDriver appDriver;
 
     auto path = Loong::Foundation::LoongPathUtils::GetParent(argv[0]) + "/Resources";
     Loong::FS::ScopedDriver fsDriver(argv[0]);

@@ -2,9 +2,9 @@
 // Copyright (c) 2020 Carl Chen. All rights reserved.
 //
 
-#include "LoongApp/LoongInput.h"
+#include "LoongWindow/LoongInput.h"
 
-namespace Loong::App {
+namespace Loong::Window {
 
 void LoongInput::BeginFrame()
 {

@@ -3,14 +3,14 @@
 //
 
 #pragma once
-#include "LoongApp/LoongInputAction.h"
-#include "LoongApp/LoongKeyCode.h"
-#include "LoongApp/LoongMouseButton.h"
+#include "LoongWindow/LoongInputAction.h"
+#include "LoongWindow/LoongKeyCode.h"
+#include "LoongWindow/LoongMouseButton.h"
 #include "LoongFoundation/LoongMath.h"
 #include <array>
 #include <cstdint>
 
-namespace Loong::App {
+namespace Loong::Window {
 
 class LoongInput {
 public:

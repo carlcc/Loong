@@ -4,8 +4,8 @@
 
 #include "LoongEditorSceneCameraController.h"
 #include "../LoongEditor.h"
-#include "LoongApp/LoongInput.h"
-#include "LoongApp/LoongWindow.h"
+#include "LoongWindow/LoongInput.h"
+#include "LoongWindow/LoongWindow.h"
 #include "LoongCore/scene/LoongActor.h"
 #include "LoongFoundation/LoongMath.h"
 
@@ -34,25 +34,25 @@ void LoongEditorSceneCameraController::OnUpdate(const Foundation::LoongClock& cl
 
     {
         Math::Vector3 dir { 0.0F };
-        if (input.IsKeyPressed(App::LoongKeyCode::kKeyW)) {
+        if (input.IsKeyPressed(Window::LoongKeyCode::kKeyW)) {
             dir += actor->GetTransform().GetForward();
         }
-        if (input.IsKeyPressed(App::LoongKeyCode::kKeyS)) {
+        if (input.IsKeyPressed(Window::LoongKeyCode::kKeyS)) {
             dir -= actor->GetTransform().GetForward();
         }
-        if (input.IsKeyPressed(App::LoongKeyCode::kKeyA)) {
+        if (input.IsKeyPressed(Window::LoongKeyCode::kKeyA)) {
             dir -= actor->GetTransform().GetRight();
         }
-        if (input.IsKeyPressed(App::LoongKeyCode::kKeyD)) {
+        if (input.IsKeyPressed(Window::LoongKeyCode::kKeyD)) {
             dir += actor->GetTransform().GetRight();
         }
-        if (input.IsKeyPressed(App::LoongKeyCode::kKeyE)) {
+        if (input.IsKeyPressed(Window::LoongKeyCode::kKeyE)) {
             dir += Math::kUp;
         }
-        if (input.IsKeyPressed(App::LoongKeyCode::kKeyQ)) {
+        if (input.IsKeyPressed(Window::LoongKeyCode::kKeyQ)) {
             dir -= Math::kUp;
         }
-        if (input.IsKeyPressed(App::LoongKeyCode::kKeyLeftShift) || input.IsKeyPressed(App::LoongKeyCode::kKeyRightShift)) {
+        if (input.IsKeyPressed(Window::LoongKeyCode::kKeyLeftShift) || input.IsKeyPressed(Window::LoongKeyCode::kKeyRightShift)) {
             dir *= 5.0F;
         }
         actor->GetTransform().Translate(dir * clock.DeltaTime() * 2.0F);

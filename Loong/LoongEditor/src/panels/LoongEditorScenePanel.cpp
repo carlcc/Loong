@@ -6,8 +6,8 @@
 #include "../LoongEditorContext.h"
 #include "../utils/IconsFontAwesome5.h"
 #include "../utils/ImGuiUtils.h"
-#include "LoongApp/LoongInput.h"
-#include "LoongApp/LoongWindow.h"
+#include "LoongWindow/LoongInput.h"
+#include "LoongWindow/LoongWindow.h"
 #include "LoongCore/render/LoongRenderPassIdPass.h"
 #include "LoongCore/render/LoongRenderPassScenePass.h"
 #include "LoongCore/scene/LoongActor.h"
@@ -63,15 +63,15 @@ void LoongEditorScenePanel::UpdateImpl(const Foundation::LoongClock& clock)
 
 void LoongEditorScenePanel::UpdateShortcuts(const Foundation::LoongClock& clock)
 {
-    auto& inputManager = GetApp().GetInputManager();
-    if (ImGui::IsWindowHovered() && !inputManager.IsMouseButtonPressed(App::LoongMouseButton::kButtonRight)) {
-        if (inputManager.IsKeyPressEvent(App::LoongKeyCode::kKeyW)) {
+    auto& inputManager = GetWindow().GetInputManager();
+    if (ImGui::IsWindowHovered() && !inputManager.IsMouseButtonPressed(Window::LoongMouseButton::kButtonRight)) {
+        if (inputManager.IsKeyPressEvent(Window::LoongKeyCode::kKeyW)) {
             gizmo_.SetManipulateMode(LoongEditorGizmo::ManipulateMode::kTranslate);
         }
-        if (inputManager.IsKeyPressEvent(App::LoongKeyCode::kKeyE)) {
+        if (inputManager.IsKeyPressEvent(Window::LoongKeyCode::kKeyE)) {
             gizmo_.SetManipulateMode(LoongEditorGizmo::ManipulateMode::kRotate);
         }
-        if (inputManager.IsKeyPressEvent(App::LoongKeyCode::kKeyR)) {
+        if (inputManager.IsKeyPressEvent(Window::LoongKeyCode::kKeyR)) {
             gizmo_.SetManipulateMode(LoongEditorGizmo::ManipulateMode::kScale);
         }
     }
@@ -161,10 +161,10 @@ void LoongEditorScenePanel::Render(const Foundation::LoongClock& clock)
 
     auto& renderer = GetEditorContext().GetRenderer();
 
-    auto& inputManager = GetApp().GetInputManager();
+    auto& inputManager = GetWindow().GetInputManager();
     auto& mousePos = inputManager.GetMousePosition();
     if (IsFocused() && !isOverToolButton_
-        && inputManager.IsMouseButtonReleaseEvent(Loong::App::LoongMouseButton::kButtonLeft)
+        && inputManager.IsMouseButtonReleaseEvent(Loong::Window::LoongMouseButton::kButtonLeft)
         && Math::Distance(inputManager.GetMouseDownPosition(), mousePos) < 4.0F) {
         // Render selecting
         auto* frameBuffer = idPass_->GetFrameBuffer().get();

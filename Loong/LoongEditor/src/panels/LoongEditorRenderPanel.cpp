@@ -6,9 +6,9 @@
 #include "../LoongEditorContext.h"
 #include "../utils/ImGuiUtils.h"
 #include "../utils/LoongEditorSceneCameraController.h"
-#include "LoongApp/LoongInput.h"
-#include "LoongApp/LoongInputAction.h"
-#include "LoongApp/LoongWindow.h"
+#include "LoongWindow/LoongInput.h"
+#include "LoongWindow/LoongInputAction.h"
+#include "LoongWindow/LoongWindow.h"
 #include "LoongCore/render/LoongRenderPass.h"
 #include "LoongCore/render/LoongRenderPassScenePass.h"
 #include "LoongCore/render/LoongRenderPipeline.h"
@@ -73,13 +73,13 @@ void LoongEditorRenderPanel::UpdateImpl(const Foundation::LoongClock& clock)
     // Update camera actor
     if (ImGui::IsItemHovered(ImGuiHoveredFlags_None)) {
 
-        const auto& editorInput = GetApp().GetInputManager();
+        const auto& editorInput = GetWindow().GetInputManager();
 
-        if (editorInput.IsMouseButtonPressed(App::LoongMouseButton::kButtonRight)) {
-            GetApp().SetMouseMode(App::LoongWindow::MouseMode::kDisabled);
+        if (editorInput.IsMouseButtonPressed(Window::LoongMouseButton::kButtonRight)) {
+            GetWindow().SetMouseMode(Window::LoongWindow::MouseMode::kDisabled);
             ImGui::GetIO().DisableMouseUpdate = true;
         } else {
-            GetApp().SetMouseMode(App::LoongWindow::MouseMode::kNormal);
+            GetWindow().SetMouseMode(Window::LoongWindow::MouseMode::kNormal);
             ImGui::GetIO().DisableMouseUpdate = false;
         }
         if (ImGui::GetIO().DisableMouseUpdate) {

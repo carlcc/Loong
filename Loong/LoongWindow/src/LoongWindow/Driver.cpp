@@ -2,10 +2,10 @@
 // Copyright (c) 2020 Carl Chen. All rights reserved.
 //
 
-#include "LoongApp/Driver.h"
+#include "LoongWindow/Driver.h"
 #include <GLFW/glfw3.h>
 
-namespace Loong::App {
+namespace Loong::Window {
 
 bool Initialize()
 {

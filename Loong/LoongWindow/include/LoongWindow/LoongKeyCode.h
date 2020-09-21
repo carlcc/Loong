@@ -4,7 +4,7 @@
 
 #pragma once
 
-namespace Loong::App {
+namespace Loong::Window {
 
 enum class LoongKeyCode {
     // clang-format off

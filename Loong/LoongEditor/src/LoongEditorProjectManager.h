@@ -7,14 +7,14 @@
 #include "LoongFoundation/LoongSigslotHelper.h"
 #include <string>
 
-namespace Loong::App {
+namespace Loong::Window {
 class LoongWindow;
 }
 namespace Loong::Editor {
 
 class LoongEditorProjectManager : public Foundation::LoongHasSlots {
 public:
-    explicit LoongEditorProjectManager(App::LoongWindow* window);
+    explicit LoongEditorProjectManager(Window::LoongWindow* window);
     bool Initialize();
 
     const std::string& GetSelectedPath() const { return selectedPath_; }
@@ -23,7 +23,7 @@ protected:
     void OnClose();
     void OnUpdate();
 
-    App::LoongWindow* window_ { nullptr };
+    Window::LoongWindow* window_ { nullptr };
     std::string selectedPath_ {};
 };
 

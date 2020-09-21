@@ -1,14 +1,14 @@
 #include <GLFW/glfw3.h>
 
-#include "LoongApp/Driver.h"
-#include "LoongApp/LoongWindow.h"
+#include "LoongWindow/Driver.h"
+#include "LoongWindow/LoongWindow.h"
 #include "LoongFoundation/LoongLogger.h"
 #include "LoongRHI/Driver.h"
 #include "LoongRHI/LoongRHIManager.h"
 #include <cassert>
 #include <iostream>
 
-std::shared_ptr<Loong::App::LoongWindow> gApp;
+std::shared_ptr<Loong::Window::LoongWindow> gWindow;
 
 namespace Loong {
 
@@ -62,9 +62,9 @@ class LoongEditor : public Foundation::LoongHasSlots {
 public:
     LoongEditor()
     {
-        gApp->SubscribeUpdate(this, &LoongEditor::OnUpdate);
-        gApp->SubscribeRender(this, &LoongEditor::OnRender);
-        gApp->SubscribePresent(this, &LoongEditor::OnPresent);
+        gWindow->SubscribeUpdate(this, &LoongEditor::OnUpdate);
+        gWindow->SubscribeRender(this, &LoongEditor::OnRender);
+        gWindow->SubscribePresent(this, &LoongEditor::OnPresent);
 
         auto swapChain = RHI::LoongRHIManager::GetSwapChain();
         auto device = RHI::LoongRHIManager::GetDevice();
@@ -177,21 +177,21 @@ public:
 
 void StartApp()
 {
-    Loong::App::ScopedDriver appDriver;
+    Loong::Window::ScopedDriver appDriver;
     assert(appDriver);
 
-    Loong::App::LoongWindow::WindowConfig config {};
+    Loong::Window::LoongWindow::WindowConfig config {};
     config.title = "Play Ground";
-    gApp = std::make_shared<Loong::App::LoongWindow>(config);
+    gWindow = std::make_shared<Loong::Window::LoongWindow>(config);
 
-    Loong::RHI::ScopedDriver rhiDriver(gApp->GetGlfwWindow(), Loong::RHI::RENDER_DEVICE_TYPE_VULKAN);
+    Loong::RHI::ScopedDriver rhiDriver(gWindow->GetGlfwWindow(), Loong::RHI::RENDER_DEVICE_TYPE_VULKAN);
     assert(rhiDriver);
 
     Loong::LoongEditor myApp;
 
-    gApp->Run();
+    gWindow->Run();
 
-    gApp = nullptr;
+    gWindow = nullptr;
     Loong::RHI::LoongRHIManager::Uninitialize();
 }
 

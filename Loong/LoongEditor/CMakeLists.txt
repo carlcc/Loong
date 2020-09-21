@@ -14,7 +14,7 @@ target_include_directories(LoongEditor PRIVATE src)
 
 target_link_libraries(LoongEditor
 PRIVATE
-        LoongApp
+        LoongWindow
         LoongAsset
         LoongFileSystem
         LoongResource

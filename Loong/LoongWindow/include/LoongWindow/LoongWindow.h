@@ -3,11 +3,11 @@
 //
 
 #pragma once
-#include "LoongApp/LoongInput.h"
+#include "LoongWindow/LoongInput.h"
 #include "LoongFoundation/LoongSigslotHelper.h"
 
 struct GLFWwindow;
-namespace Loong::App {
+namespace Loong::Window {
 
 class LoongWindow {
 public:

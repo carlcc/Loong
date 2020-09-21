@@ -15,7 +15,7 @@ target_include_directories(LoongCubeToPanorama PRIVATE src)
 target_link_libraries(LoongCubeToPanorama
 PRIVATE
         LoongFoundation
-        LoongApp
+        LoongWindow
         LoongResource
         LoongAsset
         )

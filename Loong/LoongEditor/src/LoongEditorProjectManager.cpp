@@ -3,7 +3,7 @@
 //
 
 #include "LoongEditorProjectManager.h"
-#include "LoongApp/LoongWindow.h"
+#include "LoongWindow/LoongWindow.h"
 #include "LoongFoundation/LoongDefer.h"
 #include "LoongFoundation/LoongLogger.h"
 #include <imgui.h>
@@ -11,7 +11,7 @@
 
 namespace Loong::Editor {
 
-LoongEditorProjectManager::LoongEditorProjectManager(App::LoongWindow* window)
+LoongEditorProjectManager::LoongEditorProjectManager(Window::LoongWindow* window)
 {
     window_ = window;
     window->SubscribeUpdate(this, &LoongEditorProjectManager::OnUpdate);
