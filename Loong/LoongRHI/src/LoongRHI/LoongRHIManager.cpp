@@ -319,4 +319,58 @@ RefCntAutoPtr<IDeviceContext> LoongRHIManager::GetImmediateContext()
     return gRhiImpl.immediateContext_;
 }
 
+RHI::RefCntAutoPtr<RHI::IPipelineState> LoongRHIManager::CreateGraphicsPSOForCurrentSwapChain(
+    const char* pipelineName, const ShaderCreateInfo& vs, const ShaderCreateInfo& ps, bool depthEnabled,
+    CULL_MODE cullMode, PRIMITIVE_TOPOLOGY topology)
+{
+    auto& swapChain = gRhiImpl.swapChain_;
+    auto& device = gRhiImpl.device_;
+
+    RHI::PipelineStateCreateInfo psoCreateInfo;
+    RHI::PipelineStateDesc& psoDesc = psoCreateInfo.PSODesc;
+
+    // Pipeline state name is used by the engine to report issues.
+    // It is always a good idea to give objects descriptive names.
+    psoDesc.Name = pipelineName;
+
+    // This is a graphics pipeline
+    psoDesc.PipelineType = RHI::PIPELINE_TYPE_GRAPHICS;
+
+    // This tutorial will render to a single render target
+    psoDesc.GraphicsPipeline.NumRenderTargets = 1;
+    // Set render target format which is the format of the swap chain's color buffer
+    psoDesc.GraphicsPipeline.RTVFormats[0] = swapChain->GetDesc().ColorBufferFormat;
+    // Use the depth buffer format from the swap chain
+    psoDesc.GraphicsPipeline.DSVFormat = swapChain->GetDesc().DepthBufferFormat;
+    // Primitive topology defines what kind of primitives will be rendered by this pipeline state
+    psoDesc.GraphicsPipeline.PrimitiveTopology = topology;
+    // No back face culling for this tutorial
+    psoDesc.GraphicsPipeline.RasterizerDesc.CullMode = cullMode;
+    // Disable depth testing
+    psoDesc.GraphicsPipeline.DepthStencilDesc.DepthEnable = depthEnabled;
+
+    // Create a vertex shader
+    RHI::RefCntAutoPtr<RHI::IShader> pVS;
+    device->CreateShader(vs, &pVS);
+
+    // Create a pixel shader
+    RHI::RefCntAutoPtr<RHI::IShader> pPS;
+    device->CreateShader(ps, &pPS);
+
+    // Finally, create the pipeline state
+    psoDesc.GraphicsPipeline.pVS = pVS;
+    psoDesc.GraphicsPipeline.pPS = pPS;
+
+    RefCntAutoPtr<IPipelineState> pso;
+    device->CreatePipelineState(psoCreateInfo, &pso);
+
+    return pso;
+}
+
+void LoongRHIManager::Present(bool vsync)
+{
+    assert(gRhiImpl.swapChain_ != nullptr);
+    gRhiImpl.swapChain_->Present(vsync ? 1 : 0);
+}
+
 }

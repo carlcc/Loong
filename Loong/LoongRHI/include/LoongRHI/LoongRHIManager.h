@@ -26,11 +26,19 @@ public:
 
     static void Uninitialize();
 
+    static void Present(bool vsync);
+
     static RefCntAutoPtr<ISwapChain> GetSwapChain();
 
     static RefCntAutoPtr<IRenderDevice> GetDevice();
 
     static RefCntAutoPtr<IDeviceContext> GetImmediateContext();
+
+    //=== Create methods
+    static RHI::RefCntAutoPtr<RHI::IPipelineState> CreateGraphicsPSOForCurrentSwapChain(
+        const char* pipelineName,
+        const RHI::ShaderCreateInfo& vs, const RHI::ShaderCreateInfo& ps, bool depthEnabled = true,
+        CULL_MODE cullMode = CULL_MODE_BACK, PRIMITIVE_TOPOLOGY topology = PRIMITIVE_TOPOLOGY_TRIANGLE_LIST);
 };
 
 }
