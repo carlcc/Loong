@@ -4,14 +4,6 @@
 #include "LoongRHI/LoongRHIManager.h"
 #include "GetNativeWindow.h"
 #include "LoongFoundation/LoongLogger.h"
-#include <DeviceContext.h>
-#include <EngineFactory.h>
-#include <Errors.hpp>
-#include <PlatformDefinitions.h>
-#include <RefCntAutoPtr.hpp>
-#include <RenderDevice.h>
-#include <ScreenCapture.hpp>
-#include <SwapChain.h>
 #if D3D11_SUPPORTED
 #include <EngineFactoryD3D11.h>
 #endif
@@ -310,6 +302,21 @@ bool LoongRHIManager::Initialize(GLFWwindow* glfwWindow, RENDER_DEVICE_TYPE devi
 void LoongRHIManager::Uninitialize()
 {
     gRhiImpl.Uninitialize();
+}
+
+RefCntAutoPtr<ISwapChain> LoongRHIManager::GetSwapChain()
+{
+    return gRhiImpl.swapChain_;
+}
+
+RefCntAutoPtr<IRenderDevice> LoongRHIManager::GetDevice()
+{
+    return gRhiImpl.device_;
+}
+
+RefCntAutoPtr<IDeviceContext> LoongRHIManager::GetImmediateContext()
+{
+    return gRhiImpl.immediateContext_;
 }
 
 }
