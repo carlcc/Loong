@@ -4,6 +4,8 @@
 #include "LoongRHI/LoongRHIManager.h"
 #include "GetNativeWindow.h"
 #include "LoongFoundation/LoongLogger.h"
+#include <GraphicsUtilities.h>
+#include <TextureUtilities.h>
 #if D3D11_SUPPORTED
 #include <EngineFactoryD3D11.h>
 #endif
@@ -304,6 +306,12 @@ void LoongRHIManager::Uninitialize()
     gRhiImpl.Uninitialize();
 }
 
+void LoongRHIManager::Present(bool vsync)
+{
+    assert(gRhiImpl.swapChain_ != nullptr);
+    gRhiImpl.swapChain_->Present(vsync ? 1 : 0);
+}
+
 RefCntAutoPtr<ISwapChain> LoongRHIManager::GetSwapChain()
 {
     return gRhiImpl.swapChain_;
@@ -320,8 +328,9 @@ RefCntAutoPtr<IDeviceContext> LoongRHIManager::GetImmediateContext()
 }
 
 RHI::RefCntAutoPtr<RHI::IPipelineState> LoongRHIManager::CreateGraphicsPSOForCurrentSwapChain(
-    const char* pipelineName, const ShaderCreateInfo& vs, const ShaderCreateInfo& ps, bool depthEnabled,
-    CULL_MODE cullMode, PRIMITIVE_TOPOLOGY topology)
+    const char* pipelineName, const ShaderCreateInfo& vs, const ShaderCreateInfo& ps,
+    InputLayoutDesc inputLayout, PipelineResourceLayoutDesc resourceLayout,
+    bool depthEnabled, CULL_MODE cullMode, PRIMITIVE_TOPOLOGY topology)
 {
     auto& swapChain = gRhiImpl.swapChain_;
     auto& device = gRhiImpl.device_;
@@ -361,16 +370,48 @@ RHI::RefCntAutoPtr<RHI::IPipelineState> LoongRHIManager::CreateGraphicsPSOForCur
     psoDesc.GraphicsPipeline.pVS = pVS;
     psoDesc.GraphicsPipeline.pPS = pPS;
 
+    psoDesc.GraphicsPipeline.InputLayout = inputLayout;
+    psoDesc.ResourceLayout = resourceLayout;
+
     RefCntAutoPtr<IPipelineState> pso;
     device->CreatePipelineState(psoCreateInfo, &pso);
 
     return pso;
 }
 
-void LoongRHIManager::Present(bool vsync)
+RefCntAutoPtr<IBuffer> LoongRHIManager::CreateUniformBuffer(const char* bufferName, uint32_t size, void* initialData, USAGE usage, BIND_FLAGS bindFlags, CPU_ACCESS_FLAGS cpuAccessFlags)
 {
-    assert(gRhiImpl.swapChain_ != nullptr);
-    gRhiImpl.swapChain_->Present(vsync ? 1 : 0);
+    RefCntAutoPtr<IBuffer> buffer;
+    Diligent::CreateUniformBuffer(gRhiImpl.device_, size, bufferName, &buffer, usage, bindFlags, cpuAccessFlags, initialData);
+    return buffer;
+}
+
+RefCntAutoPtr<IBuffer> LoongRHIManager::CreateVertexBuffer(const char* bufferName, uint32_t size, void* initialData, USAGE usage, BIND_FLAGS bindFlags)
+{
+    assert(initialData != nullptr);
+    assert(size > 0);
+
+    RefCntAutoPtr<IBuffer> buffer;
+    BufferDesc vertBuffDesc;
+    vertBuffDesc.Name = bufferName;
+    vertBuffDesc.Usage = usage;
+    vertBuffDesc.BindFlags = bindFlags;
+    vertBuffDesc.uiSizeInBytes = size;
+    BufferData vbData;
+    vbData.pData = initialData;
+    vbData.DataSize = size;
+    gRhiImpl.device_->CreateBuffer(vertBuffDesc, &vbData, &buffer);
+
+    return buffer;
+}
+
+RefCntAutoPtr<ITexture> LoongRHIManager::CreateTextureFromFile(const char* file, bool isSrgb)
+{
+    RefCntAutoPtr<ITexture> texture;
+    TextureLoadInfo loadInfo;
+    loadInfo.IsSRGB = isSrgb;
+    Diligent::CreateTextureFromFile(file, loadInfo, gRhiImpl.device_, &texture);
+    return texture;
 }
 
 }

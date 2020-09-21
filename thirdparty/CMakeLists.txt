@@ -81,3 +81,4 @@ add_subdirectory(nativefiledialog)
 # Do not support opengl
 set(DILIGENT_NO_OPENGL ON)
 add_subdirectory(DiligentCore EXCLUDE_FROM_ALL)
+add_subdirectory(DiligentTools EXCLUDE_FROM_ALL)

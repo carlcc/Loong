@@ -54,6 +54,7 @@ PUBLIC
     Diligent-Common
     Diligent-GraphicsTools
     Diligent-TargetPlatform
+    Diligent-TextureLoader
     glfw
 )
 
