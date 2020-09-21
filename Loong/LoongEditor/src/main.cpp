@@ -4,7 +4,7 @@
 #include "LoongFileSystem/Driver.h"
 #include "LoongResource/Driver.h"
 
-#include "LoongApp/LoongApp.h"
+#include "LoongApp/LoongWindow.h"
 #include "LoongEditor.h"
 #include "LoongEditorContext.h"
 #include "LoongEditorProjectManager.h"
@@ -79,9 +79,9 @@ int LoadFonts()
 int StartApp(int argc, char** argv)
 {
 
-    Loong::App::LoongApp::WindowConfig config {};
+    Loong::App::LoongWindow::WindowConfig config {};
     config.title = "LoongEditor";
-    std::shared_ptr<Loong::App::LoongApp> app = std::make_shared<Loong::App::LoongApp>(config);
+    std::shared_ptr<Loong::App::LoongWindow> window = std::make_shared<Loong::App::LoongWindow>(config);
 
     if (0 != LoadFonts()) {
         return 1;
@@ -89,12 +89,12 @@ int StartApp(int argc, char** argv)
 
     std::shared_ptr<Loong::Editor::LoongEditorContext> context;
     {
-        Loong::Editor::LoongEditorProjectManager projectManager(app.get());
+        Loong::Editor::LoongEditorProjectManager projectManager(window.get());
         if (!projectManager.Initialize()) {
             LOONG_ERROR("Initialized project manager failed!");
             return 2;
         }
-        app->Run();
+        window->Run();
 
         auto projectFile = projectManager.GetSelectedPath();
         if (projectFile.empty()) {
@@ -108,13 +108,13 @@ int StartApp(int argc, char** argv)
         Loong::FS::LoongFileSystem::MountSearchPath(context->GetProjectDirPath());
     }
 
-    Loong::Editor::LoongEditor editor(app.get(), context);
+    Loong::Editor::LoongEditor editor(window.get(), context);
     if (!editor.Initialize()) {
         LOONG_ERROR("Initialized editor failed!");
         return 2;
     }
 
-    return app->Run();
+    return window->Run();
 }
 
 int main(int argc, char** argv)

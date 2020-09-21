@@ -6,9 +6,9 @@
 #include "../LoongEditorContext.h"
 #include "../utils/ImGuiUtils.h"
 #include "../utils/LoongEditorSceneCameraController.h"
-#include "LoongApp/LoongApp.h"
 #include "LoongApp/LoongInput.h"
 #include "LoongApp/LoongInputAction.h"
+#include "LoongApp/LoongWindow.h"
 #include "LoongCore/render/LoongRenderPass.h"
 #include "LoongCore/render/LoongRenderPassScenePass.h"
 #include "LoongCore/render/LoongRenderPipeline.h"
@@ -76,10 +76,10 @@ void LoongEditorRenderPanel::UpdateImpl(const Foundation::LoongClock& clock)
         const auto& editorInput = GetApp().GetInputManager();
 
         if (editorInput.IsMouseButtonPressed(App::LoongMouseButton::kButtonRight)) {
-            GetApp().SetMouseMode(App::LoongApp::MouseMode::kDisabled);
+            GetApp().SetMouseMode(App::LoongWindow::MouseMode::kDisabled);
             ImGui::GetIO().DisableMouseUpdate = true;
         } else {
-            GetApp().SetMouseMode(App::LoongApp::MouseMode::kNormal);
+            GetApp().SetMouseMode(App::LoongWindow::MouseMode::kNormal);
             ImGui::GetIO().DisableMouseUpdate = false;
         }
         if (ImGui::GetIO().DisableMouseUpdate) {

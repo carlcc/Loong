@@ -4,8 +4,8 @@
 
 #include "LoongEditorSceneCameraController.h"
 #include "../LoongEditor.h"
-#include "LoongApp/LoongApp.h"
 #include "LoongApp/LoongInput.h"
+#include "LoongApp/LoongWindow.h"
 #include "LoongCore/scene/LoongActor.h"
 #include "LoongFoundation/LoongMath.h"
 
@@ -21,7 +21,7 @@ void LoongEditorSceneCameraController::OnUpdate(const Foundation::LoongClock& cl
 {
     auto* actor = GetOwner();
     auto euler = Math::QuatToEuler(actor->GetTransform().GetRotation());
-    const auto& input = editor_->GetApp().GetInputManager();
+    const auto& input = editor_->GetWindow().GetInputManager();
 
     {
         euler.x -= input.GetMouseDelta().y / 200.0F; // pitch

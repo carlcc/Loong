@@ -9,7 +9,7 @@
 #include "LoongFoundation/LoongSigslotHelper.h"
 
 namespace Loong::App {
-class LoongApp;
+class LoongWindow;
 }
 
 namespace Loong::Editor {
@@ -61,7 +61,7 @@ public:
 
     LoongEditorContext& GetEditorContext();
 
-    App::LoongApp& GetApp();
+    App::LoongWindow& GetApp();
 
     LOONG_DECLARE_SIGNAL(OnOpen);
     LOONG_DECLARE_SIGNAL(OnClose);

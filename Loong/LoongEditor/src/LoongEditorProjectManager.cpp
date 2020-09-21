@@ -3,7 +3,7 @@
 //
 
 #include "LoongEditorProjectManager.h"
-#include "LoongApp/LoongApp.h"
+#include "LoongApp/LoongWindow.h"
 #include "LoongFoundation/LoongDefer.h"
 #include "LoongFoundation/LoongLogger.h"
 #include <imgui.h>
@@ -11,11 +11,11 @@
 
 namespace Loong::Editor {
 
-LoongEditorProjectManager::LoongEditorProjectManager(App::LoongApp* app)
+LoongEditorProjectManager::LoongEditorProjectManager(App::LoongWindow* window)
 {
-    app_ = app;
-    app->SubscribeUpdate(this, &LoongEditorProjectManager::OnUpdate);
-    app->SubscribeWindowClose(this, &LoongEditorProjectManager::OnClose);
+    window_ = window;
+    window->SubscribeUpdate(this, &LoongEditorProjectManager::OnUpdate);
+    window->SubscribeWindowClose(this, &LoongEditorProjectManager::OnClose);
 }
 
 bool LoongEditorProjectManager::Initialize()
@@ -49,7 +49,7 @@ void LoongEditorProjectManager::OnUpdate()
             if (result == nfdresult_t::NFD_OKAY) {
                 LOONG_INFO("Open project '{}'", outPath);
                 selectedPath_ = outPath;
-                app_->SetShouldClose(true);
+                window_->SetShouldClose(true);
             } else {
                 LOONG_ERROR("Selecting project was canceled or an error occured", outPath);
                 // TODO: handler error

@@ -8,13 +8,13 @@
 #include <string>
 
 namespace Loong::App {
-class LoongApp;
+class LoongWindow;
 }
 namespace Loong::Editor {
 
 class LoongEditorProjectManager : public Foundation::LoongHasSlots {
 public:
-    explicit LoongEditorProjectManager(App::LoongApp* app);
+    explicit LoongEditorProjectManager(App::LoongWindow* window);
     bool Initialize();
 
     const std::string& GetSelectedPath() const { return selectedPath_; }
@@ -23,7 +23,7 @@ protected:
     void OnClose();
     void OnUpdate();
 
-    App::LoongApp* app_ { nullptr };
+    App::LoongWindow* window_ { nullptr };
     std::string selectedPath_ {};
 };
 

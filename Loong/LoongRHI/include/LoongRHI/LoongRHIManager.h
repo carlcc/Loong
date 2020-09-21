@@ -4,7 +4,8 @@
 #pragma once
 
 #include <GraphicsTypes.h>
-#include <NativeWindow.h>
+
+struct GLFWwindow;
 
 namespace Loong::RHI {
 
@@ -12,7 +13,7 @@ using namespace Diligent;
 
 class LoongRHIManager {
 public:
-    static bool Initialize(NativeWindow nativeWindow, RENDER_DEVICE_TYPE deviceType);
+    static bool Initialize(GLFWwindow* glfwWindow, RENDER_DEVICE_TYPE deviceType);
 
     static void Uninitialize();
 };

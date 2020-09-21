@@ -102,9 +102,9 @@ LoongEditorContext& LoongEditorPanel::GetEditorContext()
     return editor_->GetContext();
 }
 
-App::LoongApp& LoongEditorPanel::GetApp()
+App::LoongWindow& LoongEditorPanel::GetApp()
 {
-    return editor_->GetApp();
+    return editor_->GetWindow();
 }
 
 }

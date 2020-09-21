@@ -4,7 +4,7 @@
 
 #include <glad/glad.h>
 
-#include "LoongApp/LoongApp.h"
+#include "LoongApp/LoongWindow.h"
 #include "LoongFoundation/LoongLogger.h"
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
@@ -13,9 +13,9 @@
 
 namespace Loong::App {
 
-class LoongApp::Impl {
+class LoongWindow::Impl {
 public:
-    explicit Impl(LoongApp* self, const WindowConfig& config)
+    explicit Impl(LoongWindow* self, const WindowConfig& config)
     {
         // Decide GL+GLSL versions
         glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
@@ -39,16 +39,16 @@ public:
 
         glfwSetFramebufferSizeCallback(glfwWindow_, [](GLFWwindow* win, int w, int h) {
             auto* ptr = glfwGetWindowUserPointer(win);
-            reinterpret_cast<LoongApp*>(ptr)->FrameBufferResizeSignal_.emit(w, h);
+            reinterpret_cast<LoongWindow*>(ptr)->FrameBufferResizeSignal_.emit(w, h);
         });
         glfwSetWindowSizeCallback(glfwWindow_, [](GLFWwindow* win, int w, int h) {
             auto* ptr = glfwGetWindowUserPointer(win);
-            reinterpret_cast<LoongApp*>(ptr)->WindowResizeSignal_.emit(w, h);
+            reinterpret_cast<LoongWindow*>(ptr)->WindowResizeSignal_.emit(w, h);
         });
         glfwSetKeyCallback(glfwWindow_, [](GLFWwindow* win, int key, int scancode, int action, int mod) {
             auto* ptr = glfwGetWindowUserPointer(win);
             (void)scancode;
-            auto* self = reinterpret_cast<LoongApp*>(ptr);
+            auto* self = reinterpret_cast<LoongWindow*>(ptr);
             switch (action) {
             case GLFW_PRESS:
                 self->impl_->input_.SetIsKeyPressed(LoongKeyCode(key));
@@ -68,7 +68,7 @@ public:
         });
         glfwSetMouseButtonCallback(glfwWindow_, [](GLFWwindow* win, int button, int action, int mod) {
             auto* ptr = glfwGetWindowUserPointer(win);
-            auto* self = reinterpret_cast<LoongApp*>(ptr);
+            auto* self = reinterpret_cast<LoongWindow*>(ptr);
             switch (action) {
             case GLFW_PRESS:
                 self->impl_->input_.SetIsMouseButtonPressed(LoongMouseButton(button));
@@ -90,21 +90,21 @@ public:
         });
         glfwSetCursorPosCallback(glfwWindow_, [](GLFWwindow* win, double x, double y) {
             auto* ptr = glfwGetWindowUserPointer(win);
-            auto* self = reinterpret_cast<LoongApp*>(ptr);
+            auto* self = reinterpret_cast<LoongWindow*>(ptr);
             self->impl_->input_.SetMousePosition(float(x), float(y));
             self->CursorPosSignal_.emit(x, y);
         });
         glfwSetWindowPosCallback(glfwWindow_, [](GLFWwindow* win, int x, int y) {
             auto* ptr = glfwGetWindowUserPointer(win);
-            reinterpret_cast<LoongApp*>(ptr)->WindowPosSignal_.emit(x, y);
+            reinterpret_cast<LoongWindow*>(ptr)->WindowPosSignal_.emit(x, y);
         });
         glfwSetWindowIconifyCallback(glfwWindow_, [](GLFWwindow* win, int iconified) {
             auto* ptr = glfwGetWindowUserPointer(win);
-            reinterpret_cast<LoongApp*>(ptr)->WindowIconifySignal_.emit(iconified == GLFW_TRUE);
+            reinterpret_cast<LoongWindow*>(ptr)->WindowIconifySignal_.emit(iconified == GLFW_TRUE);
         });
         glfwSetWindowCloseCallback(glfwWindow_, [](GLFWwindow* win) {
             auto* ptr = glfwGetWindowUserPointer(win);
-            reinterpret_cast<LoongApp*>(ptr)->WindowCloseSignal_.emit();
+            reinterpret_cast<LoongWindow*>(ptr)->WindowCloseSignal_.emit();
         });
 
         // InitImGui();
@@ -236,19 +236,19 @@ public:
 
     bool IsMouseVisible() const
     {
-        return GetMouseMode() == LoongApp::MouseMode::kNormal;
+        return GetMouseMode() == LoongWindow::MouseMode::kNormal;
     }
 
     MouseMode GetMouseMode() const
     {
         auto mode = glfwGetInputMode(glfwWindow_, GLFW_CURSOR);
         if (mode == GLFW_CURSOR_NORMAL) {
-            return LoongApp::MouseMode::kNormal;
+            return LoongWindow::MouseMode::kNormal;
         }
         if (mode == GLFW_CURSOR_HIDDEN) {
-            return LoongApp::MouseMode::kHidden;
+            return LoongWindow::MouseMode::kHidden;
         }
-        return LoongApp::MouseMode::kDisabled;
+        return LoongWindow::MouseMode::kDisabled;
     }
 
     void SetMouseMode(MouseMode b)
@@ -259,7 +259,7 @@ public:
         }
         int modes[] = { GLFW_CURSOR_NORMAL, GLFW_CURSOR_HIDDEN, GLFW_CURSOR_DISABLED };
         glfwSetInputMode(glfwWindow_, GLFW_CURSOR, modes[b]);
-        if (oldMode == LoongApp::MouseMode::kDisabled && b == LoongApp::MouseMode::kNormal) {
+        if (oldMode == LoongWindow::MouseMode::kDisabled && b == LoongWindow::MouseMode::kNormal) {
             // from hidden to normal. Since the mouse pos while it was disabled does not equals to our latest mouse pos.
             // We need to reset the mouse pos and clear the mouse delta
             double x, y;
@@ -277,69 +277,69 @@ public:
 
 private:
     GLFWwindow* glfwWindow_ { nullptr };
-    LoongApp* self_ { nullptr };
+    LoongWindow* self_ { nullptr };
     LoongInput input_ {};
 };
 
-LoongApp::LoongApp(const LoongApp::WindowConfig& config)
+LoongWindow::LoongWindow(const LoongWindow::WindowConfig& config)
     : impl_(new Impl(this, config))
 {
 }
 
-LoongApp::~LoongApp()
+LoongWindow::~LoongWindow()
 {
     delete impl_;
 }
 
-int LoongApp::Run()
+int LoongWindow::Run()
 {
     return impl_->Run();
 }
 
-void LoongApp::GetFramebufferSize(int& width, int& height) const
+void LoongWindow::GetFramebufferSize(int& width, int& height) const
 {
     impl_->GetFramebufferSize(width, height);
 }
 
-void LoongApp::SetTitle(const char* title)
+void LoongWindow::SetTitle(const char* title)
 {
     impl_->SetTitle(title);
 }
-void LoongApp::SetShouldClose(bool b)
+void LoongWindow::SetShouldClose(bool b)
 {
     impl_->SetShouldClose(b);
 }
 
-bool LoongApp::IsMouseVisible() const
+bool LoongWindow::IsMouseVisible() const
 {
     return impl_->IsMouseVisible();
 }
-LoongApp::MouseMode LoongApp::GetMouseMode() const
+LoongWindow::MouseMode LoongWindow::GetMouseMode() const
 {
     return impl_->GetMouseMode();
 }
 
-void LoongApp::SetMouseMode(LoongApp::MouseMode b)
+void LoongWindow::SetMouseMode(LoongWindow::MouseMode b)
 {
     impl_->SetMouseMode(b);
 }
 
-const LoongInput& LoongApp::GetInputManager() const
+const LoongInput& LoongWindow::GetInputManager() const
 {
     return impl_->GetInputManager();
 }
 
-void LoongApp::GetWindowSize(int& width, int& height) const
+void LoongWindow::GetWindowSize(int& width, int& height) const
 {
     impl_->GetWindowSize(width, height);
 }
 
-void LoongApp::GetFrameBufferSize(int& width, int& height) const
+void LoongWindow::GetFrameBufferSize(int& width, int& height) const
 {
     impl_->GetFramebufferSize(width, height);
 }
 
-GLFWwindow* LoongApp::GetGlfwWindow() const
+GLFWwindow* LoongWindow::GetGlfwWindow() const
 {
     return impl_->GetGlfwWindow();
 }

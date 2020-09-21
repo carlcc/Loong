@@ -3,7 +3,7 @@
 //
 
 #include "LoongEditor.h"
-#include "LoongApp/LoongApp.h"
+#include "LoongApp/LoongWindow.h"
 #include "LoongCore/scene/LoongScene.h"
 #include "LoongFoundation/LoongClock.h"
 #include "panels/LoongEditorContentPanel.h"
@@ -21,9 +21,9 @@
 
 namespace Loong::Editor {
 
-LoongEditor::LoongEditor(Loong::App::LoongApp* app, const std::shared_ptr<LoongEditorContext>& context)
+LoongEditor::LoongEditor(Loong::App::LoongWindow* app, const std::shared_ptr<LoongEditorContext>& context)
 {
-    app_ = app;
+    window_ = app;
     app->SubscribeBeginFrame(this, &LoongEditor::OnBeginFrame);
     app->SubscribeRender(this, &LoongEditor::OnRender);
     app->SubscribeUpdate(this, &LoongEditor::OnUpdate);

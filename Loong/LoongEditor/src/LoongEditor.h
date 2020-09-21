@@ -13,7 +13,7 @@
 #include <unordered_map>
 
 namespace Loong::App {
-class LoongApp;
+class LoongWindow;
 }
 
 namespace Loong::Editor {
@@ -25,7 +25,7 @@ public:
     using EndFrameTask = std::function<void()>; // Tasks execute on end of logic frame (before rendering)
     using PanelMap = std::unordered_map<std::string, std::shared_ptr<LoongEditorPanel>>;
 
-    explicit LoongEditor(Loong::App::LoongApp* app, const std::shared_ptr<LoongEditorContext>& context);
+    explicit LoongEditor(Loong::App::LoongWindow* app, const std::shared_ptr<LoongEditorContext>& context);
 
     bool Initialize();
 
@@ -53,7 +53,7 @@ public:
         return nullptr;
     }
 
-    App::LoongApp& GetApp() const { return *app_; }
+    App::LoongWindow& GetWindow() const { return *window_; }
 
     LoongEditorContext& GetContext() const { return *context_; }
 
@@ -67,7 +67,7 @@ private:
     void DoEndFrameTasks();
 
 private:
-    App::LoongApp* app_ { nullptr };
+    App::LoongWindow* window_ { nullptr };
     std::shared_ptr<LoongEditorContext> context_ { nullptr };
     std::queue<EndFrameTask> endFrameTaskQueue_ {};
     LoongEditorModalConfirmPopup confirmPopup_ {};

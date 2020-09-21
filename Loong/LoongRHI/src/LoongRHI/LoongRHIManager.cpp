@@ -2,8 +2,8 @@
 // Copyright (c) 2020 Carl Chen. All rights reserved.
 //
 #include "LoongRHI/LoongRHIManager.h"
+#include "GetNativeWindow.h"
 #include "LoongFoundation/LoongLogger.h"
-// #include "../platform/GetNativeWindow.h"
 #include <DeviceContext.h>
 #include <EngineFactory.h>
 #include <Errors.hpp>
@@ -29,7 +29,7 @@ namespace Loong::RHI {
 
 struct LoongRHIImpl {
 
-    void GetEngineInitializationAttribs(RENDER_DEVICE_TYPE deviceType, EngineCreateInfo& engineCI, SwapChainDesc& /*SCDesc*/)
+    static void GetEngineInitializationAttribs(RENDER_DEVICE_TYPE deviceType, EngineCreateInfo& engineCI, SwapChainDesc& /*SCDesc*/)
     {
         switch (deviceType) {
 #if D3D11_SUPPORTED
@@ -301,8 +301,9 @@ struct LoongRHIImpl {
 
 static LoongRHIImpl gRhiImpl {};
 
-bool LoongRHIManager::Initialize(NativeWindow nativeWindow, RENDER_DEVICE_TYPE deviceType)
+bool LoongRHIManager::Initialize(GLFWwindow* glfwWindow, RENDER_DEVICE_TYPE deviceType)
 {
+    NativeWindow nativeWindow = GetNativeWindow(glfwWindow);
     return gRhiImpl.Initialize(nativeWindow, deviceType);
 }
 

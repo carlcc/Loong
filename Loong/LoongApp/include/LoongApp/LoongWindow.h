@@ -9,7 +9,7 @@
 struct GLFWwindow;
 namespace Loong::App {
 
-class LoongApp {
+class LoongWindow {
 public:
     enum MouseMode {
         kNormal = 0,
@@ -30,13 +30,13 @@ public:
         int refreshRate { 60 };
         int samples { 0 };
     };
-    explicit LoongApp(const WindowConfig& config);
-    ~LoongApp();
+    explicit LoongWindow(const WindowConfig& config);
+    ~LoongWindow();
 
-    LoongApp(const LoongApp&) = delete;
-    LoongApp(LoongApp&&) = delete;
-    LoongApp& operator=(const LoongApp&) = delete;
-    LoongApp& operator=(LoongApp&&) = delete;
+    LoongWindow(const LoongWindow&) = delete;
+    LoongWindow(LoongWindow&&) = delete;
+    LoongWindow& operator=(const LoongWindow&) = delete;
+    LoongWindow& operator=(LoongWindow&&) = delete;
 
     int Run();
 

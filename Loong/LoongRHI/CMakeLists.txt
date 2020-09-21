@@ -12,7 +12,7 @@ if (WIN32)
             Diligent-GraphicsEngineVk-static
             Diligent-GraphicsEngineVkInterface
             )
-    # set(LOONG_PLATFORM_SRC_FILES platform/win/GetNativeWindow.cpp)
+    set(LOONG_PLATFORM_SRC_FILES platform/win/GetNativeWindow.cpp)
 elseif (APPLE)
     set(LOONG_PLATFORM_GRAPHICS_IMPLS
             # Metal has not been implemented
@@ -21,7 +21,7 @@ elseif (APPLE)
             Diligent-GraphicsEngineVk-static
             Diligent-GraphicsEngineVkInterface
             )
-    # set(LOONG_PLATFORM_SRC_FILES platform/macos/GetNativeWindow.mm)
+    set(LOONG_PLATFORM_SRC_FILES platform/macos/GetNativeWindow.mm)
 else()
     message(FATAL_ERROR "Unkown system")
 endif()
@@ -30,11 +30,19 @@ endif()
 file(GLOB_RECURSE SOURCE src/*)
 file(GLOB_RECURSE INCLUDE include/*)
 
-add_library(LoongRHI STATIC ${SOURCE} ${INCLUDE})
+add_library(LoongRHI STATIC
+        ${SOURCE}
+        ${INCLUDE}
+        ${LOONG_PLATFORM_SRC_FILES}
+        platform/GetNativeWindow.h
+)
 
 target_include_directories(LoongRHI
 PUBLIC
     include
+
+PRIVATE:
+    platform
 )
 
 target_link_libraries(LoongRHI
@@ -46,10 +54,11 @@ PUBLIC
     Diligent-Common
     Diligent-GraphicsTools
     Diligent-TargetPlatform
+    glfw
 )
 
-source_group("src" FILES ${SOURCE})
-source_group("include" FILES ${INCLUDE})
+source_group("src" FILES ${SOURCE} ${LOONG_PLATFORM_SRC_FILES})
+source_group("include" FILES ${INCLUDE} platform/GetNativeWindow.h)
 
 set_target_properties(LoongRHI PROPERTIES
     FOLDER Loong

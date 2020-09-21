@@ -10,7 +10,7 @@
 
 #include "Flags.h"
 #include "LoongApp/Driver.h"
-#include "LoongApp/LoongApp.h"
+#include "LoongApp/LoongWindow.h"
 #include "LoongAsset/LoongImage.h"
 #include "LoongFoundation/LoongDefer.h"
 #include "LoongFoundation/LoongLogger.h"
@@ -235,9 +235,9 @@ int Convert()
     Loong::App::ScopedDriver appDriver;
     Loong::Resource::ScopedDriver resourceDriver;
 
-    Loong::App::LoongApp::WindowConfig cfg;
+    Loong::App::LoongWindow::WindowConfig cfg;
     cfg.visible = 0;
-    Loong::App::LoongApp app(cfg);
+    Loong::App::LoongWindow app(cfg);
 
     auto& flags = Flags::Get();
 
