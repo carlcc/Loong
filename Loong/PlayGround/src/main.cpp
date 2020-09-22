@@ -4,12 +4,11 @@
 #include "LoongRHI/LoongRHIManager.h"
 #include "LoongWindow/Driver.h"
 #include "LoongWindow/LoongWindow.h"
+#include "LoongWindow/LoongWindowManager.h"
 #include <GLFW/glfw3.h>
 #include <GraphicsUtilities.h>
 #include <cassert>
 #include <iostream>
-
-std::shared_ptr<Loong::Window::LoongWindow> gWindow;
 
 namespace Loong {
 
@@ -64,11 +63,19 @@ void main(in  PSInput  PSIn,
 
 class LoongEditor : public Foundation::LoongHasSlots {
 public:
-    LoongEditor()
+    Window::LoongWindow* window_ { nullptr };
+    bool Initialize(Window::LoongWindow* window, RHI::RefCntAutoPtr<RHI::ISwapChain> swapChain)
     {
-        gWindow->SubscribeUpdate(this, &LoongEditor::OnUpdate);
-        gWindow->SubscribeRender(this, &LoongEditor::OnRender);
-        gWindow->SubscribePresent(this, &LoongEditor::OnPresent);
+        window_ = window;
+
+        swapChain_ = swapChain;
+        window->SubscribeUpdate(this, &LoongEditor::OnUpdate);
+        window->SubscribeRender(this, &LoongEditor::OnRender);
+        window->SubscribePresent(this, &LoongEditor::OnPresent);
+        window->SubscribeFrameBufferResize(this, &LoongEditor::OnFrameBufferResize);
+        window->SubscribeWindowClose(this, &LoongEditor::OnClose);
+        window->GetFramebufferSize(frameBufferWidth_, frameBufferHeight_);
+        OnFrameBufferResize(frameBufferWidth_, frameBufferHeight_);
 
         clock_.Reset();
 
@@ -115,12 +122,14 @@ public:
         resourceLayout.StaticSamplers = shaderSamplers;
         resourceLayout.NumStaticSamplers = _countof(shaderSamplers);
 
-        pso_ = RHI::LoongRHIManager::CreateGraphicsPSOForCurrentSwapChain("TexturedCube", vs, ps, inputLayout, resourceLayout, true, Diligent::CULL_MODE_NONE);
+        pso_ = RHI::LoongRHIManager::CreateGraphicsPSOForCurrentSwapChain(swapChain_, "TexturedCube", vs, ps, inputLayout, resourceLayout, true, Diligent::CULL_MODE_NONE);
         vsConstants_ = RHI::LoongRHIManager::CreateUniformBuffer("VS constants CB", sizeof(RHI::float4x4));
         pso_->GetStaticVariableByName(RHI::SHADER_TYPE_VERTEX, "Constants")->Set(vsConstants_);
         pso_->CreateShaderResourceBinding(&srb_, true);
 
         InitResources();
+
+        return true;
     }
 
     void InitResources()
@@ -198,22 +207,12 @@ public:
         srb_->GetVariableByName(RHI::SHADER_TYPE_PIXEL, "g_Texture")->Set(textureSRV_);
     }
 
-    void OnUpdate()
-    {
-        clock_.Update();
-        using float4x4 = RHI::float4x4;
-
-        float4x4 cubeModelTransform = float4x4::RotationY(clock_.ElapsedTime()) * float4x4::RotationX(-RHI::PI_F * 0.1f);
-        // Camera is at (0, 0, -5) looking along the Z axis
-        float4x4 view = float4x4::Translation(0.f, 0.0f, 5.0f);
-        float4x4 proj = float4x4::Projection(RHI::PI_F / 4.0f, 1.0f, 0.001f, 1000.f, false);
-        worldViewProjMatrix_ = cubeModelTransform * view * proj;
-    }
+    void OnUpdate();
 
     void OnRender()
     {
         auto immediateContext = RHI::LoongRHIManager::GetImmediateContext();
-        auto swapChain = RHI::LoongRHIManager::GetSwapChain();
+        auto swapChain = swapChain_;
 
         assert(immediateContext != nullptr);
         assert(swapChain != nullptr);
@@ -222,10 +221,8 @@ public:
         RHI::ITextureView* pDSV = swapChain->GetDepthBufferDSV();
         immediateContext->SetRenderTargets(1, &pRTV, pDSV, RHI::RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
 
-        // Clear the back buffer
-        const float ClearColor[] = { 0.350f, 0.350f, 0.350f, 1.0f };
         // Let the engine perform required state transitions
-        immediateContext->ClearRenderTarget(pRTV, ClearColor, RHI::RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
+        immediateContext->ClearRenderTarget(pRTV, clearColor_, RHI::RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
         immediateContext->ClearDepthStencil(pDSV, RHI::CLEAR_DEPTH_FLAG, 1.f, 0, RHI::RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
 
         {
@@ -252,7 +249,26 @@ public:
 
     void OnPresent()
     {
-        RHI::LoongRHIManager::Present(true);
+        bool vsync = true;
+        swapChain_->Present(vsync ? 1 : 0);
+    }
+
+    void OnFrameBufferResize(int w, int h)
+    {
+        frameBufferWidth_ = w;
+        frameBufferHeight_ = h;
+        frameBufferAspect_ = (float)w / (float)h;
+        swapChain_->Resize(w, h);
+    }
+
+    void OnClose()
+    {
+        OnClose1();
+    }
+
+    virtual void OnClose1()
+    {
+        Window::LoongWindowManager::DestroyAllWindows();
     }
 
     Foundation::LoongClock clock_ {};
@@ -264,7 +280,42 @@ public:
     RHI::RefCntAutoPtr<RHI::ITexture> texture_ { nullptr };
     RHI::RefCntAutoPtr<RHI::ITextureView> textureSRV_ { nullptr };
     RHI::float4x4 worldViewProjMatrix_ {};
+    int frameBufferWidth_ { 0 };
+    int frameBufferHeight_ { 0 };
+    float frameBufferAspect_ { 1.0F };
+    RHI::RefCntAutoPtr<RHI::ISwapChain> swapChain_ { nullptr };
+    float clearColor_[4] { 0.350f, 0.350f, 0.350f, 1.0f };
 };
+
+class LoongEditor2 : public LoongEditor {
+public:
+    void OnClose1() override
+    {
+        Window::LoongWindowManager::DestroyWindow(window_);
+    }
+};
+
+void LoongEditor::OnUpdate()
+{
+    if (window_->GetInputManager().IsKeyReleaseEvent(Window::LoongKeyCode::kKeyN)) {
+        auto* ed = new LoongEditor2;
+        auto* win = Window::LoongWindowManager::CreateWindow({}, [ed](auto* w) {
+            delete ed;
+        });
+        ed->Initialize(win, RHI::LoongRHIManager::CreateSwapChain(win->GetGlfwWindow()));
+        ed->clearColor_[0] = (1.0F + sin(clock_.ElapsedTime())) / 2.0F;
+        ed->clearColor_[1] = (1.0F + sin(clock_.ElapsedTime() * 1.3f)) / 2.0F;
+        ed->clearColor_[2] = (1.0F + sin(clock_.ElapsedTime() * 1.5f)) / 2.0F;
+    }
+    clock_.Update();
+    using float4x4 = RHI::float4x4;
+
+    float4x4 cubeModelTransform = float4x4::RotationY(clock_.ElapsedTime()) * float4x4::RotationX(-RHI::PI_F * 0.1f);
+    // Camera is at (0, 0, -5) looking along the Z axis
+    float4x4 view = float4x4::Translation(0.f, 0.0f, 5.0f);
+    float4x4 proj = float4x4::Projection(RHI::PI_F / 4.0f, frameBufferAspect_, 0.001f, 1000.f, false);
+    worldViewProjMatrix_ = cubeModelTransform * view * proj;
+}
 
 }
 
@@ -273,18 +324,21 @@ void StartApp()
     Loong::Window::ScopedDriver appDriver;
     assert(appDriver);
 
-    Loong::Window::LoongWindow::WindowConfig config {};
+    Loong::Window::WindowConfig config {};
     config.title = "Play Ground";
-    gWindow = std::make_shared<Loong::Window::LoongWindow>(config);
+    auto window = Loong::Window::LoongWindowManager::CreateWindow(config);
 
-    Loong::RHI::ScopedDriver rhiDriver(gWindow->GetGlfwWindow(), Loong::RHI::RENDER_DEVICE_TYPE_VULKAN);
+    Loong::RHI::ScopedDriver rhiDriver(window->GetGlfwWindow(), Loong::RHI::RENDER_DEVICE_TYPE_VULKAN);
     assert(rhiDriver);
 
-    Loong::LoongEditor myApp;
+    auto* ed = new Loong::LoongEditor;
+    ed->Initialize(window, Loong::RHI::LoongRHIManager::GetPrimarySwapChain());
+    Loong::Window::LoongWindowManager::SetDeleterForWindow(window, [ed](auto* w) {
+        delete ed;
+    });
 
-    gWindow->Run();
+    Loong::Window::LoongWindowManager::Run();
 
-    gWindow = nullptr;
     Loong::RHI::LoongRHIManager::Uninitialize();
 }
 

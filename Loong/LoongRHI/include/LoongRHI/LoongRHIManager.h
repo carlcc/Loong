@@ -29,16 +29,17 @@ public:
 
     static void Uninitialize();
 
-    static void Present(bool vsync);
-
-    static RefCntAutoPtr<ISwapChain> GetSwapChain();
+    static RefCntAutoPtr<ISwapChain> GetPrimarySwapChain();
 
     static RefCntAutoPtr<IRenderDevice> GetDevice();
 
     static RefCntAutoPtr<IDeviceContext> GetImmediateContext();
 
     //=== Create methods
-    static RHI::RefCntAutoPtr<RHI::IPipelineState> CreateGraphicsPSOForCurrentSwapChain(
+
+    static RefCntAutoPtr<ISwapChain> CreateSwapChain(GLFWwindow* glfwWindow);
+
+    static RHI::RefCntAutoPtr<RHI::IPipelineState> CreateGraphicsPSOForCurrentSwapChain(ISwapChain* swapChain,
         const char* pipelineName, const RHI::ShaderCreateInfo& vs, const RHI::ShaderCreateInfo& ps,
         InputLayoutDesc inputLayout, PipelineResourceLayoutDesc resourceLayout = {}, bool depthEnabled = true,
         CULL_MODE cullMode = CULL_MODE_BACK, PRIMITIVE_TOPOLOGY topology = PRIMITIVE_TOPOLOGY_TRIANGLE_LIST);

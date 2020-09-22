@@ -23,7 +23,7 @@ namespace Loong::RHI {
 
 struct LoongRHIImpl {
 
-    static void GetEngineInitializationAttribs(RENDER_DEVICE_TYPE deviceType, EngineCreateInfo& engineCI, SwapChainDesc& /*SCDesc*/)
+    static void GetEngineInitializationAttribs(RENDER_DEVICE_TYPE deviceType, EngineCreateInfo& engineCI)
     {
         switch (deviceType) {
 #if D3D11_SUPPORTED
@@ -61,15 +61,55 @@ struct LoongRHIImpl {
         }
     }
 
-    bool Initialize(NativeWindow nativeWindow, RENDER_DEVICE_TYPE deviceType)
+    RefCntAutoPtr<ISwapChain> CreateSwapChain(NativeWindow nativeWindow)
     {
-        deviceType_ = deviceType;
 #if PLATFORM_MACOS
         // We need at least 3 buffers on Metal to avoid massive
         // peformance degradation in full screen mode.
         // https://github.com/KhronosGroup/MoltenVK/issues/808
         swapChainInitDesc_.BufferCount = 3;
 #endif
+        RefCntAutoPtr<ISwapChain> swapChain {};
+
+        switch (deviceType_) {
+#if D3D11_SUPPORTED
+        case RENDER_DEVICE_TYPE_D3D11: {
+            auto* pFactoryD3D11 = GetEngineFactoryD3D11();
+            pFactoryD3D11->CreateSwapChainD3D11(device_, immediateContext_, swapChainInitDesc_, FullScreenModeDesc {}, nativeWindow, &swapChain);
+        } break;
+#endif
+
+#if D3D12_SUPPORTED
+        case RENDER_DEVICE_TYPE_D3D12: {
+            auto* pFactoryD3D12 = GetEngineFactoryD3D12();
+            pFactoryD3D12->CreateSwapChainD3D12(device_, immediateContext_, swapChainInitDesc_, FullScreenModeDesc {}, nativeWindow, &swapChain);
+        } break;
+#endif
+
+#if VULKAN_SUPPORTED
+        case RENDER_DEVICE_TYPE_VULKAN: {
+            auto* pFactoryVk = GetEngineFactoryVk();
+            pFactoryVk->CreateSwapChainVk(device_, immediateContext_, swapChainInitDesc_, nativeWindow, &swapChain);
+        } break;
+#endif
+
+#if METAL_SUPPORTED
+        case RENDER_DEVICE_TYPE_METAL: {
+            auto* pFactoryMtl = GetEngineFactoryMtl();
+            pFactoryMtl->CreateSwapChainMtl(device_, immediateContext_, swapChainInitDesc_, nativeWindow, &swapChain);
+        } break;
+#endif
+
+        default:
+            LOG_ERROR_AND_THROW("Unknown device type");
+            break;
+        }
+        return swapChain;
+    }
+
+    bool Initialize(NativeWindow nativeWindow, RENDER_DEVICE_TYPE deviceType)
+    {
+        deviceType_ = deviceType;
 
         std::vector<IDeviceContext*> ppContexts;
         switch (deviceType_) {
@@ -90,7 +130,7 @@ struct LoongRHIImpl {
                 EngineCI.DebugFlags = D3D11_DEBUG_FLAG_NONE;
             }
 
-            GetEngineInitializationAttribs(deviceType_, EngineCI, swapChainInitDesc_);
+            GetEngineInitializationAttribs(deviceType_, EngineCI);
 
 #if ENGINE_DLL
             // Load the dll and import GetEngineFactoryD3D11() function
@@ -131,8 +171,6 @@ struct LoongRHIImpl {
             if (!device_) {
                 LOG_ERROR_AND_THROW("Failed to create Direct3D11 render device and contexts.");
             }
-
-            pFactoryD3D11->CreateSwapChainD3D11(device_, ppContexts[0], swapChainInitDesc_, FullScreenModeDesc {}, nativeWindow, &swapChain_);
         } break;
 #endif
 
@@ -151,7 +189,7 @@ struct LoongRHIImpl {
                 EngineCI.EnableDebugLayer = false;
             }
 
-            GetEngineInitializationAttribs(deviceType_, EngineCI, swapChainInitDesc_);
+            GetEngineInitializationAttribs(deviceType_, EngineCI);
 
 #if ENGINE_DLL
             // Load the dll and import GetEngineFactoryD3D12() function
@@ -202,9 +240,6 @@ struct LoongRHIImpl {
             if (!device_) {
                 LOG_ERROR_AND_THROW("Failed to create Direct3D12 render device and contexts.");
             }
-
-            if (!swapChain_)
-                pFactoryD3D12->CreateSwapChainD3D12(device_, ppContexts[0], swapChainInitDesc_, FullScreenModeDesc {}, nativeWindow, &swapChain_);
         } break;
 #endif
 
@@ -224,7 +259,7 @@ struct LoongRHIImpl {
                 EngVkAttribs.EnableValidation = false;
             }
 
-            GetEngineInitializationAttribs(deviceType_, EngVkAttribs, swapChainInitDesc_);
+            GetEngineInitializationAttribs(deviceType_, EngVkAttribs);
             ppContexts.resize(1 + EngVkAttribs.NumDeferredContexts);
             auto* pFactoryVk = GetEngineFactoryVk();
             engineFactory_ = pFactoryVk;
@@ -232,9 +267,6 @@ struct LoongRHIImpl {
             if (!device_) {
                 LOG_ERROR_AND_THROW("Failed to create Vulkan render device and contexts.");
             }
-
-            if (!swapChain_)
-                pFactoryVk->CreateSwapChainVk(device_, ppContexts[0], swapChainInitDesc_, nativeWindow, &swapChain_);
         } break;
 #endif
 
@@ -242,13 +274,10 @@ struct LoongRHIImpl {
         case RENDER_DEVICE_TYPE_METAL: {
             EngineMtlCreateInfo MtlAttribs;
 
-            GetEngineInitializationAttribs(deviceType_, MtlAttribs, swapChainInitDesc_);
+            GetEngineInitializationAttribs(deviceType_, MtlAttribs);
             ppContexts.resize(1 + MtlAttribs.NumDeferredContexts);
             auto* pFactoryMtl = GetEngineFactoryMtl();
             pFactoryMtl->CreateDeviceAndContextsMtl(MtlAttribs, &device_, ppContexts.data());
-
-            if (!swapChain_)
-                pFactoryMtl->CreateSwapChainMtl(device_, ppContexts[0], swapChainInitDesc_, nativeWindow, &swapChain_);
         } break;
 #endif
 
@@ -262,6 +291,11 @@ struct LoongRHIImpl {
         deferredContexts_.resize(NumDeferredCtx);
         for (Uint32 ctx = 0; ctx < NumDeferredCtx; ++ctx)
             deferredContexts_[ctx].Attach(ppContexts[1 + ctx]);
+
+        // The first swapchain is primary, the reset are not
+        swapChainInitDesc_.IsPrimary = true;
+        swapChain_ = CreateSwapChain(nativeWindow);
+        swapChainInitDesc_.IsPrimary = false;
 
         return true;
     }
@@ -306,13 +340,7 @@ void LoongRHIManager::Uninitialize()
     gRhiImpl.Uninitialize();
 }
 
-void LoongRHIManager::Present(bool vsync)
-{
-    assert(gRhiImpl.swapChain_ != nullptr);
-    gRhiImpl.swapChain_->Present(vsync ? 1 : 0);
-}
-
-RefCntAutoPtr<ISwapChain> LoongRHIManager::GetSwapChain()
+RefCntAutoPtr<ISwapChain> LoongRHIManager::GetPrimarySwapChain()
 {
     return gRhiImpl.swapChain_;
 }
@@ -327,12 +355,18 @@ RefCntAutoPtr<IDeviceContext> LoongRHIManager::GetImmediateContext()
     return gRhiImpl.immediateContext_;
 }
 
+RefCntAutoPtr<ISwapChain> LoongRHIManager::CreateSwapChain(GLFWwindow* glfwWindow)
+{
+    NativeWindow nativeWindow = GetNativeWindow(glfwWindow);
+    return gRhiImpl.CreateSwapChain(nativeWindow);
+}
+
 RHI::RefCntAutoPtr<RHI::IPipelineState> LoongRHIManager::CreateGraphicsPSOForCurrentSwapChain(
+    ISwapChain* swapChain,
     const char* pipelineName, const ShaderCreateInfo& vs, const ShaderCreateInfo& ps,
     InputLayoutDesc inputLayout, PipelineResourceLayoutDesc resourceLayout,
     bool depthEnabled, CULL_MODE cullMode, PRIMITIVE_TOPOLOGY topology)
 {
-    auto& swapChain = gRhiImpl.swapChain_;
     auto& device = gRhiImpl.device_;
 
     RHI::PipelineStateCreateInfo psoCreateInfo;

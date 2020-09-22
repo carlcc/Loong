@@ -2,14 +2,15 @@
 // Copyright (c) 2020 Carl Chen. All rights reserved.
 //
 
-#include <glad/glad.h>
-
 #include "LoongWindow/LoongWindow.h"
 #include "LoongFoundation/LoongLogger.h"
+#include "LoongWindow/LoongWindowManager.h"
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
 #include <GLFW/glfw3.h>
 #include <imgui.h>
+#include <set>
+#include <vector>
 
 namespace Loong::Window {
 
@@ -163,52 +164,6 @@ public:
         // //IM_ASSERT(font != NULL);
     }
 
-    int Run()
-    {
-        glfwSetWindowShouldClose(glfwWindow_, 0);
-
-        {
-            double x, y;
-            glfwGetCursorPos(glfwWindow_, &x, &y);
-            // set mouse position twice to clear the delta to Zero
-            input_.SetMousePosition(float(x), float(y));
-            input_.SetMousePosition(float(x), float(y));
-        }
-        while (!glfwWindowShouldClose(glfwWindow_)) {
-            input_.BeginFrame();
-            glfwPollEvents();
-            int display_w, display_h;
-            GetFramebufferSize(display_w, display_h);
-
-            // glViewport(0, 0, display_w, display_h);
-            // glClearColor(0.0F, 0.0F, 0.0F, 1.0F);
-            // glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-
-            // ImGui_ImplOpenGL3_NewFrame();
-            // ImGui_ImplGlfw_NewFrame();
-            // ImGui::NewFrame();
-
-            self_->BeginFrameSignal_.emit();
-
-            self_->UpdateSignal_.emit();
-
-            // ImGui::Render();
-
-            self_->RenderSignal_.emit();
-
-            GetFramebufferSize(display_w, display_h);
-            // glViewport(0, 0, display_w, display_h);
-            // ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-
-            self_->LateUpdateSignal_.emit();
-
-            self_->PresentSignal_.emit();
-
-            // glfwSwapBuffers(glfwWindow_);
-        }
-        return 0;
-    }
-
     const LoongInput& GetInputManager() const
     {
         return input_;
@@ -217,6 +172,15 @@ public:
     GLFWwindow* GetGlfwWindow() const
     {
         return glfwWindow_;
+    }
+
+    void SetVisible(bool b)
+    {
+        if (b) {
+            glfwShowWindow(glfwWindow_);
+        } else {
+            glfwHideWindow(glfwWindow_);
+        }
     }
 
     void GetFramebufferSize(int& width, int& height)
@@ -279,9 +243,156 @@ private:
     GLFWwindow* glfwWindow_ { nullptr };
     LoongWindow* self_ { nullptr };
     LoongInput input_ {};
+    // TODO: Place it here, find a better place later
+    std::function<void(LoongWindow*)> onDelete_ { nullptr };
+
+    friend class WindowManagerImpl;
 };
 
-LoongWindow::LoongWindow(const LoongWindow::WindowConfig& config)
+class WindowManagerImpl {
+public:
+    static WindowManagerImpl& Get()
+    {
+        static WindowManagerImpl wm;
+        return wm;
+    }
+
+    ~WindowManagerImpl()
+    {
+        for (auto* w : windowsToRun_) {
+            DoDestroyWindow(w);
+        }
+        for (auto* w : newWindowsToRun_) {
+            DoDestroyWindow(w);
+        }
+        windowsToDestroy_.clear();
+        newWindowsToRun_.clear();
+        windowsToRun_.clear();
+    }
+
+private:
+    WindowManagerImpl() = default;
+
+public:
+    void DoDestroyWindow(LoongWindow* w)
+    {
+        w->WindowDestroySignal_.emit();
+        if (w->impl_->onDelete_) {
+            w->impl_->onDelete_(w);
+        }
+        delete w;
+    }
+
+    int Run()
+    {
+        while (true) {
+            if (!windowsToDestroy_.empty()) {
+                auto toStop = std::move(windowsToDestroy_);
+                for (auto w : toStop) {
+                    DoDestroyWindow(w);
+                    windowsToRun_.erase(w);
+                }
+            }
+            if (!newWindowsToRun_.empty()) {
+                for (auto* w : newWindowsToRun_) {
+                    windowsToRun_.insert(w);
+                }
+                newWindowsToRun_.clear();
+            }
+            if (windowsToRun_.empty()) {
+                break;
+            }
+
+            for (auto* win : windowsToRun_) {
+                win->impl_->input_.BeginFrame();
+            }
+            glfwPollEvents();
+            for (auto* win : windowsToRun_) {
+                win->BeginFrameSignal_.emit();
+            }
+            for (auto* win : windowsToRun_) {
+                win->UpdateSignal_.emit();
+            }
+            for (auto* win : windowsToRun_) {
+                win->RenderSignal_.emit();
+            }
+            for (auto* win : windowsToRun_) {
+                win->PresentSignal_.emit();
+            }
+        }
+        return 0;
+    }
+
+    void AddWindow(LoongWindow* window)
+    {
+        assert(windowsToRun_.count(window) == 0);
+        glfwSetWindowShouldClose(window->impl_->glfwWindow_, 0);
+        {
+            double x, y;
+            glfwGetCursorPos(window->impl_->glfwWindow_, &x, &y);
+            // set mouse position twice to clear the delta to Zero
+            window->impl_->input_.SetMousePosition(float(x), float(y));
+            window->impl_->input_.SetMousePosition(float(x), float(y));
+        }
+        newWindowsToRun_.insert(window);
+    }
+
+    LoongWindow* CreateWindow(const WindowConfig& cfg, std::function<void(LoongWindow*)>&& onDelete)
+    {
+        auto* win = new LoongWindow(cfg);
+        SetDeleterForWindow(win, std::move(onDelete));
+        AddWindow(win);
+        return win;
+    }
+
+    void SetDeleterForWindow(LoongWindow* win, std::function<void(LoongWindow*)>&& onDelete)
+    {
+        win->impl_->onDelete_ = std::move(onDelete);
+    }
+
+    void DestroyWindow(LoongWindow* window)
+    {
+        windowsToDestroy_.insert(window);
+    }
+
+    void DestroyAllWindows()
+    {
+        for (auto& w : windowsToRun_) {
+            windowsToDestroy_.insert(w);
+        }
+    }
+
+    std::set<LoongWindow*> windowsToRun_ {};
+    std::set<LoongWindow*> newWindowsToRun_ {};
+    std::set<LoongWindow*> windowsToDestroy_ {};
+};
+
+LoongWindow* LoongWindowManager::CreateWindow(const WindowConfig& cfg, std::function<void(LoongWindow*)>&& onDelete)
+{
+    return WindowManagerImpl::Get().CreateWindow(cfg, std::move(onDelete));
+}
+
+int LoongWindowManager::Run()
+{
+    return WindowManagerImpl::Get().Run();
+}
+
+void LoongWindowManager::DestroyWindow(LoongWindow* win)
+{
+    WindowManagerImpl::Get().DestroyWindow(win);
+}
+
+void LoongWindowManager::DestroyAllWindows()
+{
+    WindowManagerImpl::Get().DestroyAllWindows();
+}
+
+void LoongWindowManager::SetDeleterForWindow(LoongWindow* win, std::function<void(LoongWindow*)>&& onDelete)
+{
+    WindowManagerImpl::Get().SetDeleterForWindow(win, std::move(onDelete));
+}
+
+LoongWindow::LoongWindow(const WindowConfig& config)
     : impl_(new Impl(this, config))
 {
 }
@@ -291,9 +402,9 @@ LoongWindow::~LoongWindow()
     delete impl_;
 }
 
-int LoongWindow::Run()
+void LoongWindow::SetVisible(bool visible)
 {
-    return impl_->Run();
+    impl_->SetVisible(visible);
 }
 
 void LoongWindow::GetFramebufferSize(int& width, int& height) const
