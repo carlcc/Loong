@@ -6,6 +6,7 @@
 #include "LoongFoundation/LoongLogger.h"
 #include <GraphicsUtilities.h>
 #include <TextureUtilities.h>
+#include <cassert>
 #if D3D11_SUPPORTED
 #include <EngineFactoryD3D11.h>
 #endif
