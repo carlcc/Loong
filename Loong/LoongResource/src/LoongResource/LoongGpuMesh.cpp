@@ -12,28 +12,12 @@ LoongGpuMesh::LoongGpuMesh(const Asset::LoongMesh& mesh)
     , indicesCount_(uint32_t(mesh.GetIndices().size()))
     , materialIndex_(uint32_t(mesh.GetMaterialIndex()))
 {
-    CreateBuffers(mesh.GetVertices().data(), mesh.GetVertices().size(), mesh.GetIndices().data(), mesh.GetIndices().size());
+    verticesCount_ = (uint32_t)mesh.GetVertices().size();
+    indicesCount_ = (uint32_t)mesh.GetIndices().size();
+    materialIndex_ = mesh.GetMaterialIndex();
+    vbo_ = RHI::LoongRHIManager::CreateVertexBuffer("Mesh vertex buffer", verticesCount_ * sizeof(mesh.GetVertices()[0]), mesh.GetVertices().data());
+    ibo_ = RHI::LoongRHIManager::CreateIndexBuffer("Mesh index buffer", indicesCount_ * sizeof(mesh.GetIndices()[0]), mesh.GetIndices().data());
     aabb_ = mesh.GetAABB();
-}
-
-void LoongGpuMesh::CreateBuffers(const Asset::LoongVertex* vertices, size_t verticesCount, const uint32_t* indices, size_t indicesCount)
-{
-    vbo_ = std::make_unique<LoongVertexBuffer>();
-    vbo_->BufferData(vertices, verticesCount);
-    ibo_ = std::make_unique<LoongIndexBuffer>();
-    ibo_->BufferData(indices, indicesCount);
-
-    const GLsizei vertexSize = sizeof(Asset::LoongVertex);
-
-    vao_.Bind();
-    vbo_->Bind();
-    ibo_->Bind();
-    vao_.BindAttribute<float>(0, *vbo_, 3, vertexSize, 0);
-    vao_.BindAttribute<float>(1, *vbo_, 2, vertexSize, sizeof(float) * 3);
-    vao_.BindAttribute<float>(2, *vbo_, 3, vertexSize, sizeof(float) * 5);
-    vao_.BindAttribute<float>(3, *vbo_, 3, vertexSize, sizeof(float) * 8);
-    vao_.BindAttribute<float>(4, *vbo_, 3, vertexSize, sizeof(float) * 11);
-    vao_.Unbind();
 }
 
 }

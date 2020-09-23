@@ -20,4 +20,7 @@ target_link_libraries(PlayGround
 PRIVATE
 LoongWindow
         LoongRHI
+        LoongAsset
+        LoongFileSystem
+        LoongResource
         )

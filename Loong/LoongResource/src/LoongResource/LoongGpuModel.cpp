@@ -13,9 +13,8 @@ LoongGpuModel::LoongGpuModel(const Asset::LoongModel& model, const std::string& 
     meshes_.reserve(model.GetMeshes().size());
     materialNames_ = model.GetMaterialNames();
     aabb_ = model.GetAABB();
-
-    for (auto& mesh : model.GetMeshes()) {
-        meshes_.emplace_back(new LoongGpuMesh(*mesh));
+    for (auto* mesh : model.GetMeshes()) {
+        meshes_.emplace_back(new Resource::LoongGpuMesh(*mesh));
     }
     path_ = path;
 }

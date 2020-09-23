@@ -413,14 +413,14 @@ RHI::RefCntAutoPtr<RHI::IPipelineState> LoongRHIManager::CreateGraphicsPSOForCur
     return pso;
 }
 
-RefCntAutoPtr<IBuffer> LoongRHIManager::CreateUniformBuffer(const char* bufferName, uint32_t size, void* initialData, USAGE usage, BIND_FLAGS bindFlags, CPU_ACCESS_FLAGS cpuAccessFlags)
+RefCntAutoPtr<IBuffer> LoongRHIManager::CreateUniformBuffer(const char* bufferName, uint32_t size, const void* initialData, USAGE usage, BIND_FLAGS bindFlags, CPU_ACCESS_FLAGS cpuAccessFlags)
 {
     RefCntAutoPtr<IBuffer> buffer;
-    Diligent::CreateUniformBuffer(gRhiImpl.device_, size, bufferName, &buffer, usage, bindFlags, cpuAccessFlags, initialData);
+    Diligent::CreateUniformBuffer(gRhiImpl.device_, size, bufferName, &buffer, usage, bindFlags, cpuAccessFlags, const_cast<void*>(initialData));
     return buffer;
 }
 
-RefCntAutoPtr<IBuffer> LoongRHIManager::CreateVertexBuffer(const char* bufferName, uint32_t size, void* initialData, USAGE usage, BIND_FLAGS bindFlags)
+RefCntAutoPtr<IBuffer> LoongRHIManager::CreateVertexBuffer(const char* bufferName, uint32_t size, const void* initialData, USAGE usage, BIND_FLAGS bindFlags)
 {
     assert(initialData != nullptr);
     assert(size > 0);

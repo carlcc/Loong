@@ -7,46 +7,86 @@
 #include "LoongWindow/LoongWindowManager.h"
 #include <GLFW/glfw3.h>
 #include <GraphicsUtilities.h>
+#include <LoongAsset/LoongMesh.h>
+#include <LoongAsset/LoongModel.h>
+#include <LoongFileSystem/Driver.h>
+#include <LoongFileSystem/LoongFileSystem.h>
+#include <LoongFoundation/LoongPathUtils.h>
+#include <LoongResource/LoongGpuMesh.h>
+#include <LoongResource/LoongGpuModel.h>
 #include <cassert>
 #include <iostream>
 
 namespace Loong {
+struct UniformConstants {
+    RHI::float4x4 ub_MVP;
+    RHI::float4x4 ub_Model;
+    RHI::float4x4 ub_View;
+    RHI::float4x4 ub_Projection;
+    RHI::float3 ub_ViewPos;
+    float ub_Time;
+};
 
 static const char* VSSource = R"(
 cbuffer Constants
 {
-    float4x4 g_WorldViewProj;
+    float4x4 ub_MVP;
+    float4x4 ub_Model;
+    float4x4 ub_View;
+    float4x4 ub_Projection;
+    float3   ub_ViewPos;
+    float    ub_Time;
 };
 
 struct VSInput
 {
-    float3 Pos : ATTRIB0;
-    float2 UV  : ATTRIB1;
+    float3 v_Pos    : ATTRIB0;
+    float2 v_Uv     : ATTRIB1;
+    float3 v_Normal : ATTRIB2;
+    float3 v_Tan    : ATTRIB3;
+    float3 v_BiTan  : ATTRIB4;
 };
 
 struct PSInput
 {
-    float4 Pos : SV_POSITION;
-    float2 UV  : TEX_COORD;
+    float4 Pos          : SV_POSITION;
+    float2 Uv           : TEX_COORD;
+    // float3 WorldNormal  : NORMAL;
+    float4 WorldPos     : POSITIONT;
+    float3 CameraPos    ;
+    float3x3 TBN        ;
 };
 
 void main(in  VSInput VSIn,
           out PSInput PSIn)
 {
-    PSIn.Pos = mul( float4(VSIn.Pos,1.0), g_WorldViewProj);
-    PSIn.UV  = VSIn.UV;
+    float4 pos = float4(VSIn.v_Pos,1.0);
+
+    PSIn.Pos = ub_MVP * pos;// mul(pos, ub_MVP);
+    PSIn.Uv  = VSIn.v_Uv;
+    PSIn.WorldPos = mul(pos, ub_Model);
+    PSIn.CameraPos = ub_ViewPos;
+
+    float3 T = normalize(float3(ub_Model * float4(VSIn.v_Tan,   0.0)));
+    float3 B = normalize(float3(ub_Model * float4(VSIn.v_BiTan, 0.0)));
+    float3 N = normalize(float3(ub_Model * float4(VSIn.v_Normal,0.0)));
+    PSIn.TBN = float3x3(T, B, N);
 }
 )";
 
 // Pixel shader simply outputs interpolated vertex color
 static const char* PSSource = R"(
-Texture2D    g_Texture;
-SamplerState g_Texture_sampler;
+Texture2D    g_Albedo;
+SamplerState g_Albedo_sampler;
 
 struct PSInput
 {
-    float4 Pos : SV_POSITION;
-    float2 UV : TEX_COORD;
+    float4 Pos          : SV_POSITION;
+    float2 Uv           : TEX_COORD;
+    float3 WorldNormal  : NORMAL;
+    float4 WorldPos     : POSITIONT;
+    float3 CameraPos    ;
+    float3x3 TBN        ;
 };
 
 struct PSOutput
@@ -57,12 +97,13 @@ struct PSOutput
 void main(in  PSInput  PSIn,
           out PSOutput PSOut)
 {
-    PSOut.Color = g_Texture.Sample(g_Texture_sampler, PSIn.UV);
+    PSOut.Color = g_Albedo.Sample(g_Albedo_sampler, PSIn.Uv);
 }
 )";
 
 class LoongEditor : public Foundation::LoongHasSlots {
 public:
+    std::shared_ptr<Resource::LoongGpuModel> model_ { nullptr };
     Window::LoongWindow* window_ { nullptr };
     bool Initialize(Window::LoongWindow* window, RHI::RefCntAutoPtr<RHI::ISwapChain> swapChain)
     {
@@ -81,7 +122,6 @@ public:
 
         RHI::ShaderCreateInfo vs;
         vs.SourceLanguage = RHI::SHADER_SOURCE_LANGUAGE_HLSL;
-        // OpenGL backend requires emulated combined HLSL texture samplers (g_Texture + g_Texture_sampler combination)
         vs.UseCombinedTextureSamplers = true;
         vs.Desc.ShaderType = RHI::SHADER_TYPE_VERTEX;
         vs.EntryPoint = "main";
@@ -95,10 +135,12 @@ public:
         ps.EntryPoint = "main";
         ps.Desc.Name = "Cube pixel shader";
         ps.Source = PSSource;
-
         RHI::LayoutElement layoutElements[] {
             RHI::LayoutElement { 0, 0, 3, RHI::VT_FLOAT32, false },
             RHI::LayoutElement { 1, 0, 2, RHI::VT_FLOAT32, false },
+            RHI::LayoutElement { 2, 0, 3, RHI::VT_FLOAT32, false },
+            RHI::LayoutElement { 3, 0, 3, RHI::VT_FLOAT32, false },
+            RHI::LayoutElement { 4, 0, 3, RHI::VT_FLOAT32, false },
         };
         RHI::InputLayoutDesc inputLayout {};
         inputLayout.LayoutElements = layoutElements;
@@ -107,104 +149,39 @@ public:
         RHI::PipelineResourceLayoutDesc resourceLayout;
         resourceLayout.DefaultVariableType = RHI::SHADER_RESOURCE_VARIABLE_TYPE_STATIC;
         RHI::ShaderResourceVariableDesc shaderVariables[] {
-            { RHI::SHADER_TYPE_PIXEL, "g_Texture", RHI::SHADER_RESOURCE_VARIABLE_TYPE_MUTABLE }
+            { RHI::SHADER_TYPE_PIXEL, "g_Albedo", RHI::SHADER_RESOURCE_VARIABLE_TYPE_MUTABLE }
         };
 
         RHI::SamplerDesc samplerConfig {
             RHI::FILTER_TYPE_LINEAR, RHI::FILTER_TYPE_LINEAR, RHI::FILTER_TYPE_LINEAR,
-            RHI::TEXTURE_ADDRESS_CLAMP, RHI::TEXTURE_ADDRESS_CLAMP, RHI::TEXTURE_ADDRESS_CLAMP
+            RHI::TEXTURE_ADDRESS_WRAP, RHI::TEXTURE_ADDRESS_WRAP, RHI::TEXTURE_ADDRESS_WRAP
         };
         RHI::StaticSamplerDesc shaderSamplers[] {
-            { RHI::SHADER_TYPE_PIXEL, "g_Texture", samplerConfig }
+            { RHI::SHADER_TYPE_PIXEL, "g_Albedo", samplerConfig }
         };
         resourceLayout.Variables = shaderVariables;
         resourceLayout.NumVariables = _countof(shaderVariables);
         resourceLayout.StaticSamplers = shaderSamplers;
         resourceLayout.NumStaticSamplers = _countof(shaderSamplers);
 
-        pso_ = RHI::LoongRHIManager::CreateGraphicsPSOForCurrentSwapChain(swapChain_, "TexturedCube", vs, ps, inputLayout, resourceLayout, true, Diligent::CULL_MODE_NONE);
-        vsConstants_ = RHI::LoongRHIManager::CreateUniformBuffer("VS constants CB", sizeof(RHI::float4x4));
+        pso_ = RHI::LoongRHIManager::CreateGraphicsPSOForCurrentSwapChain(swapChain_, "TexturedCube", vs, ps, inputLayout, resourceLayout, true, Diligent::CULL_MODE_BACK);
+        vsConstants_ = RHI::LoongRHIManager::CreateUniformBuffer("VS constants CB", sizeof(UniformConstants));
         pso_->GetStaticVariableByName(RHI::SHADER_TYPE_VERTEX, "Constants")->Set(vsConstants_);
         pso_->CreateShaderResourceBinding(&srb_, true);
 
         InitResources();
-
         return true;
     }
 
     void InitResources()
     {
-        using float3 = RHI::float3;
-        using float2 = RHI::float2;
-        struct Vertex {
-            float3 pos;
-            float2 uv;
-        };
-
-        // Cube vertices
-        //      (-1,+1,+1)________________(+1,+1,+1)
-        //               /|              /|
-        //              / |             / |
-        //             /  |            /  |
-        //            /   |           /   |
-        //(-1,-1,+1) /____|__________/(+1,-1,+1)
-        //           |    |__________|____|
-        //           |   /(-1,+1,-1) |    /(+1,+1,-1)
-        //           |  /            |   /
-        //           | /             |  /
-        //           |/              | /
-        //           /_______________|/
-        //        (-1,-1,-1)       (+1,-1,-1)
-        //
-        // This time we have to duplicate verices because texture coordinates cannot
-        // be shared
-        Vertex kCubeVerts[] = {
-            { float3(-1, -1, -1), float2(0, 1) },
-            { float3(-1, +1, -1), float2(0, 0) },
-            { float3(+1, +1, -1), float2(1, 0) },
-            { float3(+1, -1, -1), float2(1, 1) },
-
-            { float3(-1, -1, -1), float2(0, 1) },
-            { float3(-1, -1, +1), float2(0, 0) },
-            { float3(+1, -1, +1), float2(1, 0) },
-            { float3(+1, -1, -1), float2(1, 1) },
-
-            { float3(+1, -1, -1), float2(0, 1) },
-            { float3(+1, -1, +1), float2(1, 1) },
-            { float3(+1, +1, +1), float2(1, 0) },
-            { float3(+1, +1, -1), float2(0, 0) },
-
-            { float3(+1, +1, -1), float2(0, 1) },
-            { float3(+1, +1, +1), float2(0, 0) },
-            { float3(-1, +1, +1), float2(1, 0) },
-            { float3(-1, +1, -1), float2(1, 1) },
-
-            { float3(-1, +1, -1), float2(1, 0) },
-            { float3(-1, +1, +1), float2(0, 0) },
-            { float3(-1, -1, +1), float2(0, 1) },
-            { float3(-1, -1, -1), float2(1, 1) },
-
-            { float3(-1, -1, +1), float2(1, 1) },
-            { float3(+1, -1, +1), float2(0, 1) },
-            { float3(+1, +1, +1), float2(0, 0) },
-            { float3(-1, +1, +1), float2(1, 0) }
-        };
-
-        uint32_t kIndices[] = {
-            2, 0, 1, 2, 3, 0,
-            4, 6, 5, 4, 7, 6,
-            8, 10, 9, 8, 11, 10,
-            12, 14, 13, 12, 15, 14,
-            16, 18, 17, 16, 19, 18,
-            20, 21, 22, 20, 22, 23
-        };
-
-        cubeVertexBuffer_ = RHI::LoongRHIManager::CreateVertexBuffer("Cube vertex buffer", sizeof(kCubeVerts), kCubeVerts);
-        cubeIndexBuffer_ = RHI::LoongRHIManager::CreateIndexBuffer("Cube index buffer", sizeof(kIndices), kIndices);
-        texture_ = RHI::LoongRHIManager::CreateTextureFromFile("Resources/Textures/Loong.jpg", true);
+        texture_ = RHI::LoongRHIManager::CreateTextureFromFile("Resources/Textures/DamagedHelmet_0.jpg", true);
         textureSRV_ = texture_->GetDefaultView(RHI::TEXTURE_VIEW_SHADER_RESOURCE);
 
-        srb_->GetVariableByName(RHI::SHADER_TYPE_PIXEL, "g_Texture")->Set(textureSRV_);
+        srb_->GetVariableByName(RHI::SHADER_TYPE_PIXEL, "g_Albedo")->Set(textureSRV_);
+
+        Asset::LoongModel assetModel("/Models/DamagedHelmet.lgmdl");
+        model_ = std::make_shared<Resource::LoongGpuModel>(assetModel, "/Models/DamagedHelmet.lgmdl");
     }
 
     void OnUpdate();
@@ -227,24 +204,30 @@ public:
 
         {
             // Map the buffer and write current world-view-projection matrix
-            RHI::MapHelper<RHI::float4x4> cbConstants(immediateContext, vsConstants_, RHI::MAP_WRITE, RHI::MAP_FLAG_DISCARD);
-            *cbConstants = worldViewProjMatrix_.Transpose();
+            RHI::MapHelper<UniformConstants> uniforms(immediateContext, vsConstants_, RHI::MAP_WRITE, RHI::MAP_FLAG_DISCARD);
+            uniforms->ub_View = uniforms_.ub_View.Transpose();
+            uniforms->ub_Projection = uniforms_.ub_Projection.Transpose();
+            uniforms->ub_Model = uniforms_.ub_Model.Transpose();
+            uniforms->ub_MVP = uniforms_.ub_MVP.Transpose();
+            uniforms->ub_ViewPos = uniforms_.ub_ViewPos;
+            uniforms->ub_Time = uniforms_.ub_Time;
         }
-
-        uint32_t offset = 0;
-        RHI::IBuffer* buffers[] = { cubeVertexBuffer_ };
-        immediateContext->SetVertexBuffers(0, 1, buffers, &offset, RHI::RESOURCE_STATE_TRANSITION_MODE_TRANSITION, RHI::SET_VERTEX_BUFFERS_FLAG_RESET);
-        immediateContext->SetIndexBuffer(cubeIndexBuffer_, 0, RHI::RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
 
         immediateContext->SetPipelineState(pso_);
         immediateContext->CommitShaderResources(srb_, RHI::RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
+        uint32_t offset = 0;
+        for (auto* mesh : model_->GetMeshes()) {
+            RHI::IBuffer* buffers[] = { mesh->GetVBO() };
+            immediateContext->SetVertexBuffers(0, 1, buffers, &offset, RHI::RESOURCE_STATE_TRANSITION_MODE_TRANSITION, RHI::SET_VERTEX_BUFFERS_FLAG_RESET);
+            immediateContext->SetIndexBuffer(mesh->GetIBO(), 0, RHI::RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
 
-        RHI::DrawIndexedAttribs drawAttrs;
+            RHI::DrawIndexedAttribs drawAttrs;
 
-        drawAttrs.IndexType = RHI::VT_UINT32;
-        drawAttrs.NumIndices = 36;
-        drawAttrs.Flags = Diligent::DRAW_FLAG_VERIFY_ALL;
-        immediateContext->DrawIndexed(drawAttrs);
+            drawAttrs.IndexType = RHI::VT_UINT32;
+            drawAttrs.NumIndices = mesh->GetIndexCount();
+            drawAttrs.Flags = Diligent::DRAW_FLAG_VERIFY_ALL;
+            immediateContext->DrawIndexed(drawAttrs);
+        }
     }
 
     void OnPresent()
@@ -274,8 +257,6 @@ public:
     Foundation::LoongClock clock_ {};
     RHI::RefCntAutoPtr<RHI::IPipelineState> pso_ { nullptr };
     RHI::RefCntAutoPtr<RHI::IBuffer> vsConstants_ { nullptr };
-    RHI::RefCntAutoPtr<RHI::IBuffer> cubeVertexBuffer_ { nullptr };
-    RHI::RefCntAutoPtr<RHI::IBuffer> cubeIndexBuffer_ { nullptr };
     RHI::RefCntAutoPtr<RHI::IShaderResourceBinding> srb_ { nullptr };
     RHI::RefCntAutoPtr<RHI::ITexture> texture_ { nullptr };
     RHI::RefCntAutoPtr<RHI::ITextureView> textureSRV_ { nullptr };
@@ -285,6 +266,8 @@ public:
     float frameBufferAspect_ { 1.0F };
     RHI::RefCntAutoPtr<RHI::ISwapChain> swapChain_ { nullptr };
     float clearColor_[4] { 0.350f, 0.350f, 0.350f, 1.0f };
+
+    UniformConstants uniforms_ {};
 };
 
 class LoongEditor2 : public LoongEditor {
@@ -310,17 +293,25 @@ void LoongEditor::OnUpdate()
     clock_.Update();
     using float4x4 = RHI::float4x4;
 
-    float4x4 cubeModelTransform = float4x4::RotationY(clock_.ElapsedTime()) * float4x4::RotationX(-RHI::PI_F * 0.1f);
-    // Camera is at (0, 0, -5) looking along the Z axis
-    float4x4 view = float4x4::Translation(0.f, 0.0f, 5.0f);
-    float4x4 proj = float4x4::Projection(RHI::PI_F / 4.0f, frameBufferAspect_, 0.001f, 1000.f, false);
-    worldViewProjMatrix_ = cubeModelTransform * view * proj;
+    uniforms_.ub_Model = float4x4::RotationY(clock_.ElapsedTime()) * float4x4::RotationX(-RHI::PI_F * 0.1f);
+    // Camera is at (0, 0, -4) looking along the Z axis
+    uniforms_.ub_View = float4x4::Translation(0.f, 0.0f, 4.0f);
+    uniforms_.ub_Projection = float4x4::Projection(RHI::PI_F / 4.0f, frameBufferAspect_, 0.001f, 1000.f, false);
+    uniforms_.ub_ViewPos = RHI::float3 { 0, 0, -4 };
+    uniforms_.ub_MVP = uniforms_.ub_Model * uniforms_.ub_View * uniforms_.ub_Projection;
+    uniforms_.ub_Time = clock_.ElapsedTime();
 }
 
 }
 
-void StartApp()
+void StartApp(int argc, char** argv)
 {
+    Loong::FS::ScopedDriver fsDriver(argv[0]);
+    auto path = Loong::Foundation::LoongPathUtils::GetParent(argv[0]) + "/Resources";
+    Loong::FS::LoongFileSystem::MountSearchPath(path);
+    path = Loong::Foundation::LoongPathUtils::Normalize(argv[0]) + "/../../Resources";
+    Loong::FS::LoongFileSystem::MountSearchPath(path);
+
     Loong::Window::ScopedDriver appDriver;
     assert(appDriver);
 
@@ -349,7 +340,7 @@ int main(int argc, char** argv)
         std::cout << "[" << logItem.level << "][" << logItem.location << "]: " << logItem.message << std::endl;
     });
 
-    StartApp();
+    StartApp(argc, argv);
 
     return 0;
 }

@@ -2,3 +2,5 @@ draft
 build
 vs2019_debug_x64
 .vscode
+cmake-build-debug
+Resources

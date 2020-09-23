@@ -18,6 +18,7 @@ PUBLIC
     LoongFoundation
     LoongAsset
     LoongFileSystem
+    LoongRHI
     glad
     rapidjson
 )
