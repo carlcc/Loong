@@ -7,10 +7,9 @@
 #else
 #error Unknown platform.
 #endif
-#include <GLFW/glfw3.h>
-#include <GLFW/glfw3native.h>
 
 #include "../platform/GetNativeWindow.h"
+
 #include <PlatformDefinitions.h>
 #include <Errors.hpp>
 #include <StringTools.hpp>
@@ -26,6 +25,9 @@
 #include <cassert>
 #include <iostream>
 
+
+#include <GLFW/glfw3.h>
+#include <GLFW/glfw3native.h>
 #if D3D11_SUPPORTED
 #include <EngineFactoryD3D11.h>
 #endif

@@ -4,7 +4,6 @@
 #pragma once
 
 // Diligent engine header files, are put here intentionally to avoid include them in other file
-#include <AdvancedMath.hpp>
 #include <BasicMath.hpp>
 #include <DeviceContext.h>
 #include <EngineFactory.h>

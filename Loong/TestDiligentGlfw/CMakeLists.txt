@@ -22,7 +22,14 @@ elseif (APPLE)
             )
     set(LOONG_PLATFORM_SRC_FILES platform/macos/GetNativeWindow.mm)
 else()
-    message(FATAL_ERROR "Unkown system")
+    #message(FATAL_ERROR "Unkown system")
+    # message(FATAL_ERROR "Unkown system")
+    set(LOONG_PLATFORM_GRAPHICS_IMPLS
+        # Metal has not been implemented
+        Diligent-GraphicsEngineVk-static
+        Diligent-GraphicsEngineVkInterface
+    )
+    set(LOONG_PLATFORM_SRC_FILES platform/linux/GetNativeWindow.cpp)
 endif()
 
 set(SOURCE

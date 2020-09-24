@@ -1,5 +1,4 @@
 #pragma once
-#include <GLFW/glfw3.h>
 #include <NativeWindow.h>
-
+#include <GLFW/glfw3.h>
 Diligent::NativeWindow GetNativeWindow(GLFWwindow* window);

@@ -313,14 +313,14 @@ void StartApp(int argc, char** argv)
     Loong::FS::LoongFileSystem::MountSearchPath(path);
 
     Loong::Window::ScopedDriver appDriver;
-    assert(appDriver);
+    assert(bool(appDriver));
 
     Loong::Window::WindowConfig config {};
     config.title = "Play Ground";
     auto window = Loong::Window::LoongWindowManager::CreateWindow(config);
 
     Loong::RHI::ScopedDriver rhiDriver(window->GetGlfwWindow(), Loong::RHI::RENDER_DEVICE_TYPE_VULKAN);
-    assert(rhiDriver);
+    assert(bool(rhiDriver));
 
     auto* ed = new Loong::LoongEditor;
     ed->Initialize(window, Loong::RHI::LoongRHIManager::GetPrimarySwapChain());

@@ -32,6 +32,11 @@ struct ScopedDriver {
         return !suc_;
     }
 
+    explicit operator bool() const
+    {
+        return suc_;
+    }
+
 private:
     bool suc_ { false };
 };
