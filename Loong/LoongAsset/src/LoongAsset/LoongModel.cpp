@@ -42,7 +42,9 @@ LoongModel::LoongModel(const std::string& path)
         return;
     }
     std::vector<uint8_t> buffer(fileSize);
-    assert(FS::LoongFileSystem::LoadFileContent(path, buffer.data(), fileSize) == fileSize);
+    auto size = FS::LoongFileSystem::LoadFileContent(path, buffer.data(), fileSize);
+    (void)size;
+    assert(size == fileSize);
 
     MemoryInputStream inputStream(buffer.data(), buffer.size());
 

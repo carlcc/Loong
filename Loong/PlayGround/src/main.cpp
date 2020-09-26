@@ -18,6 +18,7 @@
 #include <iostream>
 
 namespace Loong {
+
 struct UniformConstants {
     RHI::float4x4 ub_MVP;
     RHI::float4x4 ub_Model;
