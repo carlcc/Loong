@@ -16,6 +16,7 @@
 #include <LoongResource/LoongGpuMesh.h>
 #include <LoongResource/LoongGpuModel.h>
 #include <LoongResource/LoongResourceManager.h>
+#include <LoongResource/LoongTexture.h>
 #include <cassert>
 #include <iostream>
 
@@ -179,7 +180,7 @@ public:
     void InitResources()
     {
         texture_ = Resource::LoongResourceManager::GetTexture("/Textures/DamagedHelmet_0.jpg");
-        textureSRV_ = texture_->GetDefaultView(RHI::TEXTURE_VIEW_SHADER_RESOURCE);
+        textureSRV_ = texture_->GetTexture()->GetDefaultView(RHI::TEXTURE_VIEW_SHADER_RESOURCE);
 
         srb_->GetVariableByName(RHI::SHADER_TYPE_PIXEL, "g_Albedo")->Set(textureSRV_);
 
@@ -260,7 +261,7 @@ public:
     RHI::RefCntAutoPtr<RHI::IPipelineState> pso_ { nullptr };
     RHI::RefCntAutoPtr<RHI::IBuffer> vsConstants_ { nullptr };
     RHI::RefCntAutoPtr<RHI::IShaderResourceBinding> srb_ { nullptr };
-    RHI::RefCntAutoPtr<RHI::ITexture> texture_ { nullptr };
+    std::shared_ptr<Resource::LoongTexture> texture_ { nullptr };
     RHI::RefCntAutoPtr<RHI::ITextureView> textureSRV_ { nullptr };
     RHI::float4x4 worldViewProjMatrix_ {};
     int frameBufferWidth_ { 0 };

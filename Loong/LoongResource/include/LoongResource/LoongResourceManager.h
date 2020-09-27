@@ -13,6 +13,7 @@ namespace Loong::Resource {
 class LoongGpuModel;
 class LoongGpuMesh;
 class LoongMaterial;
+class LoongTexture;
 
 class LoongResourceManager {
 public:
@@ -22,7 +23,7 @@ public:
 
     static void Uninitialize();
 
-    static RHI::RefCntAutoPtr<RHI::ITexture> GetTexture(const std::string& path);
+    static std::shared_ptr<LoongTexture> GetTexture(const std::string& path);
 
     static std::shared_ptr<LoongGpuModel> GetModel(const std::string& path);
 

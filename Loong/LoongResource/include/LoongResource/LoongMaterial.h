@@ -15,23 +15,23 @@
 
 namespace Loong::Resource {
 
-class LoongShader;
 class LoongTexture;
 
 // TODO: Generate material class from shader file
 class LoongMaterial {
 public:
+    using TextureRef = std::shared_ptr<LoongTexture>;
     struct UniformData {
-        RHI::RefCntAutoPtr<RHI::ITextureView> albedoMap;
+        TextureRef albedoMap;
+        TextureRef normalMap;
+        TextureRef metallicMap;
+        TextureRef roughnessMap;
+        TextureRef emissiveMap;
+        TextureRef ambientOcclusionMap;
         Math::Vector3 albedo;
-        RHI::RefCntAutoPtr<RHI::ITextureView> normalMap;
-        RHI::RefCntAutoPtr<RHI::ITextureView> metallicMap;
         float metallic;
-        RHI::RefCntAutoPtr<RHI::ITextureView> roughnessMap;
         float roughness;
-        RHI::RefCntAutoPtr<RHI::ITextureView> emissiveMap;
-        float emissiveFactorMap;
-        RHI::RefCntAutoPtr<RHI::ITextureView> ambientOcclusionMap;
+        float emissiveFactor;
         float clearCoat;
         float clearCoatRoughness;
         Math::Vector2 textureTiling;

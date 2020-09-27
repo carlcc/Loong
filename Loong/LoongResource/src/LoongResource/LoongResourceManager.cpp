@@ -43,7 +43,7 @@ private:
     std::map<std::string, T> pool_ {};
 };
 
-static ResourceCache<RHI::RefCntAutoPtr<RHI::ITexture>> gTextureCache;
+static ResourceCache<std::shared_ptr<LoongTexture>> gTextureCache;
 static ResourceCache<std::shared_ptr<LoongGpuModel>> gModelCache;
 
 static std::map<std::string, std::weak_ptr<LoongMaterial>> gLoadedMaterials;
@@ -62,14 +62,16 @@ void LoongResourceManager::Uninitialize()
     gSkyBoxMesh = nullptr;
 }
 
-RHI::RefCntAutoPtr<RHI::ITexture> LoongResourceManager::GetTexture(const std::string& path)
+std::shared_ptr<LoongTexture> LoongResourceManager::GetTexture(const std::string& path)
 {
     auto texture = gTextureCache.Get(path);
     if (texture != nullptr) {
         return texture;
     }
 
-    texture = Resource::LoongTextureLoader::Create(path, RHI::LoongRHIManager::GetDevice(), true);
+    texture = Resource::LoongTextureLoader::Create(path, RHI::LoongRHIManager::GetDevice(), true, [](const std::string& p) {
+        LOONG_TRACE("Unload texture '{}'", p);
+    });
     if (texture != nullptr) {
         gTextureCache.Insert(path, texture);
         LOONG_TRACE("Load texture '{}' succeed", path);

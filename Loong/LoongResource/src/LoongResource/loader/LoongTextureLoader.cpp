@@ -9,6 +9,7 @@
 #include "LoongFoundation/LoongLogger.h"
 #include "LoongFoundation/LoongPathUtils.h"
 #include "LoongRHI/LoongRHIManager.h"
+#include "LoongResource/LoongTexture.h"
 #include "LoongResource/loader/LoongTextureLoader.h"
 #include <Image.h> // Diligent Engine
 #include <TextureLoader.h> // Dliigent Engine
@@ -16,14 +17,12 @@
 
 namespace Loong::Resource {
 
-RHI::RefCntAutoPtr<RHI::ITexture> LoongTextureLoader::Create(const std::string& vfsPath, RHI::RefCntAutoPtr<RHI::IRenderDevice> device, bool isSrgb)
+std::shared_ptr<LoongTexture> LoongTextureLoader::Create(const std::string& vfsPath, RHI::RefCntAutoPtr<RHI::IRenderDevice> device, bool isSrgb, std::function<void(const std::string&)>&& onDestroy)
 {
-    RHI::RefCntAutoPtr<RHI::ITexture> texture { nullptr };
-
     int64_t fileSize = FS::LoongFileSystem::GetFileSize(vfsPath);
     if (fileSize <= 0) {
         LOONG_ERROR("Failed to load texture '{}': Wrong file size", vfsPath);
-        return texture;
+        return nullptr;
     }
     std::vector<uint8_t> buffer(fileSize);
     int64_t size = FS::LoongFileSystem::LoadFileContent(vfsPath, buffer.data(), fileSize);
@@ -54,7 +53,7 @@ RHI::RefCntAutoPtr<RHI::ITexture> LoongTextureLoader::Create(const std::string& 
         auto extView = Foundation::LoongPathUtils::GetFileExtension(vfsPath);
         if (extView.empty()) {
             LOONG_WARNING("Unable to recognize file format: file name '{}' does not contain extension, abort", vfsPath);
-            return texture;
+            return nullptr;
         }
 
         std::string extension(extView.data(), extView.size());
@@ -70,7 +69,7 @@ RHI::RefCntAutoPtr<RHI::ITexture> LoongTextureLoader::Create(const std::string& 
             imgFileFormat = RHI::IMAGE_FILE_FORMAT_KTX;
         } else {
             LOONG_ERROR("Unsupported file format '{}'", extension);
-            return texture;
+            return nullptr;
         }
     }
 
@@ -78,6 +77,7 @@ RHI::RefCntAutoPtr<RHI::ITexture> LoongTextureLoader::Create(const std::string& 
     loadInfo.IsSRGB = isSrgb;
     LOONG_ASSERT(device != nullptr, "Device is nullptr, please make sure the RHI has been initialized");
 
+    RHI::RefCntAutoPtr<RHI::ITexture> texture { nullptr };
     if (imgFileFormat == RHI::IMAGE_FILE_FORMAT_PNG || imgFileFormat == RHI::IMAGE_FILE_FORMAT_JPEG || imgFileFormat == RHI::IMAGE_FILE_FORMAT_TIFF) {
         RHI::RefCntAutoPtr<RHI::Image> image { nullptr };
         RHI::ImageLoadInfo imgLoadInfo;
@@ -90,20 +90,32 @@ RHI::RefCntAutoPtr<RHI::ITexture> LoongTextureLoader::Create(const std::string& 
         RHI::CreateTextureFromKTX(dataBlob, loadInfo, device, &texture);
     } else {
         LOONG_ERROR("Failed to load texture '{}': Unknown format", vfsPath);
-        return texture;
+        return nullptr;
     }
 
     LOONG_VERIFY(texture != nullptr, "Create texture failed!");
-    return texture;
+    auto* lgTex = new LoongTexture(texture, vfsPath);
+    if (onDestroy != nullptr) {
+        return std::shared_ptr<LoongTexture>(lgTex, [onDestroy = std::move(onDestroy)](LoongTexture* t) {
+            onDestroy(t->GetPath());
+            delete t;
+        });
+    } else {
+        return std::shared_ptr<LoongTexture>(lgTex, [onDestroy = std::move(onDestroy)](LoongTexture* t) {
+            delete t;
+        });
+    }
 }
 
-RHI::RefCntAutoPtr<RHI::ITexture> LoongTextureLoader::CreateColor(uint8_t data[4], bool generateMipmap, const std::function<void(const std::string&)>& onDestroy)
+std::shared_ptr<LoongTexture> LoongTextureLoader::CreateColor(uint8_t data[4], bool generateMipmap, const std::function<void(const std::string&)>& onDestroy)
 {
+    LOONG_ASSERT(false, "NYI");
     return {};
 }
 
-RHI::RefCntAutoPtr<RHI::ITexture> LoongTextureLoader::CreateFromMemory(uint8_t* data, uint32_t width, uint32_t height, bool generateMipmap, const std::function<void(const std::string&)>& onDestroy, int channelCount)
+std::shared_ptr<LoongTexture> LoongTextureLoader::CreateFromMemory(uint8_t* data, uint32_t width, uint32_t height, bool generateMipmap, const std::function<void(const std::string&)>& onDestroy, int channelCount)
 {
+    LOONG_ASSERT(false, "NYI");
     return {};
 }
 
