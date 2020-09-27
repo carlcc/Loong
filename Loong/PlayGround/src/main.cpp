@@ -12,8 +12,10 @@
 #include <LoongFileSystem/Driver.h>
 #include <LoongFileSystem/LoongFileSystem.h>
 #include <LoongFoundation/LoongPathUtils.h>
+#include <LoongResource/Driver.h>
 #include <LoongResource/LoongGpuMesh.h>
 #include <LoongResource/LoongGpuModel.h>
+#include <LoongResource/LoongResourceManager.h>
 #include <cassert>
 #include <iostream>
 
@@ -176,13 +178,12 @@ public:
 
     void InitResources()
     {
-        texture_ = RHI::LoongRHIManager::CreateTextureFromFile("Resources/Textures/DamagedHelmet_0.jpg", true);
+        texture_ = Resource::LoongResourceManager::GetTexture("/Textures/DamagedHelmet_0.jpg");
         textureSRV_ = texture_->GetDefaultView(RHI::TEXTURE_VIEW_SHADER_RESOURCE);
 
         srb_->GetVariableByName(RHI::SHADER_TYPE_PIXEL, "g_Albedo")->Set(textureSRV_);
 
-        Asset::LoongModel assetModel("/Models/DamagedHelmet.lgmdl");
-        model_ = std::make_shared<Resource::LoongGpuModel>(assetModel, "/Models/DamagedHelmet.lgmdl");
+        model_ = Resource::LoongResourceManager::GetModel("/Models/DamagedHelmet.lgmdl");
     }
 
     void OnUpdate();
@@ -322,6 +323,9 @@ void StartApp(int argc, char** argv)
 
     Loong::RHI::ScopedDriver rhiDriver(window->GetGlfwWindow(), Loong::RHI::RENDER_DEVICE_TYPE_VULKAN);
     assert(bool(rhiDriver));
+
+    Loong::Resource::ScopedDriver resourceDriver;
+    assert(bool(resourceDriver));
 
     auto* ed = new Loong::LoongEditor;
     ed->Initialize(window, Loong::RHI::LoongRHIManager::GetPrimarySwapChain());
