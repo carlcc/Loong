@@ -252,7 +252,7 @@ public:
 
     void OnPresent()
     {
-        bool vsync = true;
+        bool vsync = false;
         swapChain_->Present(vsync ? 1 : 0);
     }
 
