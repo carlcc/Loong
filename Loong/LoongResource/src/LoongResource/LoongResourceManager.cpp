@@ -45,8 +45,8 @@ private:
 
 static ResourceCache<std::shared_ptr<LoongTexture>> gTextureCache;
 static ResourceCache<std::shared_ptr<LoongGpuModel>> gModelCache;
+static ResourceCache<std::shared_ptr<LoongMaterial>> gMaterialCache;
 
-static std::map<std::string, std::weak_ptr<LoongMaterial>> gLoadedMaterials;
 static std::shared_ptr<LoongGpuMesh> gSkyBoxMesh;
 
 bool LoongResourceManager::Initialize()
@@ -58,7 +58,7 @@ void LoongResourceManager::Uninitialize()
 {
     gTextureCache.Clear();
     gModelCache.Clear();
-    gLoadedMaterials.clear();
+    gMaterialCache.Clear();
     gSkyBoxMesh = nullptr;
 }
 
@@ -85,7 +85,6 @@ std::shared_ptr<LoongGpuModel> LoongResourceManager::GetModel(const std::string&
 {
     auto spGpuModel = gModelCache.Get(path);
     if (spGpuModel != nullptr) {
-        assert(spGpuModel != nullptr);
         return spGpuModel;
     }
 
@@ -106,26 +105,22 @@ std::shared_ptr<LoongGpuModel> LoongResourceManager::GetModel(const std::string&
 
 std::shared_ptr<LoongMaterial> LoongResourceManager::GetMaterial(const std::string& path)
 {
-    auto it = gLoadedMaterials.find(path);
-    if (it != gLoadedMaterials.end()) {
-        auto sp = it->second.lock();
-        assert(sp != nullptr);
-        return sp;
+    auto spMaterial = gMaterialCache.Get(path);
+    if (spMaterial != nullptr) {
+        return spMaterial;
     }
 
     LOONG_TRACE("Load material '{}'", path);
-    auto material = LoongMaterialLoader::Create(path, [](const std::string& path) {
-        gLoadedMaterials.erase(path);
+    spMaterial = LoongMaterialLoader::Create(path, [](const std::string& path) {
         LOONG_TRACE("Unload material '{}'", path);
     });
-
-    if (material != nullptr) {
-        gLoadedMaterials.insert({ path, material });
-        LOONG_TRACE("Load material '{}' succeed", path);
-    } else {
-        LOONG_ERROR("Load material '{}' failed", path);
+    if (spMaterial != nullptr) {
+        return nullptr;
     }
-    return material;
+
+    gMaterialCache.Insert(path, spMaterial);
+    LOONG_TRACE("Load material '{}' succeed", path);
+    return spMaterial;
 }
 
 std::shared_ptr<LoongGpuMesh> LoongResourceManager::GetSkyboxMesh()

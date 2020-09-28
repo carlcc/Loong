@@ -20,7 +20,7 @@ PUBLIC
     LoongFileSystem
     LoongRHI
     glad
-    rapidjson
+    jsonmapper
 )
 
 source_group("src" FILES ${SOURCE})

@@ -58,10 +58,10 @@ public:
 
     const std::string& GetPath() const { return path_; }
 
-    void SetPath(const std::string& path) { path_ = path; }
-
 private:
     void FillUniform();
+    LoongMaterial() = default;
+    ~LoongMaterial() = default;
 
 private:
     // Pipeline states
@@ -73,6 +73,8 @@ private:
     // Uniform data
     UniformData uniforms_ {};
     std::string path_ {};
+
+    friend class LoongMaterialLoader;
 };
 
 }

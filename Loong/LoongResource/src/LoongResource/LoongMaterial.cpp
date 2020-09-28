@@ -14,9 +14,4 @@ LoongPipelineFixedState LoongMaterial::GenerateStateMask() const
     return result;
 }
 
-void LoongMaterial::FillUniform()
-{
-
-}
-
 }
