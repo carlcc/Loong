@@ -7,6 +7,12 @@
 #include <cstdlib>
 #include <iostream>
 
+#ifdef NDEBUG
+
+#define LOONG_ASSERT(condition, msg)
+#define LOONG_VERIFY(condition, msg)
+
+#else
 #define LOONG_ASSERT(condition, msg)                                   \
     do {                                                               \
         if (condition)                                                 \
@@ -23,3 +29,5 @@
         std::cerr << "Verify failure '" #condition "' at " << __FILE__ \
                   << ":" << __LINE__ << ": " << msg << std::endl;      \
     } while (false)
+
+#endif

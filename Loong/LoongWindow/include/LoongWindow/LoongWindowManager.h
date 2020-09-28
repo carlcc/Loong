@@ -12,6 +12,8 @@ struct WindowConfig;
 
 class LoongWindowManager {
 public:
+    using Task = std::function<void()>;
+
     static int Run();
 
     // NOTE: If you want to destroy this window, invoke Destroy function
@@ -22,6 +24,8 @@ public:
     static void DestroyWindow(LoongWindow* win);
 
     static void DestroyAllWindows();
+
+    static void RunInMainThread(Task&& task);
 };
 
 }

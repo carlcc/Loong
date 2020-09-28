@@ -9,6 +9,8 @@
 #include "imgui_impl_opengl3.h"
 #include <GLFW/glfw3.h>
 #include <imgui.h>
+#include <mutex>
+#include <queue>
 #include <set>
 #include <vector>
 
@@ -319,8 +321,30 @@ public:
             for (auto* win : windowsToRun_) {
                 win->PresentSignal_.emit();
             }
+            RunTasks();
         }
         return 0;
+    }
+
+    void RunInMainThread(LoongWindowManager::Task&& task)
+    {
+        std::unique_lock<std::mutex> lck(tasksMutex_);
+        tasks_.push(std::move(task));
+        ++tasksCount_;
+    }
+
+    void RunTasks()
+    {
+        while (tasksCount_ > 0) {
+            LoongWindowManager::Task task { nullptr };
+            {
+                std::unique_lock<std::mutex> lck(tasksMutex_);
+                task = std::move(tasks_.front());
+                tasks_.pop();
+                --tasksCount_;
+            }
+            task();
+        }
     }
 
     void AddWindow(LoongWindow* window)
@@ -365,6 +389,10 @@ public:
     std::set<LoongWindow*> windowsToRun_ {};
     std::set<LoongWindow*> newWindowsToRun_ {};
     std::set<LoongWindow*> windowsToDestroy_ {};
+
+    std::queue<LoongWindowManager::Task> tasks_ {};
+    size_t tasksCount_ { 0 };
+    std::mutex tasksMutex_ {};
 };
 
 LoongWindow* LoongWindowManager::CreateWindow(const WindowConfig& cfg, std::function<void(LoongWindow*)>&& onDelete)
@@ -390,6 +418,11 @@ void LoongWindowManager::DestroyAllWindows()
 void LoongWindowManager::SetDeleterForWindow(LoongWindow* win, std::function<void(LoongWindow*)>&& onDelete)
 {
     WindowManagerImpl::Get().SetDeleterForWindow(win, std::move(onDelete));
+}
+
+void LoongWindowManager::RunInMainThread(Task&& task)
+{
+    WindowManagerImpl::Get().RunInMainThread(std::move(task));
 }
 
 LoongWindow::LoongWindow(const WindowConfig& config)
