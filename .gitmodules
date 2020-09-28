@@ -1,3 +1,6 @@
 [submodule "thirdparty/glfw"]
 	path = thirdparty/glfw
 	url = https://github.com/glfw/glfw.git
+[submodule "thirdparty/JsonMapper"]
+	path = thirdparty/JsonMapper
+	url = https://github.com/carlcc/JsonMapper.git
