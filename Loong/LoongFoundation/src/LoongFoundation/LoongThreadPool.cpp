@@ -35,7 +35,11 @@ public:
     }
     ~LoongThreadPoolImpl()
     {
-        isStop_ = true;
+        {
+            std::unique_lock<std::mutex> lck(tasksMutex_);
+            isStop_ = true;
+        }
+        hasTaskCv_.notify_all();
         for (auto& th : threads_) {
             if (th.joinable()) {
                 th.join();
@@ -73,6 +77,9 @@ private:
                 hasTaskCv_.wait(lck, [this]() {
                     return !tasks_.empty() || isStop_;
                 });
+                if (isStop_) {
+                    break;
+                }
                 task = std::move(tasks_.front());
                 tasks_.pop();
                 --tasksCount_;
