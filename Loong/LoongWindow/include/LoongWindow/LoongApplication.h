@@ -10,7 +10,7 @@ namespace Loong::Window {
 class LoongWindow;
 struct WindowConfig;
 
-class LoongWindowManager {
+class LoongApplication {
 public:
     using Task = std::function<void()>;
 
@@ -29,5 +29,4 @@ public:
 
     static bool IsInMainThread();
 };
-
 }

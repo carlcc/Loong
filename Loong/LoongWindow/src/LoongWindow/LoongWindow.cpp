@@ -4,7 +4,7 @@
 
 #include "LoongWindow/LoongWindow.h"
 #include "LoongFoundation/LoongLogger.h"
-#include "LoongWindow/LoongWindowManager.h"
+#include "LoongWindow/LoongApplication.h"
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
 #include <GLFW/glfw3.h>
@@ -248,18 +248,18 @@ private:
     // TODO: Place it here, find a better place later
     std::function<void(LoongWindow*)> onDelete_ { nullptr };
 
-    friend class WindowManagerImpl;
+    friend class LoongApplicationImpl;
 };
 
-class WindowManagerImpl {
+class LoongApplicationImpl {
 public:
-    static WindowManagerImpl& Get()
+    static LoongApplicationImpl& Get()
     {
-        static WindowManagerImpl wm;
+        static LoongApplicationImpl wm;
         return wm;
     }
 
-    ~WindowManagerImpl()
+    ~LoongApplicationImpl()
     {
         for (auto* w : windowsToRun_) {
             DoDestroyWindow(w);
@@ -273,7 +273,7 @@ public:
     }
 
 private:
-    WindowManagerImpl() = default;
+    LoongApplicationImpl() = default;
 
 public:
     void DoDestroyWindow(LoongWindow* w)
@@ -327,7 +327,7 @@ public:
         return 0;
     }
 
-    void RunInMainThread(LoongWindowManager::Task&& task)
+    void RunInMainThread(LoongApplication::Task&& task)
     {
         std::unique_lock<std::mutex> lck(tasksMutex_);
         tasks_.push(std::move(task));
@@ -337,7 +337,7 @@ public:
     void RunTasks()
     {
         while (tasksCount_ > 0) {
-            LoongWindowManager::Task task { nullptr };
+            LoongApplication::Task task { nullptr };
             {
                 std::unique_lock<std::mutex> lck(tasksMutex_);
                 task = std::move(tasks_.front());
@@ -397,45 +397,45 @@ public:
     std::set<LoongWindow*> newWindowsToRun_ {};
     std::set<LoongWindow*> windowsToDestroy_ {};
 
-    std::queue<LoongWindowManager::Task> tasks_ {};
+    std::queue<LoongApplication::Task> tasks_ {};
     size_t tasksCount_ { 0 };
     std::mutex tasksMutex_ {};
     std::thread::id mainThreadId_ {};
 };
 
-LoongWindow* LoongWindowManager::CreateWindow(const WindowConfig& cfg, std::function<void(LoongWindow*)>&& onDelete)
+LoongWindow* LoongApplication::CreateWindow(const WindowConfig& cfg, std::function<void(LoongWindow*)>&& onDelete)
 {
-    return WindowManagerImpl::Get().CreateWindow(cfg, std::move(onDelete));
+    return LoongApplicationImpl::Get().CreateWindow(cfg, std::move(onDelete));
 }
 
-int LoongWindowManager::Run()
+int LoongApplication::Run()
 {
-    return WindowManagerImpl::Get().Run();
+    return LoongApplicationImpl::Get().Run();
 }
 
-void LoongWindowManager::DestroyWindow(LoongWindow* win)
+void LoongApplication::DestroyWindow(LoongWindow* win)
 {
-    WindowManagerImpl::Get().DestroyWindow(win);
+    LoongApplicationImpl::Get().DestroyWindow(win);
 }
 
-void LoongWindowManager::DestroyAllWindows()
+void LoongApplication::DestroyAllWindows()
 {
-    WindowManagerImpl::Get().DestroyAllWindows();
+    LoongApplicationImpl::Get().DestroyAllWindows();
 }
 
-void LoongWindowManager::SetDeleterForWindow(LoongWindow* win, std::function<void(LoongWindow*)>&& onDelete)
+void LoongApplication::SetDeleterForWindow(LoongWindow* win, std::function<void(LoongWindow*)>&& onDelete)
 {
-    WindowManagerImpl::Get().SetDeleterForWindow(win, std::move(onDelete));
+    LoongApplicationImpl::Get().SetDeleterForWindow(win, std::move(onDelete));
 }
 
-void LoongWindowManager::RunInMainThread(Task&& task)
+void LoongApplication::RunInMainThread(Task&& task)
 {
-    WindowManagerImpl::Get().RunInMainThread(std::move(task));
+    LoongApplicationImpl::Get().RunInMainThread(std::move(task));
 }
 
-bool LoongWindowManager::IsInMainThread()
+bool LoongApplication::IsInMainThread()
 {
-    return WindowManagerImpl::Get().IsInMainThread();
+    return LoongApplicationImpl::Get().IsInMainThread();
 }
 
 LoongWindow::LoongWindow(const WindowConfig& config)

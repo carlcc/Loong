@@ -81,7 +81,7 @@ private:
 private:
     class Impl;
     Impl* impl_ { nullptr };
-    friend class WindowManagerImpl;
+    friend class LoongApplicationImpl;
 };
 
 }

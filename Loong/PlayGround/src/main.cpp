@@ -3,8 +3,8 @@
 #include "LoongRHI/Driver.h"
 #include "LoongRHI/LoongRHIManager.h"
 #include "LoongWindow/Driver.h"
+#include "LoongWindow/LoongApplication.h"
 #include "LoongWindow/LoongWindow.h"
-#include "LoongWindow/LoongWindowManager.h"
 #include <GLFW/glfw3.h>
 #include <GraphicsUtilities.h>
 #include <LoongAsset/LoongMesh.h>
@@ -184,11 +184,11 @@ public:
     {
         Foundation::LoongThreadPool::AddTask([&]() {
             texture_ = Resource::LoongResourceManager::GetTexture("/Textures/DamagedHelmet_0.jpg");
-            LOONG_ASSERT(!Window::LoongWindowManager::IsInMainThread(), "");
+            LOONG_ASSERT(!Window::LoongApplication::IsInMainThread(), "");
             LOONG_INFO("Loading texture...");
 
-            Window::LoongWindowManager::RunInMainThread([&]() {
-                LOONG_ASSERT(Window::LoongWindowManager::IsInMainThread(), "");
+            Window::LoongApplication::RunInMainThread([&]() {
+                LOONG_ASSERT(Window::LoongApplication::IsInMainThread(), "");
                 textureSRV_ = texture_->GetTexture()->GetDefaultView(RHI::TEXTURE_VIEW_SHADER_RESOURCE);
 
                 srb_->GetVariableByName(RHI::SHADER_TYPE_PIXEL, "g_Albedo")->Set(textureSRV_);
@@ -203,7 +203,7 @@ public:
 
     void OnRender()
     {
-        LOONG_ASSERT(Window::LoongWindowManager::IsInMainThread(), "");
+        LOONG_ASSERT(Window::LoongApplication::IsInMainThread(), "");
         auto immediateContext = RHI::LoongRHIManager::GetImmediateContext();
         auto swapChain = swapChain_;
 
@@ -271,7 +271,7 @@ public:
 
     virtual void OnClose1()
     {
-        Window::LoongWindowManager::DestroyAllWindows();
+        Window::LoongApplication::DestroyAllWindows();
     }
 
     Foundation::LoongClock clock_ {};
@@ -294,16 +294,16 @@ class LoongEditor2 : public LoongEditor {
 public:
     void OnClose1() override
     {
-        Window::LoongWindowManager::DestroyWindow(window_);
+        Window::LoongApplication::DestroyWindow(window_);
     }
 };
 
 void LoongEditor::OnUpdate()
 {
-    LOONG_ASSERT(Window::LoongWindowManager::IsInMainThread(), "");
+    LOONG_ASSERT(Window::LoongApplication::IsInMainThread(), "");
     if (window_->GetInputManager().IsKeyReleaseEvent(Window::LoongKeyCode::kKeyN)) {
         auto* ed = new LoongEditor2;
-        auto* win = Window::LoongWindowManager::CreateWindow({}, [ed](auto* w) {
+        auto* win = Window::LoongApplication::CreateWindow({}, [ed](auto* w) {
             delete ed;
         });
         ed->Initialize(win, RHI::LoongRHIManager::CreateSwapChain(win->GetGlfwWindow()));
@@ -338,7 +338,7 @@ void StartApp(int argc, char** argv)
 
     Loong::Window::WindowConfig config {};
     config.title = "Play Ground";
-    auto window = Loong::Window::LoongWindowManager::CreateWindow(config);
+    auto window = Loong::Window::LoongApplication::CreateWindow(config);
 
     Loong::RHI::ScopedDriver rhiDriver(window->GetGlfwWindow(), Loong::RHI::RENDER_DEVICE_TYPE_VULKAN);
     assert(bool(rhiDriver));
@@ -348,11 +348,11 @@ void StartApp(int argc, char** argv)
 
     auto* ed = new Loong::LoongEditor;
     ed->Initialize(window, Loong::RHI::LoongRHIManager::GetPrimarySwapChain());
-    Loong::Window::LoongWindowManager::SetDeleterForWindow(window, [ed](auto* w) {
+    Loong::Window::LoongApplication::SetDeleterForWindow(window, [ed](auto* w) {
         delete ed;
     });
 
-    Loong::Window::LoongWindowManager::Run();
+    Loong::Window::LoongApplication::Run();
 
     Loong::RHI::LoongRHIManager::Uninitialize();
 }
