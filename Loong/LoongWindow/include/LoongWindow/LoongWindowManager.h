@@ -26,6 +26,8 @@ public:
     static void DestroyAllWindows();
 
     static void RunInMainThread(Task&& task);
+
+    static bool IsInMainThread();
 };
 
 }

@@ -11,7 +11,10 @@
 #include <LoongAsset/LoongModel.h>
 #include <LoongFileSystem/Driver.h>
 #include <LoongFileSystem/LoongFileSystem.h>
+#include <LoongFoundation/Driver.h>
+#include <LoongFoundation/LoongAssert.h>
 #include <LoongFoundation/LoongPathUtils.h>
+#include <LoongFoundation/LoongThreadPool.h>
 #include <LoongResource/Driver.h>
 #include <LoongResource/LoongGpuMesh.h>
 #include <LoongResource/LoongGpuModel.h>
@@ -57,8 +60,8 @@ struct PSInput
     float2 Uv           : TEX_COORD;
     // float3 WorldNormal  : NORMAL;
     float4 WorldPos     : POSITIONT;
-    float3 CameraPos    ;
-    float3x3 TBN        ;
+    //float3 CameraPos    ;
+    //float3x3 TBN        ;
 };
 
 void main(in  VSInput VSIn,
@@ -66,15 +69,15 @@ void main(in  VSInput VSIn,
 {
     float4 pos = float4(VSIn.v_Pos,1.0);
 
-    PSIn.Pos = ub_MVP * pos;// mul(pos, ub_MVP);
+    PSIn.Pos = mul(pos, ub_MVP);
     PSIn.Uv  = VSIn.v_Uv;
     PSIn.WorldPos = mul(pos, ub_Model);
-    PSIn.CameraPos = ub_ViewPos;
+    //PSIn.CameraPos = ub_ViewPos;
 
-    float3 T = normalize(float3(ub_Model * float4(VSIn.v_Tan,   0.0)));
-    float3 B = normalize(float3(ub_Model * float4(VSIn.v_BiTan, 0.0)));
-    float3 N = normalize(float3(ub_Model * float4(VSIn.v_Normal,0.0)));
-    PSIn.TBN = float3x3(T, B, N);
+    //float3 T = normalize(float3(ub_Model * float4(VSIn.v_Tan,   0.0)));
+    //float3 B = normalize(float3(ub_Model * float4(VSIn.v_BiTan, 0.0)));
+    //float3 N = normalize(float3(ub_Model * float4(VSIn.v_Normal,0.0)));
+    //PSIn.TBN = float3x3(T, B, N);
 }
 )";
 
@@ -89,8 +92,8 @@ struct PSInput
     float2 Uv           : TEX_COORD;
     float3 WorldNormal  : NORMAL;
     float4 WorldPos     : POSITIONT;
-    float3 CameraPos    ;
-    float3x3 TBN        ;
+    //float3 CameraPos    ;
+    //float3x3 TBN        ;
 };
 
 struct PSOutput
@@ -179,18 +182,28 @@ public:
 
     void InitResources()
     {
-        texture_ = Resource::LoongResourceManager::GetTexture("/Textures/DamagedHelmet_0.jpg");
-        textureSRV_ = texture_->GetTexture()->GetDefaultView(RHI::TEXTURE_VIEW_SHADER_RESOURCE);
+        Foundation::LoongThreadPool::AddTask([&]() {
+            texture_ = Resource::LoongResourceManager::GetTexture("/Textures/DamagedHelmet_0.jpg");
+            LOONG_ASSERT(!Window::LoongWindowManager::IsInMainThread(), "");
+            LOONG_INFO("Loading texture...");
 
-        srb_->GetVariableByName(RHI::SHADER_TYPE_PIXEL, "g_Albedo")->Set(textureSRV_);
+            Window::LoongWindowManager::RunInMainThread([&]() {
+                LOONG_ASSERT(Window::LoongWindowManager::IsInMainThread(), "");
+                textureSRV_ = texture_->GetTexture()->GetDefaultView(RHI::TEXTURE_VIEW_SHADER_RESOURCE);
 
-        model_ = Resource::LoongResourceManager::GetModel("/Models/DamagedHelmet.lgmdl");
+                srb_->GetVariableByName(RHI::SHADER_TYPE_PIXEL, "g_Albedo")->Set(textureSRV_);
+
+                model_ = Resource::LoongResourceManager::GetModel("/Models/DamagedHelmet.lgmdl");
+            });
+            return true;
+        });
     }
 
     void OnUpdate();
 
     void OnRender()
     {
+        LOONG_ASSERT(Window::LoongWindowManager::IsInMainThread(), "");
         auto immediateContext = RHI::LoongRHIManager::GetImmediateContext();
         auto swapChain = swapChain_;
 
@@ -204,6 +217,10 @@ public:
         // Let the engine perform required state transitions
         immediateContext->ClearRenderTarget(pRTV, clearColor_, RHI::RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
         immediateContext->ClearDepthStencil(pDSV, RHI::CLEAR_DEPTH_FLAG, 1.f, 0, RHI::RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
+
+        if (texture_ == nullptr || model_ == nullptr) {
+            return;
+        }
 
         {
             // Map the buffer and write current world-view-projection matrix
@@ -283,6 +300,7 @@ public:
 
 void LoongEditor::OnUpdate()
 {
+    LOONG_ASSERT(Window::LoongWindowManager::IsInMainThread(), "");
     if (window_->GetInputManager().IsKeyReleaseEvent(Window::LoongKeyCode::kKeyN)) {
         auto* ed = new LoongEditor2;
         auto* win = Window::LoongWindowManager::CreateWindow({}, [ed](auto* w) {
@@ -304,11 +322,11 @@ void LoongEditor::OnUpdate()
     uniforms_.ub_MVP = uniforms_.ub_Model * uniforms_.ub_View * uniforms_.ub_Projection;
     uniforms_.ub_Time = clock_.ElapsedTime();
 }
-
 }
 
 void StartApp(int argc, char** argv)
 {
+    Loong::Foundation::ScopedDriver foundationDriver;
     Loong::FS::ScopedDriver fsDriver(argv[0]);
     auto path = Loong::Foundation::LoongPathUtils::GetParent(argv[0]) + "/Resources";
     Loong::FS::LoongFileSystem::MountSearchPath(path);

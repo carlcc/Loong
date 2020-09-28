@@ -287,6 +287,7 @@ public:
 
     int Run()
     {
+        mainThreadId_ = std::this_thread::get_id();
         while (true) {
             if (!windowsToDestroy_.empty()) {
                 auto toStop = std::move(windowsToDestroy_);
@@ -347,6 +348,12 @@ public:
         }
     }
 
+    bool IsInMainThread()
+    {
+        auto id = std::this_thread::get_id();
+        return mainThreadId_ == id;
+    }
+
     void AddWindow(LoongWindow* window)
     {
         assert(windowsToRun_.count(window) == 0);
@@ -393,6 +400,7 @@ public:
     std::queue<LoongWindowManager::Task> tasks_ {};
     size_t tasksCount_ { 0 };
     std::mutex tasksMutex_ {};
+    std::thread::id mainThreadId_ {};
 };
 
 LoongWindow* LoongWindowManager::CreateWindow(const WindowConfig& cfg, std::function<void(LoongWindow*)>&& onDelete)
@@ -423,6 +431,11 @@ void LoongWindowManager::SetDeleterForWindow(LoongWindow* win, std::function<voi
 void LoongWindowManager::RunInMainThread(Task&& task)
 {
     WindowManagerImpl::Get().RunInMainThread(std::move(task));
+}
+
+bool LoongWindowManager::IsInMainThread()
+{
+    return WindowManagerImpl::Get().IsInMainThread();
 }
 
 LoongWindow::LoongWindow(const WindowConfig& config)
