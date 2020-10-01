@@ -12,6 +12,7 @@
 #include <mutex>
 #include <queue>
 #include <set>
+#include <thread>
 #include <vector>
 
 namespace Loong::Window {

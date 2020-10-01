@@ -32,6 +32,7 @@ public:
         callback_ = std::move(task.callback_);
         isCaneled_ = task.isCaneled_;
         isDone_ = task.isDone_;
+        return *this;
     }
 
     void Cancel() { isCaneled_ = true; }

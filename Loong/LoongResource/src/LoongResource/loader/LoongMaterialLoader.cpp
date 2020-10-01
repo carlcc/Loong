@@ -9,9 +9,9 @@
 #include "LoongResource/LoongMaterial.h"
 #include "LoongResource/LoongResourceManager.h"
 #include "LoongResource/LoongTexture.h"
-#include <JsonMapper/JsonMapper.h>
-#include <JsonMapper/types/deserialize/string.h>
-#include <JsonMapper/types/serialize/string.h>
+#include <jsonmapper/JsonMapper.h>
+#include <jsonmapper/types/deserialize/string.h>
+#include <jsonmapper/types/serialize/string.h>
 #include <sstream>
 #include <string>
 #include <string_view>

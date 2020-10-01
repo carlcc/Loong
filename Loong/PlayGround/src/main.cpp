@@ -361,7 +361,7 @@ int main(int argc, char** argv)
 {
 
     auto listener = Loong::Foundation::Logger::Get().SubscribeLog([](const Loong::Foundation::LogItem& logItem) {
-        std::cout << "[" << logItem.level << "][" << logItem.location << "]: " << logItem.message << std::endl;
+        std::cout << "[" << logItem.level << "]: " << logItem.message << " (" << logItem.location << ")" << std::endl;
     });
 
     StartApp(argc, argv);

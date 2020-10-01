@@ -2,8 +2,6 @@
 // Copyright (c) 2020 Carl Chen. All rights reserved.
 //
 
-#pragma once
-
 #include "LoongFoundation/LoongThreadPool.h"
 #include "LoongFoundation/LoongAssert.h"
 #include "LoongFoundation/LoongLogger.h"
