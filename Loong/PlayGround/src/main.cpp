@@ -18,8 +18,10 @@
 #include <LoongResource/Driver.h>
 #include <LoongResource/LoongGpuMesh.h>
 #include <LoongResource/LoongGpuModel.h>
+#include <LoongResource/LoongMaterial.h>
 #include <LoongResource/LoongResourceManager.h>
 #include <LoongResource/LoongTexture.h>
+#include <LoongResource/loader/LoongMaterialLoader.h>
 #include <cassert>
 #include <iostream>
 
@@ -311,6 +313,10 @@ void LoongEditor::OnUpdate()
         ed->clearColor_[1] = (1.0F + sin(clock_.ElapsedTime() * 1.3f)) / 2.0F;
         ed->clearColor_[2] = (1.0F + sin(clock_.ElapsedTime() * 1.5f)) / 2.0F;
     }
+    if (window_->GetInputManager().IsKeyReleaseEvent(Window::LoongKeyCode::kKeyM)) {
+        auto* mat = new Resource::LoongMaterial;
+        Resource::LoongMaterialLoader::Write("Materials/test.lgmtl", mat);
+    }
     clock_.Update();
     using float4x4 = RHI::float4x4;
 
@@ -332,6 +338,8 @@ void StartApp(int argc, char** argv)
     Loong::FS::LoongFileSystem::MountSearchPath(path);
     path = Loong::Foundation::LoongPathUtils::Normalize(argv[0]) + "/../../Resources";
     Loong::FS::LoongFileSystem::MountSearchPath(path);
+    path = "/Users/chenchen02/gitrepo/Loong/Resources";
+    Loong::FS::LoongFileSystem::SetWriteDir(path);
 
     Loong::Window::ScopedDriver appDriver;
     assert(bool(appDriver));

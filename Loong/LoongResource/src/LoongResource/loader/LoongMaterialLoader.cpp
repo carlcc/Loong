@@ -189,6 +189,14 @@ struct MaterialData {
     }
 };
 
+inline LoongMaterial::TextureRef LoadTexture(const std::string& path)
+{
+    if (path.empty()) {
+        return nullptr;
+    }
+    return LoongResourceManager::GetTexture(path);
+}
+
 std::shared_ptr<LoongMaterial> LoongMaterialLoader::Create(const std::string& filePath, const std::function<void(const std::string&)>& onDestroy)
 {
     int64_t fileSize = FS::LoongFileSystem::GetFileSize(filePath);
@@ -216,12 +224,12 @@ std::shared_ptr<LoongMaterial> LoongMaterialLoader::Create(const std::string& fi
     material->depthTest_ = materialData.pipelineState.depthTest;
 
     // Uniforms
-    material->uniforms_.albedoMap = LoongResourceManager::GetTexture(materialData.uniforms.albedoMap);
-    material->uniforms_.normalMap = LoongResourceManager::GetTexture(materialData.uniforms.normalMap);
-    material->uniforms_.metallicMap = LoongResourceManager::GetTexture(materialData.uniforms.metallicMap);
-    material->uniforms_.roughnessMap = LoongResourceManager::GetTexture(materialData.uniforms.roughnessMap);
-    material->uniforms_.emissiveMap = LoongResourceManager::GetTexture(materialData.uniforms.emissiveMap);
-    material->uniforms_.ambientOcclusionMap = LoongResourceManager::GetTexture(materialData.uniforms.ambientOcclusionMap);
+    material->uniforms_.albedoMap = LoadTexture(materialData.uniforms.albedoMap);
+    material->uniforms_.normalMap = LoadTexture(materialData.uniforms.normalMap);
+    material->uniforms_.metallicMap = LoadTexture(materialData.uniforms.metallicMap);
+    material->uniforms_.roughnessMap = LoadTexture(materialData.uniforms.roughnessMap);
+    material->uniforms_.emissiveMap = LoadTexture(materialData.uniforms.emissiveMap);
+    material->uniforms_.ambientOcclusionMap = LoadTexture(materialData.uniforms.ambientOcclusionMap);
     material->uniforms_.metallic = materialData.uniforms.metallic;
     material->uniforms_.roughness = materialData.uniforms.roughness;
     material->uniforms_.emissiveFactor = materialData.uniforms.emissiveFactor;
@@ -234,6 +242,15 @@ std::shared_ptr<LoongMaterial> LoongMaterialLoader::Create(const std::string& fi
     return material;
 }
 
+inline const std::string& GetTexturePath(LoongTexture* tex)
+{
+    static const std::string kEmpty;
+    if (tex == nullptr) {
+        return kEmpty;
+    }
+    return tex->GetPath();
+}
+
 bool LoongMaterialLoader::Write(const std::string& filePath, const LoongMaterial* material)
 {
     MaterialData materialData;
@@ -244,12 +261,12 @@ bool LoongMaterialLoader::Write(const std::string& filePath, const LoongMaterial
     materialData.pipelineState.depthTest = material->depthTest_;
 
     // Uniforms
-    materialData.uniforms.albedoMap = material->uniforms_.albedoMap->GetPath();
-    materialData.uniforms.normalMap = material->uniforms_.normalMap->GetPath();
-    materialData.uniforms.metallicMap = material->uniforms_.metallicMap->GetPath();
-    materialData.uniforms.roughnessMap = material->uniforms_.roughnessMap->GetPath();
-    materialData.uniforms.emissiveMap = material->uniforms_.emissiveMap->GetPath();
-    materialData.uniforms.ambientOcclusionMap = material->uniforms_.ambientOcclusionMap->GetPath();
+    materialData.uniforms.albedoMap = GetTexturePath(material->uniforms_.albedoMap.get());
+    materialData.uniforms.normalMap = GetTexturePath(material->uniforms_.normalMap.get());
+    materialData.uniforms.metallicMap = GetTexturePath(material->uniforms_.metallicMap.get());
+    materialData.uniforms.roughnessMap = GetTexturePath(material->uniforms_.roughnessMap.get());
+    materialData.uniforms.emissiveMap = GetTexturePath(material->uniforms_.emissiveMap.get());
+    materialData.uniforms.ambientOcclusionMap = GetTexturePath(material->uniforms_.ambientOcclusionMap.get());
     materialData.uniforms.metallic = material->uniforms_.metallic;
     materialData.uniforms.roughness = material->uniforms_.roughness;
     materialData.uniforms.emissiveFactor = material->uniforms_.emissiveFactor;

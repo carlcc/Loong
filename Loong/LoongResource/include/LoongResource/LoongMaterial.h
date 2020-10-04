@@ -5,6 +5,7 @@
 #pragma once
 
 #include "LoongFoundation/LoongLogger.h"
+#include "LoongFoundation/LoongMacros.h"
 #include "LoongFoundation/LoongMath.h"
 #include "LoongRHI/LoongRHIManager.h"
 #include "LoongResource/LoongPipelineFixedState.h"
@@ -12,6 +13,7 @@
 #include <any>
 #include <map>
 #include <string>
+#include <utility>
 
 namespace Loong::Resource {
 
@@ -46,20 +48,59 @@ public:
 
     void SetDepthTest(bool b) { depthTest_ = b; }
 
-    bool IsBlendable() const { return blendable_; }
+    LG_NODISCARD bool IsBlendable() const { return blendable_; }
 
-    bool HasBackFaceCulling() const { return backFaceCulling_; }
+    LG_NODISCARD bool HasBackFaceCulling() const { return backFaceCulling_; }
 
-    bool HasFrontFaceCulling() const { return frontFaceCulling_; }
+    LG_NODISCARD bool HasFrontFaceCulling() const { return frontFaceCulling_; }
 
-    bool HasDepthTest() const { return depthTest_; }
+    LG_NODISCARD bool HasDepthTest() const { return depthTest_; }
 
-    LoongPipelineFixedState GenerateStateMask() const;
+    LG_NODISCARD TextureRef GetAlbedoMap() const { return uniforms_.albedoMap; }
+    void SetAlbedoMap(TextureRef value) { uniforms_.albedoMap = std::move(value); }
 
-    const std::string& GetPath() const { return path_; }
+    LG_NODISCARD TextureRef GetNormalMap() const { return uniforms_.normalMap; }
+    void SetNormalMap(TextureRef value) { uniforms_.normalMap = std::move(value); }
 
-private:
-    void FillUniform();
+    LG_NODISCARD TextureRef GetMetallicMap() const { return uniforms_.metallicMap; }
+    void SetMetallicMap(TextureRef value) { uniforms_.metallicMap = std::move(value); }
+
+    LG_NODISCARD TextureRef GetRoughnessMap() const { return uniforms_.roughnessMap; }
+    void SetRoughnessMap(TextureRef value) { uniforms_.roughnessMap = std::move(value); }
+
+    LG_NODISCARD TextureRef GetEmissiveMap() const { return uniforms_.emissiveMap; }
+    void SetEmissiveMap(TextureRef value) { uniforms_.emissiveMap = std::move(value); }
+
+    LG_NODISCARD TextureRef GetAmbientOcclusionMap() const { return uniforms_.ambientOcclusionMap; }
+    void SetAmbientOcclusionMap(TextureRef value) { uniforms_.ambientOcclusionMap = std::move(value); }
+
+    LG_NODISCARD const Math::Vector3& GetAlbedo() const { return uniforms_.albedo; }
+    void SetAlbedo(const Math::Vector3& value) { uniforms_.albedo = value; }
+
+    LG_NODISCARD float GetMetallic() const { return uniforms_.metallic; }
+    void SetMetallic(float value) { uniforms_.metallic = value; }
+
+    LG_NODISCARD float GetRoughness() const { return uniforms_.roughness; }
+    void SetRoughness(float value) { uniforms_.roughness = value; }
+
+    LG_NODISCARD float GetEmissiveFactor() const { return uniforms_.emissiveFactor; }
+    void SetEmissiveFactor(float value) { uniforms_.emissiveFactor = value; }
+
+    LG_NODISCARD float GetClearCoat() const { return uniforms_.clearCoat; }
+    void SetClearCoat(float value) { uniforms_.clearCoat = value; }
+
+    LG_NODISCARD float GetClearCoatRoughness() const { return uniforms_.clearCoatRoughness; }
+    void SetClearCoatRoughness(float value) { uniforms_.clearCoatRoughness = value; }
+
+    LG_NODISCARD const Math::Vector2& GetTextureTiling() const { return uniforms_.textureTiling; }
+    void SetTextureTiling(const Math::Vector2& value) { uniforms_.textureTiling = value; }
+
+    LG_NODISCARD const Math::Vector2& GetTextureOffset() const { return uniforms_.textureOffset; }
+    void SetTextureOffset(const Math::Vector2& value) { uniforms_.textureOffset = value; }
+
+    LG_NODISCARD const std::string& GetPath() const { return path_; }
+
+public:
     LoongMaterial() = default;
     ~LoongMaterial() = default;
 

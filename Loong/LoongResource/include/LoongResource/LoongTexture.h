@@ -13,7 +13,7 @@ class LoongTexture {
 public:
     RHI::RefCntAutoPtr<RHI::ITexture> GetTexture() const { return texture_; }
 
-    const std::string GetPath() const { return path_; }
+    const std::string& GetPath() const { return path_; }
 
 private:
     LoongTexture(RHI::RefCntAutoPtr<RHI::ITexture> texture, const std::string& path);
