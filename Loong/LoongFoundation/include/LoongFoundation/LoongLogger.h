@@ -4,6 +4,7 @@
 
 #pragma once
 
+#include "LoongFoundation/LoongMacros.h"
 #include "LoongFoundation/LoongSigslotHelper.h"
 #include "fmt/format.h"
 #include <ostream>
@@ -21,7 +22,7 @@ enum class LogLevel {
     kLogLevelCount
 };
 
-inline const char* GetLogLevelName(LogLevel level)
+LG_NODISCARD inline const char* GetLogLevelName(LogLevel level)
 {
     const char* kLevelNames[int(LogLevel::kLogLevelCount)] = {
         "Trace", "Debug", "Info ", "Warn", "Error"
@@ -43,7 +44,7 @@ struct LogItem {
 
 class Logger {
 public:
-    static Logger& Get()
+    LG_NODISCARD static Logger& Get()
     {
         static Logger l;
         return l;

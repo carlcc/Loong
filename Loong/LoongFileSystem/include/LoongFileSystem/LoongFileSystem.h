@@ -4,6 +4,7 @@
 
 #pragma once
 
+#include "LoongFoundation/LoongMacros.h"
 #include <functional>
 #include <optional>
 #include <string>
@@ -23,28 +24,28 @@ public:
 
     static bool SetWriteDir(const std::string& sysPath);
 
-    static const char* GetWriteDir();
+    LG_NODISCARD static const char* GetWriteDir();
 
-    static std::vector<std::string> GetSearchPaths();
+    LG_NODISCARD static std::vector<std::string> GetSearchPaths();
 
     static bool MakeDir(const std::string& path);
 
     // If file is a directory, then it must be empty
     static bool Delete(const std::string& file);
 
-    static bool Exists(const std::string& file);
+    LG_NODISCARD static bool Exists(const std::string& file);
 
-    static bool IsDir(const std::string& file);
+    LG_NODISCARD static bool IsDir(const std::string& file);
 
-    static bool IsSymbolLink(const std::string& file);
+    LG_NODISCARD static bool IsSymbolLink(const std::string& file);
 
-    static std::optional<std::string> GetMountPoint(const std::string& realDir);
+    LG_NODISCARD static std::optional<std::string> GetMountPoint(const std::string& realDir);
 
     // if you look for "maps/level1.map", and C:\\mygame is in your search
     // path and C:\\mygame\\maps\\level1.map exists, then "C:\mygame" is returned.
-    static std::optional<std::string> GetRealDir(const std::string& file);
+    LG_NODISCARD static std::optional<std::string> GetRealDir(const std::string& file);
 
-    static std::optional<std::vector<std::string>> ListFiles(const std::string& dir);
+    LG_NODISCARD static std::optional<std::vector<std::string>> ListFiles(const std::string& dir);
 
     // Return true to stop  enumerating, the parameters: FileName
     using EnumerateCallback = std::function<bool(std::string)>;
@@ -66,7 +67,7 @@ public:
     };
     static bool GetFileStat(const std::string& name, FileStat& stat);
 
-    static int64_t GetFileSize(const std::string& name)
+    LG_NODISCARD static int64_t GetFileSize(const std::string& name)
     {
         FileStat stat {};
         if (!GetFileStat(name, stat)) {
@@ -112,11 +113,11 @@ public:
         kAppCallback,
     };
 
-    static ErrorCode GetLastErrorCode();
+    LG_NODISCARD static ErrorCode GetLastErrorCode();
 
-    static const char* GetLastError();
+    LG_NODISCARD static const char* GetLastError();
 
-    static const char* GetErrorText(ErrorCode code);
+    LG_NODISCARD static const char* GetErrorText(ErrorCode code);
 };
 
 }

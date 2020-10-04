@@ -3,6 +3,7 @@
 //
 
 #pragma once
+#include "LoongFoundation/LoongMacros.h"
 #include "LoongFoundation/LoongSigslotHelper.h"
 #include "LoongWindow/LoongInput.h"
 
@@ -45,19 +46,19 @@ public:
 
     void SetShouldClose(bool b);
 
-    bool IsMouseVisible() const;
+    LG_NODISCARD bool IsMouseVisible() const;
 
-    MouseMode GetMouseMode() const;
+    LG_NODISCARD MouseMode GetMouseMode() const;
 
     void SetMouseMode(MouseMode b);
 
-    const LoongInput& GetInputManager() const;
+    LG_NODISCARD const LoongInput& GetInputManager() const;
 
     void GetWindowSize(int& width, int& height) const;
 
     void GetFrameBufferSize(int& width, int& height) const;
 
-    GLFWwindow* GetGlfwWindow() const;
+    LG_NODISCARD GLFWwindow* GetGlfwWindow() const;
 
     LOONG_DECLARE_SIGNAL(FrameBufferResize, int, int);
     LOONG_DECLARE_SIGNAL(WindowResize, int, int);

@@ -4,6 +4,7 @@
 
 #pragma once
 
+#include "LoongFoundation/LoongMacros.h"
 #include <cstdint>
 #include <functional>
 
@@ -36,8 +37,8 @@ public:
     }
 
     void Cancel() { isCaneled_ = true; }
-    bool IsCanceld() const { return isCaneled_; }
-    bool IsDone() const { return isDone_; }
+    LG_NODISCARD bool IsCanceld() const { return isCaneled_; }
+    LG_NODISCARD bool IsDone() const { return isDone_; }
 
 private:
     void Done() { isDone_ = true; }
@@ -61,7 +62,7 @@ public:
 
     static std::shared_ptr<LoongThreadTask> AddTask(LoongThreadTask::CallbackType&& callback);
 
-    static size_t GetTasksCount();
+    LG_NODISCARD static size_t GetTasksCount();
 
     static bool Initialize(int threadNum = 0);
 

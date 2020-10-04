@@ -41,10 +41,7 @@ public:
         return *this;
     }
 
-    ~LoongDefer()
-    {
-        defered_();
-    }
+    ~LoongDefer() { defered_(); }
 
     void Cancel()
     {

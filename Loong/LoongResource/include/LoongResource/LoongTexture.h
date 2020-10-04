@@ -4,6 +4,7 @@
 
 #pragma once
 
+#include "LoongFoundation/LoongMacros.h"
 #include "LoongRHI/LoongRHIManager.h"
 #include <string>
 
@@ -11,9 +12,9 @@ namespace Loong::Resource {
 
 class LoongTexture {
 public:
-    RHI::RefCntAutoPtr<RHI::ITexture> GetTexture() const { return texture_; }
+    LG_NODISCARD RHI::RefCntAutoPtr<RHI::ITexture> GetTexture() const { return texture_; }
 
-    const std::string& GetPath() const { return path_; }
+    LG_NODISCARD const std::string& GetPath() const { return path_; }
 
 private:
     LoongTexture(RHI::RefCntAutoPtr<RHI::ITexture> texture, const std::string& path);

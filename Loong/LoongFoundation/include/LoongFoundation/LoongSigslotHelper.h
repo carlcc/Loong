@@ -4,6 +4,7 @@
 
 #pragma once
 
+#include "LoongFoundation/LoongMacros.h"
 #include "LoongFoundation/sigslot.h"
 #include <functional>
 #include <memory>
@@ -79,7 +80,7 @@ public:                                                                         
         sigName##Signal_.connect(pclass, pmemfun);                                                   \
     }                                                                                                \
     template <class Callable>                                                                        \
-    auto Subscribe##sigName(Callable&& callable)                                                     \
+    LG_NODISCARD auto Subscribe##sigName(Callable&& callable)                                        \
     {                                                                                                \
         using Listener = typename ::Loong::Foundation::CallableToSignalListener<Callable>::Listener; \
         auto listener = std::make_unique<Listener>(std::forward<Callable>(callable));                \

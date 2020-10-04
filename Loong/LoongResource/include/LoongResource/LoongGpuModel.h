@@ -4,6 +4,7 @@
 
 #pragma once
 
+#include "LoongFoundation/LoongMacros.h"
 #include "LoongFoundation/LoongMath.h"
 #include <string>
 #include <vector>
@@ -25,11 +26,11 @@ public:
     LoongGpuModel& operator=(const LoongGpuModel&) = delete;
     LoongGpuModel& operator=(LoongGpuModel&) = delete;
 
-    const std::vector<LoongGpuMesh*>& GetMeshes() const { return meshes_; }
-    const std::vector<std::string>& GetMaterialNames() const { return materialNames_; }
-    const Math::AABB GetAABB() const { return aabb_; }
+    LG_NODISCARD const std::vector<LoongGpuMesh*>& GetMeshes() const { return meshes_; }
+    LG_NODISCARD const std::vector<std::string>& GetMaterialNames() const { return materialNames_; }
+    LG_NODISCARD const Math::AABB& GetAABB() const { return aabb_; }
 
-    const std::string& GetPath() const { return path_; }
+    LG_NODISCARD const std::string& GetPath() const { return path_; }
 
 private:
     std::vector<LoongGpuMesh*> meshes_ {};

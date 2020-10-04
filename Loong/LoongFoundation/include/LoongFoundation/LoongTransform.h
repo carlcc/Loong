@@ -4,6 +4,7 @@
 
 #pragma once
 
+#include "LoongFoundation/LoongMacros.h"
 #include "LoongFoundation/LoongMath.h"
 #include "LoongFoundation/LoongSigslotHelper.h"
 
@@ -88,61 +89,61 @@ public:
         OnTransformChange();
     }
 
-    const Math::Vector3& GetPosition() const { return position_; }
-    const Math::Vector3& GetWorldPosition() const
+    LG_NODISCARD const Math::Vector3& GetPosition() const { return position_; }
+    LG_NODISCARD const Math::Vector3& GetWorldPosition() const
     {
         UpdateWorldCache();
         return worldPosition_;
     }
 
-    const Math::Quat& GetRotation() const { return rotation_; }
-    const Math::Quat& GetWorldRotation()
+    LG_NODISCARD const Math::Quat& GetRotation() const { return rotation_; }
+    LG_NODISCARD const Math::Quat& GetWorldRotation()
     {
         UpdateWorldCache();
         return worldRotation_;
     }
 
-    const Math::Vector3& GetScale() const { return scale_; }
-    const Math::Vector3& GetWorldScale() const
+    LG_NODISCARD const Math::Vector3& GetScale() const { return scale_; }
+    LG_NODISCARD const Math::Vector3& GetWorldScale() const
     {
         UpdateWorldCache();
         return worldScale_;
     }
 
-    Math::Vector3 GetForward() const { return rotation_ * Math::kForward; }
-    Math::Vector3 GetWorldForward() const
+    LG_NODISCARD Math::Vector3 GetForward() const { return rotation_ * Math::kForward; }
+    LG_NODISCARD Math::Vector3 GetWorldForward() const
     {
         UpdateWorldCache();
         return worldRotation_ * Math::kForward;
     }
 
-    Math::Vector3 GetUp() const { return rotation_ * Math::kUp; }
-    Math::Vector3 GetWorldUp() const
+    LG_NODISCARD Math::Vector3 GetUp() const { return rotation_ * Math::kUp; }
+    LG_NODISCARD Math::Vector3 GetWorldUp() const
     {
         UpdateWorldCache();
         return worldRotation_ * Math::kUp;
     }
 
-    Math::Vector3 GetRight() const { return rotation_ * Math::kRight; }
-    Math::Vector3 GetWorldRight() const
+    LG_NODISCARD Math::Vector3 GetRight() const { return rotation_ * Math::kRight; }
+    LG_NODISCARD Math::Vector3 GetWorldRight() const
     {
         UpdateWorldCache();
         return worldRotation_ * Math::kRight;
     }
 
-    const Math::Matrix4& GetTransformMatrix() const
+    LG_NODISCARD const Math::Matrix4& GetTransformMatrix() const
     {
         UpdateLocalCache();
         return localMatrix_;
     }
 
-    const Math::Matrix4& GetWorldTransformMatrix() const
+    LG_NODISCARD const Math::Matrix4& GetWorldTransformMatrix() const
     {
         UpdateWorldCache();
         return worldMatrix_;
     }
 
-    Transform* GetParent() const { return parent_; }
+    LG_NODISCARD Transform* GetParent() const { return parent_; }
 
     void SetParent(Transform* parent)
     {

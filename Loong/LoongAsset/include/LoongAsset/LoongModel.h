@@ -3,6 +3,7 @@
 //
 #pragma once
 
+#include "LoongFoundation/LoongMacros.h"
 #include "LoongFoundation/LoongMath.h"
 #include <memory>
 #include <string>
@@ -25,20 +26,11 @@ public:
 
     ~LoongModel();
 
-    const std::vector<LoongMesh*>& GetMeshes() const
-    {
-        return meshes_;
-    }
+    LG_NODISCARD const std::vector<LoongMesh*>& GetMeshes() const { return meshes_; }
 
-    const std::vector<std::string>& GetMaterialNames() const
-    {
-        return materialNames_;
-    }
+    LG_NODISCARD const std::vector<std::string>& GetMaterialNames() const { return materialNames_; }
 
-    const Math::AABB& GetAABB() const
-    {
-        return aabb_;
-    }
+    LG_NODISCARD const Math::AABB& GetAABB() const { return aabb_; }
 
     bool operator!() const { return meshes_.empty() && materialNames_.empty(); }
 

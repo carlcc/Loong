@@ -4,6 +4,7 @@
 
 #pragma once
 
+#include "LoongFoundation/LoongMacros.h"
 #include "LoongFoundation/LoongMath.h"
 #include "LoongFoundation/LoongTransform.h"
 
@@ -25,11 +26,11 @@ public:
 
     void Reset(Math::Matrix4 projection);
 
-    bool IsBoxVisible(const Math::AABB& aabb) const;
+    LG_NODISCARD bool IsBoxVisible(const Math::AABB& aabb) const;
 
-    bool IsSphereVisible(const Math::Vector3& center, float radius) const;
+    LG_NODISCARD bool IsSphereVisible(const Math::Vector3& center, float radius) const;
 
-    const Math::Vector3* GetPoints() const { return points_; }
+    LG_NODISCARD const Math::Vector3* GetPoints() const { return points_; }
 
 private:
     template <Planes i, Planes j>

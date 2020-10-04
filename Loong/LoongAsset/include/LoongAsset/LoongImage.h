@@ -4,6 +4,7 @@
 
 #pragma once
 
+#include "LoongFoundation/LoongMacros.h"
 #include <string>
 
 namespace Loong::Asset {
@@ -45,17 +46,17 @@ public:
         return *this;
     }
 
-    int GetChannelCount() const { return channelCount_; }
+    LG_NODISCARD int GetChannelCount() const { return channelCount_; }
 
-    int GetWidth() const { return width_; }
+    LG_NODISCARD int GetWidth() const { return width_; }
 
-    int GetHeight() const { return height_; }
+    LG_NODISCARD int GetHeight() const { return height_; }
 
-    char* GetData() { return buffer_; }
+    LG_NODISCARD char* GetData() { return buffer_; }
 
-    const char* GetData() const { return buffer_; }
+    LG_NODISCARD const char* GetData() const { return buffer_; }
 
-    const std::string& GetPath() const { return path_; }
+    LG_NODISCARD const std::string& GetPath() const { return path_; }
 
     void FlipVertically();
 

@@ -3,6 +3,7 @@
 //
 
 #pragma once
+#include "LoongFoundation/LoongMacros.h"
 #include "LoongFoundation/LoongMath.h"
 #include "LoongRHI/LoongRHIManager.h"
 #include <cstdint>
@@ -24,13 +25,13 @@ public:
     LoongGpuMesh& operator=(const LoongGpuMesh&) = delete;
     LoongGpuMesh& operator=(LoongGpuMesh&&) = delete;
 
-    uint32_t GetVertexCount() const { return verticesCount_; }
-    uint32_t GetIndexCount() const { return indicesCount_; }
-    uint32_t GetMaterialIndex() const { return materialIndex_; }
-    const Math::AABB& GetAABB() const { return aabb_; }
+    LG_NODISCARD uint32_t GetVertexCount() const { return verticesCount_; }
+    LG_NODISCARD uint32_t GetIndexCount() const { return indicesCount_; }
+    LG_NODISCARD uint32_t GetMaterialIndex() const { return materialIndex_; }
+    LG_NODISCARD const Math::AABB& GetAABB() const { return aabb_; }
 
-    RHI::RefCntAutoPtr<RHI::IBuffer> GetVBO() const { return vbo_; }
-    RHI::RefCntAutoPtr<RHI::IBuffer> GetIBO() const { return ibo_; }
+    LG_NODISCARD RHI::RefCntAutoPtr<RHI::IBuffer> GetVBO() const { return vbo_; }
+    LG_NODISCARD RHI::RefCntAutoPtr<RHI::IBuffer> GetIBO() const { return ibo_; }
 
 private:
     uint32_t verticesCount_ { 0 };

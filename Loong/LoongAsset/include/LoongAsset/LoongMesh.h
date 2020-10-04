@@ -4,6 +4,7 @@
 #pragma once
 
 #include "LoongAsset/LoongVertex.h"
+#include "LoongFoundation/LoongMacros.h"
 #include <cstdint>
 #include <vector>
 
@@ -18,11 +19,11 @@ public:
     LoongMesh() = default;
     LoongMesh(std::vector<LoongVertex>&& vertices, std::vector<uint32_t>&& indices, uint32_t materialIndex);
     virtual ~LoongMesh() = default;
-    const std::vector<LoongVertex>& GetVertices() const { return vertices_; }
-    const std::vector<uint32_t>& GetIndices() const { return indices_; }
-    uint32_t GetMaterialIndex() const { return materialIndex_; }
+    LG_NODISCARD const std::vector<LoongVertex>& GetVertices() const { return vertices_; }
+    LG_NODISCARD const std::vector<uint32_t>& GetIndices() const { return indices_; }
+    LG_NODISCARD uint32_t GetMaterialIndex() const { return materialIndex_; }
 
-    const Math::AABB& GetAABB() const { return aabb_; }
+    LG_NODISCARD const Math::AABB& GetAABB() const { return aabb_; }
 
     template <class Archive>
     bool Serialize(Archive& archive) { return archive(vertices_, indices_, materialIndex_, aabb_); }

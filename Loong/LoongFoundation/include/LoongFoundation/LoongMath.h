@@ -4,6 +4,7 @@
 
 #pragma once
 
+#include "LoongFoundation/LoongMacros.h"
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtx/euler_angles.hpp>
@@ -77,151 +78,151 @@ const Vector3 kUp      { 0.0F,  1.0F,  0.0F }; // NOLINT(cert-err58-cpp)
 // clang-format on
 
 template <class T>
-inline bool IsBetween(const T& v, const T& min, const T& max)
+LG_NODISCARD inline bool IsBetween(const T& v, const T& min, const T& max)
 {
     return v >= min && v <= max;
 }
 
 template <>
-inline bool IsBetween<Vector2>(const Vector2& v, const Vector2& min, const Vector2& max)
+LG_NODISCARD inline bool IsBetween<Vector2>(const Vector2& v, const Vector2& min, const Vector2& max)
 {
     return IsBetween(v.x, min.x, max.x) && IsBetween(v.y, min.y, max.y);
 }
 
 template <>
-inline bool IsBetween<Vector3>(const Vector3& v, const Vector3& min, const Vector3& max)
+LG_NODISCARD inline bool IsBetween<Vector3>(const Vector3& v, const Vector3& min, const Vector3& max)
 {
     return IsBetween(v.x, min.x, max.x) && IsBetween(v.y, min.y, max.y) && IsBetween(v.z, min.z, max.z);
 }
 
 template <>
-inline bool IsBetween<Vector4>(const Vector4& v, const Vector4& min, const Vector4& max)
+LG_NODISCARD inline bool IsBetween<Vector4>(const Vector4& v, const Vector4& min, const Vector4& max)
 {
     return IsBetween(v.x, min.x, max.x) && IsBetween(v.y, min.y, max.y) && IsBetween(v.z, min.z, max.z) && IsBetween(v.w, min.w, max.w);
 }
 
 template <class T>
-inline T Min(const T& a, const T& b)
+LG_NODISCARD inline T Min(const T& a, const T& b)
 {
     return glm::min(a, b);
 }
 
 template <class T>
-inline T Max(const T& a, const T& b)
+LG_NODISCARD inline T Max(const T& a, const T& b)
 {
     return glm::max(a, b);
 }
 
 template <class T>
-inline T Cross(const T& a, const T& b)
+LG_NODISCARD inline T Cross(const T& a, const T& b)
 {
     return glm::cross(a, b);
 }
 
 template <class T>
-inline typename T::value_type Dot(const T& a, const T& b)
+LG_NODISCARD inline typename T::value_type Dot(const T& a, const T& b)
 {
     return glm::dot(a, b);
 }
 
 template <class T>
-inline T Transpose(const T& matrix)
+LG_NODISCARD inline T Transpose(const T& matrix)
 {
     return glm::transpose(matrix);
 }
 
 template <class T>
-inline T Inverse(const T& matrixOrQuat)
+LG_NODISCARD inline T Inverse(const T& matrixOrQuat)
 {
     return glm::inverse(matrixOrQuat);
 }
 
 template <class T>
-inline T Conjugate(const T& q)
+LG_NODISCARD inline T Conjugate(const T& q)
 {
     return glm::conjugate(q);
 }
 
 template <class T>
-inline T Normalize(const T& t)
+LG_NODISCARD inline T Normalize(const T& t)
 {
     return glm::normalize(t);
 }
 
-inline Quat LookAtQuat(const Vector3& dir, const Vector3& up)
+LG_NODISCARD inline Quat LookAtQuat(const Vector3& dir, const Vector3& up)
 {
     return glm::quatLookAt(dir, up);
 }
 
-inline Matrix4 LookAt(const Vector3& eye, const Vector3& target, const Vector3& up)
+LG_NODISCARD inline Matrix4 LookAt(const Vector3& eye, const Vector3& target, const Vector3& up)
 {
     return glm::lookAt(eye, target, up);
 }
 
-inline Matrix4 Perspective(float fov, float aspect, float nearPlane, float farPlane)
+LG_NODISCARD inline Matrix4 Perspective(float fov, float aspect, float nearPlane, float farPlane)
 {
     return glm::perspective(fov, aspect, nearPlane, farPlane);
 }
 
-inline Matrix4 Perspective(float fov, float width, float height, float nearPlane, float farPlane)
+LG_NODISCARD inline Matrix4 Perspective(float fov, float width, float height, float nearPlane, float farPlane)
 {
     return glm::perspectiveFov(fov, width, height, nearPlane, farPlane);
 }
 
-inline Matrix4 Translate(const Matrix4& mat, const Vector3& trans)
+LG_NODISCARD inline Matrix4 Translate(const Matrix4& mat, const Vector3& trans)
 {
     return glm::translate(mat, trans);
 }
 
-inline Matrix4 Translate(const Vector3& trans)
+LG_NODISCARD inline Matrix4 Translate(const Vector3& trans)
 {
     return glm::translate(Math::Matrix4(Identity), trans);
 }
 
-inline Quat Rotate(const Quat& quat, const Vector3& axis, float angle)
+LG_NODISCARD inline Quat Rotate(const Quat& quat, const Vector3& axis, float angle)
 {
     return Normalize(glm::rotate(quat, angle, axis));
 }
 
-inline Matrix4 Rotate(const Matrix4& mat, const Vector3& axis, float angle)
+LG_NODISCARD inline Matrix4 Rotate(const Matrix4& mat, const Vector3& axis, float angle)
 {
     return glm::rotate(mat, angle, axis);
 }
 
-inline Matrix4 Rotate(const Vector3& axis, float angle)
+LG_NODISCARD inline Matrix4 Rotate(const Vector3& axis, float angle)
 {
     return glm::rotate(Matrix4(Identity), angle, axis);
 }
 
-inline Matrix4 Scale(const Matrix4& mat, const Vector3& scale)
+LG_NODISCARD inline Matrix4 Scale(const Matrix4& mat, const Vector3& scale)
 {
     return glm::scale(mat, scale);
 }
 
-inline Matrix4 Scale(const Vector3& scale)
+LG_NODISCARD inline Matrix4 Scale(const Vector3& scale)
 {
     return glm::scale(Matrix4(Identity), scale);
 }
 
-inline Matrix4 QuatToMatrix4(const Quat& quat)
+LG_NODISCARD inline Matrix4 QuatToMatrix4(const Quat& quat)
 {
     return glm::mat4_cast(quat);
 }
 
 template <class T>
-inline Quat MatrixToQuat(const T& mat)
+LG_NODISCARD inline Quat MatrixToQuat(const T& mat)
 {
     return glm::quat_cast(mat);
 }
 
-inline Vector3 QuatToEuler(const Quat& q)
+LG_NODISCARD inline Vector3 QuatToEuler(const Quat& q)
 {
     Vector3 euler;
     glm::extractEulerAngleYXZ(QuatToMatrix4(q), euler.y, euler.x, euler.z);
     return euler;
 }
 
-inline Quat EulerToQuat(const Vector3& euler)
+LG_NODISCARD inline Quat EulerToQuat(const Vector3& euler)
 {
     return glm::eulerAngleYXZ(euler.y, euler.x, euler.z);
     return Rotate(Quat(Identity), kUp, euler.z) * Rotate(Quat(Identity), kUp, euler.x) * Rotate(Quat(Identity), kUp, euler.y);
@@ -229,7 +230,7 @@ inline Quat EulerToQuat(const Vector3& euler)
 }
 
 template <class T>
-inline float Distance(const T& a, const T& b)
+LG_NODISCARD inline float Distance(const T& a, const T& b)
 {
     return glm::distance(a, b);
 }
@@ -268,23 +269,23 @@ inline bool DecomposeTranslation(const Matrix4& mat, Vector3& translation)
     return glm::decompose(mat, scale, rotation, translation, skew, perspective);
 }
 
-inline float Clamp(float x, float min, float max)
+LG_NODISCARD inline float Clamp(float x, float min, float max)
 {
     return glm::clamp(x, min, max);
 }
 
 template <class T>
-inline T RadToDegree(T rad) { return glm::degrees(rad); }
+LG_NODISCARD inline T RadToDegree(T rad) { return glm::degrees(rad); }
 
 template <class T>
-inline T DegreeToRad(T degree) { return glm::radians(degree); }
+LG_NODISCARD inline T DegreeToRad(T degree) { return glm::radians(degree); }
 
 class AABB {
 public:
     Vector3 min {};
     Vector3 max {};
 
-    AABB Transformed(const Math::Matrix4& transform) const;
+    LG_NODISCARD AABB Transformed(const Math::Matrix4& transform) const;
 };
 
 } // namespace Loong::Math

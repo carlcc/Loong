@@ -4,6 +4,7 @@
 
 #pragma once
 
+#include "LoongFoundation/LoongMacros.h"
 #include <algorithm>
 #include <cctype>
 #include <sstream>
@@ -21,7 +22,7 @@ template <class Separator>
 class StringSplitor {
 public:
     template <class Container>
-    operator Container() const // NOLINT(google-explicit-constructor)
+    LG_NODISCARD operator Container() const // NOLINT(google-explicit-constructor)
     {
         Container result;
         Split(result);
@@ -58,7 +59,7 @@ public:
     LoongStringUtils() = delete;
 
     template <class Str, class Separator>
-    static StringSplitor<Separator> Split(const Str& str, const Separator& separator)
+    LG_NODISCARD static StringSplitor<Separator> Split(const Str& str, const Separator& separator)
     {
         return { str, separator };
     }
@@ -70,7 +71,7 @@ public:
     }
 
     template <class Str>
-    static StringSplitor<std::string_view> Split(const Str& str, const char* separator)
+    LG_NODISCARD static StringSplitor<std::string_view> Split(const Str& str, const char* separator)
     {
         return { str, separator };
     }
@@ -81,18 +82,18 @@ public:
         StringSplitor<std::string_view> { str, separator }.Split(container);
     }
 
-    static bool StartsWith(std::string_view str, std::string_view sub)
+    LG_NODISCARD static bool StartsWith(std::string_view str, std::string_view sub)
     {
         return str.size() > sub.size() && str.compare(0, sub.size(), sub) == 0;
     }
 
-    static bool EndsWith(const std::string_view str, const std::string_view sub)
+    LG_NODISCARD static bool EndsWith(const std::string_view str, const std::string_view sub)
     {
         return str.size() > sub.size() && str.compare(str.size() - sub.size(), sub.size(), sub) == 0;
     }
 
     template <class Strings>
-    static std::string Join(const Strings& strs, std::string_view delimiter = ",")
+    LG_NODISCARD static std::string Join(const Strings& strs, std::string_view delimiter = ",")
     {
         auto it = strs.begin();
         std::stringstream ss;

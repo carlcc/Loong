@@ -3,10 +3,11 @@
 //
 
 #pragma once
+#include "LoongFoundation/LoongMacros.h"
+#include "LoongFoundation/LoongMath.h"
 #include "LoongWindow/LoongInputAction.h"
 #include "LoongWindow/LoongKeyCode.h"
 #include "LoongWindow/LoongMouseButton.h"
-#include "LoongFoundation/LoongMath.h"
 #include <array>
 #include <cstdint>
 
@@ -17,18 +18,18 @@ public:
     LoongInput();
 
     // clang-format off
-    bool IsKeyPressed(LoongKeyCode keyCode)      const { return isKeyPressed_     [int(keyCode) / 8] & (1u << (uint32_t)keyCode % 8); }
-    bool IsKeyPressEvent(LoongKeyCode keyCode)   const { return isKeyPressEvent_  [int(keyCode) / 8] & (1u << (uint32_t)keyCode % 8); }
-    bool IsKeyReleaseEvent(LoongKeyCode keyCode) const { return isKeyReleaseEvent_[int(keyCode) / 8] & (1u << (uint32_t)keyCode % 8); }
-    bool IsKeyRepeatEvent(LoongKeyCode keyCode)  const { return isKeyRepeatEvent_ [int(keyCode) / 8] & (1u << (uint32_t)keyCode % 8); }
+    LG_NODISCARD bool IsKeyPressed(LoongKeyCode keyCode)      const { return isKeyPressed_     [int(keyCode) / 8] & (1u << (uint32_t)keyCode % 8); }
+    LG_NODISCARD bool IsKeyPressEvent(LoongKeyCode keyCode)   const { return isKeyPressEvent_  [int(keyCode) / 8] & (1u << (uint32_t)keyCode % 8); }
+    LG_NODISCARD bool IsKeyReleaseEvent(LoongKeyCode keyCode) const { return isKeyReleaseEvent_[int(keyCode) / 8] & (1u << (uint32_t)keyCode % 8); }
+    LG_NODISCARD bool IsKeyRepeatEvent(LoongKeyCode keyCode)  const { return isKeyRepeatEvent_ [int(keyCode) / 8] & (1u << (uint32_t)keyCode % 8); }
 
-    bool IsMouseButtonPressed(LoongMouseButton button)      const { return isMouseButtonPressed_      & (1u << (uint32_t)button % 8); }
-    bool IsMouseButtonPressEvent(LoongMouseButton button)   const { return isMouseButtonPressEvent_   & (1u << (uint32_t)button % 8); }
-    bool IsMouseButtonReleaseEvent(LoongMouseButton button) const { return isMouseButtonReleaseEvent_ & (1u << (uint32_t)button % 8); }
+    LG_NODISCARD bool IsMouseButtonPressed(LoongMouseButton button)      const { return isMouseButtonPressed_      & (1u << (uint32_t)button % 8); }
+    LG_NODISCARD bool IsMouseButtonPressEvent(LoongMouseButton button)   const { return isMouseButtonPressEvent_   & (1u << (uint32_t)button % 8); }
+    LG_NODISCARD bool IsMouseButtonReleaseEvent(LoongMouseButton button) const { return isMouseButtonReleaseEvent_ & (1u << (uint32_t)button % 8); }
 
-    const Math::Vector2& GetMouseDownPosition() const { return mouseDownPosition_; }
-    const Math::Vector2& GetMousePosition() const { return mousePosition_; }
-    const Math::Vector2& GetMouseDelta()    const { return mouseDelta_; }
+    LG_NODISCARD const Math::Vector2& GetMouseDownPosition() const { return mouseDownPosition_; }
+    LG_NODISCARD const Math::Vector2& GetMousePosition() const { return mousePosition_; }
+    LG_NODISCARD const Math::Vector2& GetMouseDelta()    const { return mouseDelta_; }
     // clang-format on
 
     void BeginFrame();

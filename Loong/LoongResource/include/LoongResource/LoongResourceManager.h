@@ -4,6 +4,7 @@
 
 #pragma once
 
+#include "LoongFoundation/LoongMacros.h"
 #include "LoongRHI/LoongRHIManager.h"
 #include <memory>
 #include <string>
@@ -23,13 +24,13 @@ public:
 
     static void Uninitialize();
 
-    static std::shared_ptr<LoongTexture> GetTexture(const std::string& path);
+    LG_NODISCARD static std::shared_ptr<LoongTexture> GetTexture(const std::string& path);
 
-    static std::shared_ptr<LoongGpuModel> GetModel(const std::string& path);
+    LG_NODISCARD static std::shared_ptr<LoongGpuModel> GetModel(const std::string& path);
 
-    static std::shared_ptr<LoongMaterial> GetMaterial(const std::string& path);
+    LG_NODISCARD static std::shared_ptr<LoongMaterial> GetMaterial(const std::string& path);
 
-    static std::shared_ptr<LoongGpuMesh> GetSkyboxMesh();
+    LG_NODISCARD static std::shared_ptr<LoongGpuMesh> GetSkyboxMesh();
 };
 
 }

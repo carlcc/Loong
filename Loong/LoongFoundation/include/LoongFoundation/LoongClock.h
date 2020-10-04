@@ -4,6 +4,7 @@
 
 #pragma once
 
+#include "LoongFoundation/LoongMacros.h"
 #include <chrono>
 #include <cstdint>
 
@@ -31,15 +32,9 @@ public:
         currentSteadyTimeMicros_ = steadyNow;
     }
 
-    float DeltaTime() const
-    {
-        return deltaTimeMicros_ / 1000000.F;
-    }
+    LG_NODISCARD float DeltaTime() const { return deltaTimeMicros_ / 1000000.F; }
 
-    float ElapsedTime() const
-    {
-        return elapsedTimeMicros_ / 1000000.F;
-    }
+    LG_NODISCARD float ElapsedTime() const { return elapsedTimeMicros_ / 1000000.F; }
 
 private:
     int64_t baseSteadyTimeMicros_ { 0 };
