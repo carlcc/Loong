@@ -1,29 +1,24 @@
 {
-    "shader": "/Shaders/unlit.glsl",
-    "params": {
-        "u_Diffuse": {
-            "type": "vec4",
-            "value": "1 1 1 1"
-        },
-        "u_TextureTiling": {
-            "type": "vec2",
-            "value": "1 1"
-        },
-        "u_TextureOffset": {
-            "type": "vec2",
-            "value": "0 0"
-        },
-        "u_DiffuseMap": {
-            "type": "tex2d",
-            "value": "/Textures/fire.jpg"
-        }
+    "pipelineState": {
+        "blendable": false,
+        "backFaceCulling": true,
+        "frontFaceCulling": false,
+        "depthTest": true
     },
-    "state": {
-        "blend": false,
-        "backCulling": true,
-        "frontCulling": false,
-        "depthTest": true,
-        "depthWriting": true,
-        "colorWriting": true
+    "uniforms": {
+        "albedoMap": "/Textures/DamagedHelmet_0.jpg",
+        "normalMap": "",
+        "metallicMap": "",
+        "roughnessMap": "",
+        "emissiveMap": "",
+        "ambientOcclusionMap": "",
+        "albedo": "0 0 0",
+        "textureTiling": "0 0",
+        "textureOffset": "0 0",
+        "metallic": 0.0,
+        "roughness": 0.0,
+        "emissiveFactor": 0.0,
+        "clearCoat": 0.0,
+        "clearCoatRoughness": 0.0
     }
 }

@@ -185,9 +185,10 @@ public:
     void InitResources()
     {
         Foundation::LoongThreadPool::AddTask([&]() {
-            texture_ = Resource::LoongResourceManager::GetTexture("/Textures/DamagedHelmet_0.jpg");
             LOONG_ASSERT(!Window::LoongApplication::IsInMainThread(), "");
             LOONG_INFO("Loading texture...");
+            auto mtl = Resource::LoongResourceManager::GetMaterial("/Materials/Test.lgmtl");
+            texture_ = mtl->GetAlbedoMap();
 
             Window::LoongApplication::RunInMainThread([&]() {
                 LOONG_ASSERT(Window::LoongApplication::IsInMainThread(), "");

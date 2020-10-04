@@ -114,7 +114,7 @@ std::shared_ptr<LoongMaterial> LoongResourceManager::GetMaterial(const std::stri
     spMaterial = LoongMaterialLoader::Create(path, [](const std::string& path) {
         LOONG_TRACE("Unload material '{}'", path);
     });
-    if (spMaterial != nullptr) {
+    if (spMaterial == nullptr) {
         return nullptr;
     }
 
