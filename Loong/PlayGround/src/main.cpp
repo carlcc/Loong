@@ -184,21 +184,23 @@ public:
 
     void InitResources()
     {
-        Foundation::LoongThreadPool::AddTask([&]() {
+        LOONG_INFO("Loading texture...");
+        Resource::LoongResourceManager::GetMaterialAsync("/Materials/Test.lgmtl", [this](const std::shared_ptr<Resource::LoongMaterial>& mtl) {
             LOONG_ASSERT(!Window::LoongApplication::IsInMainThread(), "");
-            LOONG_INFO("Loading texture...");
-            auto mtl = Resource::LoongResourceManager::GetMaterial("/Materials/Test.lgmtl");
             texture_ = mtl->GetAlbedoMap();
 
             Window::LoongApplication::RunInMainThread([&]() {
                 LOONG_ASSERT(Window::LoongApplication::IsInMainThread(), "");
-                textureSRV_ = texture_->GetTexture()->GetDefaultView(RHI::TEXTURE_VIEW_SHADER_RESOURCE);
+                auto srv = texture_->GetTexture()->GetDefaultView(RHI::TEXTURE_VIEW_SHADER_RESOURCE);
 
-                srb_->GetVariableByName(RHI::SHADER_TYPE_PIXEL, "g_Albedo")->Set(textureSRV_);
-
-                model_ = Resource::LoongResourceManager::GetModel("/Models/DamagedHelmet.lgmdl");
+                srb_->GetVariableByName(RHI::SHADER_TYPE_PIXEL, "g_Albedo")->Set(srv);
+                textureSRV_ = srv;
             });
-            return true;
+        });
+
+        Resource::LoongResourceManager::GetModelAsync("/Models/DamagedHelmet.lgmdl", [this](const std::shared_ptr<Resource::LoongGpuModel>& model) {
+            LOONG_ASSERT(!Window::LoongApplication::IsInMainThread(), "");
+            model_ = model;
         });
     }
 

@@ -13,40 +13,29 @@ namespace Loong::Foundation {
 class LoongThreadTask {
 public:
     // Returns true if done successfully, else false
-    using CallbackType = std::function<bool()>;
+    using CallbackType = std::function<bool(LoongThreadTask* task)>;
 
-    LoongThreadTask(CallbackType&& task)
+    LoongThreadTask() = default;
+    explicit LoongThreadTask(CallbackType&& task)
         : callback_ { std::move(task) }
-        , isCaneled_ { false }
     {
     }
     LoongThreadTask(const LoongThreadTask&) = delete;
-    LoongThreadTask(LoongThreadTask&& task) noexcept
-    {
-        callback_ = std::move(task.callback_);
-        isCaneled_ = task.isCaneled_;
-        isDone_ = task.isDone_;
-    }
+    LoongThreadTask(LoongThreadTask&& task) = delete;
     LoongThreadTask& operator=(const LoongThreadTask&) = delete;
-    LoongThreadTask& operator=(LoongThreadTask&& task) noexcept
-    {
-        callback_ = std::move(task.callback_);
-        isCaneled_ = task.isCaneled_;
-        isDone_ = task.isDone_;
-        return *this;
-    }
+    LoongThreadTask& operator=(LoongThreadTask&& task) = delete;
 
-    void Cancel() { isCaneled_ = true; }
-    LG_NODISCARD bool IsCanceld() const { return isCaneled_; }
     LG_NODISCARD bool IsDone() const { return isDone_; }
+    LG_NODISCARD bool IsSucceed() const { return isSucceed_; }
+
+    void Done() { isDone_ = true; }
+    void Succeed() { isSucceed_ = true; }
 
 private:
-    void Done() { isDone_ = true; }
-
     /// What this task will do
-    CallbackType callback_ { []() { return true; } };
-    bool isCaneled_ { false };
+    CallbackType callback_ { [](LoongThreadTask*) { return true; } };
     bool isDone_ { false };
+    bool isSucceed_ { false };
 
     friend class LoongThreadPoolImpl;
 };

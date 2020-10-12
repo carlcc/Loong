@@ -5,8 +5,10 @@
 #include "LoongResource/LoongResourceManager.h"
 #include "LoongAsset/LoongMesh.h"
 #include "LoongAsset/LoongModel.h"
+#include "LoongFoundation/LoongAssert.h"
 #include "LoongFoundation/LoongDefer.h"
 #include "LoongFoundation/LoongLogger.h"
+#include "LoongFoundation/LoongThreadPool.h"
 #include "LoongResource/LoongGpuMesh.h"
 #include "LoongResource/LoongGpuModel.h"
 #include "LoongResource/LoongMaterial.h"
@@ -18,29 +20,142 @@
 
 namespace Loong::Resource {
 
+// clang-format off
+template <class T> struct ResourceLoadCallback;
+template <> struct ResourceLoadCallback<std::shared_ptr<LoongTexture>>  { using Type = LoongResourceManager::OnTextureLoadCallback; };
+template <> struct ResourceLoadCallback<std::shared_ptr<LoongGpuModel>> { using Type = LoongResourceManager::OnModelLoadCallback; };
+template <> struct ResourceLoadCallback<std::shared_ptr<LoongMaterial>> { using Type = LoongResourceManager::OnMaterialLoadCallback; };
+// clang-format on
+
+template <class T>
+struct ResourceLoaderInternal;
+template <>
+struct ResourceLoaderInternal<std::shared_ptr<LoongTexture>> {
+    static std::shared_ptr<Foundation::LoongThreadTask> Load(const std::string& path, std::function<void(std::shared_ptr<LoongTexture>)>&& onRsrc)
+    {
+        return Foundation::LoongThreadPool::AddTask([path, onRsrc = std::move(onRsrc)](auto* task) -> bool {
+            LOONG_TRACE("Load texture '{}'", path);
+            auto tex = Resource::LoongTextureLoader::Create(path, RHI::LoongRHIManager::GetDevice(), true, [](const std::string& p) {
+                LOONG_TRACE("Unload texture '{}'", p);
+            });
+            if (tex != nullptr) {
+                LOONG_TRACE("Load texture '{}' succeed", path);
+            } else {
+                LOONG_TRACE("Load texture '{}' failed", path);
+            }
+            onRsrc(tex);
+            return tex != nullptr;
+        });
+    }
+};
+template <>
+struct ResourceLoaderInternal<std::shared_ptr<LoongGpuModel>> {
+    static std::shared_ptr<Foundation::LoongThreadTask> Load(const std::string& path, std::function<void(std::shared_ptr<LoongGpuModel>)>&& onRsrc)
+    {
+        return Foundation::LoongThreadPool::AddTask([path, onRsrc = std::move(onRsrc)](auto* task) -> bool {
+            Asset::LoongModel model(path);
+            if (!model) {
+                LOONG_ERROR("Load model '{}' failed", path);
+                onRsrc(nullptr);
+                return false;
+            }
+            LOONG_TRACE("Load GPU model '{}'", path);
+            auto spGpuModel = std::shared_ptr<LoongGpuModel>(new LoongGpuModel(model, path), [](LoongGpuModel* mdl) {
+                LOONG_TRACE("Unload GPU model '{}'", mdl->GetPath());
+                delete mdl;
+            });
+            LOONG_ASSERT(spGpuModel != nullptr, "");
+            onRsrc(spGpuModel);
+            return true;
+        });
+    }
+};
+template <>
+struct ResourceLoaderInternal<std::shared_ptr<LoongMaterial>> {
+    static std::shared_ptr<Foundation::LoongThreadTask> Load(const std::string& path, std::function<void(std::shared_ptr<LoongMaterial>)>&& onRsrc)
+    {
+        LOONG_TRACE("Load material '{}'", path);
+        return LoongMaterialLoader::CreateAsync(
+            path,
+            [](const std::string& path) {
+                LOONG_TRACE("Unload material '{}'", path);
+            },
+            [onRsrc, path](const std::shared_ptr<LoongMaterial>& material) {
+                if (material == nullptr) {
+                    LOONG_TRACE("Load material '{}' failed", path);
+                } else {
+                    LOONG_TRACE("Load material '{}' succeed", path);
+                }
+                onRsrc(material);
+            } //
+        );
+    }
+};
+
 // TODO: Replace it with a better cache: with resource budget and release strategy
-// This class is not thread safe
+// This class is thread safe
+// TODO: Optimize, a more parallel implementation
 template <class T>
 struct ResourceCache {
 public:
-    T Get(const std::string& key)
+    using CallbackType = typename ResourceLoadCallback<T>::Type;
+    struct LoadingInfo {
+        /// The loading task
+        std::shared_ptr<Foundation::LoongThreadTask> task;
+        /// The callback to perform
+        std::vector<CallbackType> callbacks;
+    };
+
+    std::shared_ptr<Foundation::LoongThreadTask> GetAsync(const std::string& key, CallbackType&& cb)
     {
-        auto it = pool_.find(key);
-        if (it == pool_.end()) {
-            return T {};
+        std::unique_lock<std::mutex> lck(poolMutex_);
+        if (auto it = pool_.find(key); it != pool_.end()) {
+            // 1. If the resource has been loaded, return it
+            return Foundation::LoongThreadPool::AddTask([rsrc = it->second, cb = std::move(cb)](auto* task) {
+                cb(rsrc);
+                return true;
+            });
+        } else if (auto lit = resourceBeingLoaded_.find(key); lit != resourceBeingLoaded_.end()) {
+            // 2. Else if the resource is being loaded, add the callback to pending callbacks
+            lit->second.callbacks.push_back(std::move(cb));
+            return lit->second.task;
+        } else {
+            // 3. Else load the resource
+            auto task = ResourceLoaderInternal<T>::Load(key, [this, key](T rsrc) {
+                std::vector<CallbackType> callbacks;
+                {
+                    std::unique_lock<std::mutex> lck(poolMutex_);
+                    if (rsrc != nullptr) {
+                        pool_.emplace(key, rsrc);
+                    }
+
+                    auto it = resourceBeingLoaded_.find(key);
+                    LOONG_ASSERT(it != resourceBeingLoaded_.end(), "");
+                    callbacks = std::move(it->second.callbacks);
+                    resourceBeingLoaded_.erase(it);
+                }
+                for (auto& callback : callbacks) {
+                    callback(rsrc);
+                }
+            });
+            resourceBeingLoaded_.emplace(key, LoadingInfo { task, std::vector<CallbackType> { std::move(cb) } });
+            return task;
         }
-        return it->second;
     }
 
-    void Insert(const std::string& key, const T& t)
+    void Clear()
     {
-        pool_.emplace(key, t);
+        std::unique_lock<std::mutex> lck(poolMutex_);
+        pool_.clear();
     }
-
-    void Clear() { pool_.clear(); }
 
 private:
+    /// The loaded resources
     std::map<std::string, T> pool_ {};
+    std::mutex poolMutex_ {};
+    /// The resources being loaded
+    /// The pending callbacks to invoke once the resource is loaded
+    std::map<std::string, LoadingInfo> resourceBeingLoaded_ {};
 };
 
 static ResourceCache<std::shared_ptr<LoongTexture>> gTextureCache;
@@ -51,6 +166,7 @@ static std::shared_ptr<LoongGpuMesh> gSkyBoxMesh;
 
 bool LoongResourceManager::Initialize()
 {
+    LoongResourceManager::Uninitialize();
     return true;
 }
 
@@ -62,65 +178,19 @@ void LoongResourceManager::Uninitialize()
     gSkyBoxMesh = nullptr;
 }
 
-std::shared_ptr<LoongTexture> LoongResourceManager::GetTexture(const std::string& path)
+std::shared_ptr<Foundation::LoongThreadTask> LoongResourceManager::GetTextureAsync(const std::string& path, LoongResourceManager::OnTextureLoadCallback&& cb)
 {
-    auto texture = gTextureCache.Get(path);
-    if (texture != nullptr) {
-        return texture;
-    }
-
-    texture = Resource::LoongTextureLoader::Create(path, RHI::LoongRHIManager::GetDevice(), true, [](const std::string& p) {
-        LOONG_TRACE("Unload texture '{}'", p);
-    });
-    if (texture != nullptr) {
-        gTextureCache.Insert(path, texture);
-        LOONG_TRACE("Load texture '{}' succeed", path);
-    } else {
-        LOONG_ERROR("Load texture '{}' failed", path);
-    }
-    return texture;
+    return gTextureCache.GetAsync(path, std::move(cb));
 }
 
-std::shared_ptr<LoongGpuModel> LoongResourceManager::GetModel(const std::string& path)
+std::shared_ptr<Foundation::LoongThreadTask> LoongResourceManager::GetModelAsync(const std::string& path, LoongResourceManager::OnModelLoadCallback&& cb)
 {
-    auto spGpuModel = gModelCache.Get(path);
-    if (spGpuModel != nullptr) {
-        return spGpuModel;
-    }
-
-    Asset::LoongModel model(path);
-    if (!model) {
-        LOONG_ERROR("Load model '{}' failed", path);
-        return nullptr;
-    }
-
-    LOONG_TRACE("Load GPU model '{}'", path);
-    spGpuModel = std::make_shared<LoongGpuModel>(model, path);
-    assert(spGpuModel != nullptr);
-
-    gModelCache.Insert(path, spGpuModel);
-    LOONG_TRACE("Load GPU model '{}' succeed", path);
-    return spGpuModel;
+    return gModelCache.GetAsync(path, std::move(cb));
 }
 
-std::shared_ptr<LoongMaterial> LoongResourceManager::GetMaterial(const std::string& path)
+std::shared_ptr<Foundation::LoongThreadTask> LoongResourceManager::GetMaterialAsync(const std::string& path, LoongResourceManager::OnMaterialLoadCallback&& cb)
 {
-    auto spMaterial = gMaterialCache.Get(path);
-    if (spMaterial != nullptr) {
-        return spMaterial;
-    }
-
-    LOONG_TRACE("Load material '{}'", path);
-    spMaterial = LoongMaterialLoader::Create(path, [](const std::string& path) {
-        LOONG_TRACE("Unload material '{}'", path);
-    });
-    if (spMaterial == nullptr) {
-        return nullptr;
-    }
-
-    gMaterialCache.Insert(path, spMaterial);
-    LOONG_TRACE("Load material '{}' succeed", path);
-    return spMaterial;
+    return gMaterialCache.GetAsync(path, std::move(cb));
 }
 
 std::shared_ptr<LoongGpuMesh> LoongResourceManager::GetSkyboxMesh()

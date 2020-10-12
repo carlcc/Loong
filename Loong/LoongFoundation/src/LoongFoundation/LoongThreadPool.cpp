@@ -18,7 +18,7 @@ public:
     explicit LoongThreadPoolImpl(int threadNum)
     {
         if (threadNum == 0) {
-            threadNum = std::thread::hardware_concurrency();
+            threadNum = (int)std::thread::hardware_concurrency();
             LOONG_INFO("{} CPU cores found", threadNum);
         }
         LOONG_ASSERT(threadNum >= 0, "Thread count of threadpool should >= 0");
@@ -63,7 +63,7 @@ public:
         return task;
     }
 
-    size_t GetTasksCount() const { return tasksCount_; }
+    LG_NODISCARD size_t GetTasksCount() const { return tasksCount_; }
 
 private:
     void threadRoutine()
@@ -83,13 +83,11 @@ private:
                 --tasksCount_;
             }
 
-            if (task->IsCanceld()) {
-                continue;
+            if (task->callback_(task.get())) {
+                task->Succeed();
             }
 
-            if (task->callback_()) {
-                task->Done();
-            }
+            task->Done();
         }
     }
 

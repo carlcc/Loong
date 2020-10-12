@@ -9,6 +9,10 @@
 #include <memory>
 #include <string>
 
+namespace Loong::Foundation {
+class LoongThreadTask;
+}
+
 namespace Loong::Resource {
 
 class LoongMaterial;
@@ -17,7 +21,7 @@ class LoongMaterialLoader {
 public:
     LoongMaterialLoader() = delete;
 
-    LG_NODISCARD static std::shared_ptr<LoongMaterial> Create(const std::string& filePath, const std::function<void(const std::string&)>& onDestroy);
+    static std::shared_ptr<Foundation::LoongThreadTask> CreateAsync(const std::string& filePath, const std::function<void(const std::string&)>& onDestroy, std::function<void(std::shared_ptr<LoongMaterial>)>&& onMaterial);
 
     static bool Write(const std::string& filePath, const LoongMaterial* material);
 };

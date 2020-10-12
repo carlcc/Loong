@@ -4,11 +4,14 @@
 
 #include "LoongResource/loader/LoongMaterialLoader.h"
 #include "LoongFileSystem/LoongFileSystem.h"
+#include "LoongFoundation/LoongAssert.h"
 #include "LoongFoundation/LoongLogger.h"
 #include "LoongFoundation/LoongMath.h"
+#include "LoongFoundation/LoongThreadPool.h"
 #include "LoongResource/LoongMaterial.h"
 #include "LoongResource/LoongResourceManager.h"
 #include "LoongResource/LoongTexture.h"
+#include <atomic>
 #include <jsonmapper/JsonMapper.h>
 #include <jsonmapper/types/deserialize/string.h>
 #include <jsonmapper/types/serialize/string.h>
@@ -189,57 +192,81 @@ struct MaterialData {
     }
 };
 
-inline LoongMaterial::TextureRef LoadTexture(const std::string& path)
-{
-    if (path.empty()) {
-        return nullptr;
-    }
-    return LoongResourceManager::GetTexture(path);
-}
+#define LoadTexture(task, pWaitCounter, material, texture, path, pOnMaterial)                                                           \
+    do {                                                                                                                                \
+        if (path.empty()) {                                                                                                             \
+            --*pWaitCounter;                                                                                                            \
+            break;                                                                                                                      \
+        }                                                                                                                               \
+        LoongResourceManager::GetTextureAsync(path, [task, material, pWaitCounter, pOnMaterial](const LoongMaterial::TextureRef& tex) { \
+            material->uniforms_.texture = tex;                                                                                          \
+            --*pWaitCounter;                                                                                                            \
+            if (*pWaitCounter == 0) {                                                                                                   \
+                (*pOnMaterial)(material);                                                                                               \
+                delete pOnMaterial;                                                                                                     \
+                delete pWaitCounter;                                                                                                    \
+                task->Done();                                                                                                           \
+                task->Succeed();                                                                                                        \
+            }                                                                                                                           \
+        });                                                                                                                             \
+    } while (false)
 
-std::shared_ptr<LoongMaterial> LoongMaterialLoader::Create(const std::string& filePath, const std::function<void(const std::string&)>& onDestroy)
+std::shared_ptr<Foundation::LoongThreadTask> LoongMaterialLoader::CreateAsync(const std::string& filePath, const std::function<void(const std::string&)>& onDestroy, std::function<void(std::shared_ptr<LoongMaterial>)>&& onMaterial)
 {
-    int64_t fileSize = FS::LoongFileSystem::GetFileSize(filePath);
-    if (fileSize <= 0) {
-        LOONG_ERROR("Failed to load material '{}': Wrong file size", filePath);
-        return nullptr;
-    }
-    std::vector<uint8_t> buffer(fileSize);
-    auto size = FS::LoongFileSystem::LoadFileContent(filePath, buffer.data(), fileSize);
-    (void)size;
-    assert(size == fileSize);
+    auto ret = std::make_shared<Foundation::LoongThreadTask>();
 
-    MaterialData materialData;
-    if (!jsonmapper::DeserializeFromJsonString(materialData, std::string_view { (const char*)buffer.data(), buffer.size() })) {
-        LOONG_ERROR("Failed to load material '{}': deserialize json failed", filePath);
-        return nullptr;
-    }
-    std::shared_ptr<LoongMaterial> material(new LoongMaterial, [](LoongMaterial* m) {
-        delete m;
+    Foundation::LoongThreadPool::AddTask([ret, filePath, onMaterial = std::move(onMaterial)](auto* t) mutable -> bool {
+        int64_t fileSize = FS::LoongFileSystem::GetFileSize(filePath);
+        if (fileSize <= 0) {
+            LOONG_ERROR("Failed to load material '{}': Wrong file size", filePath);
+            onMaterial(nullptr);
+            ret->Done();
+            return true;
+        }
+        std::vector<uint8_t> buffer(fileSize);
+        auto size = FS::LoongFileSystem::LoadFileContent(filePath, buffer.data(), fileSize);
+        (void)size;
+        LOONG_ASSERT(size == fileSize, "");
+
+        MaterialData materialData;
+        if (!jsonmapper::DeserializeFromJsonString(materialData, std::string_view { (const char*)buffer.data(), buffer.size() })) {
+            LOONG_ERROR("Failed to load material '{}': deserialize json failed", filePath);
+            onMaterial(nullptr);
+            ret->Done();
+            return true;
+        }
+
+        auto pMaterial = new LoongMaterial;
+        std::shared_ptr<LoongMaterial> material(pMaterial, [](LoongMaterial* m) {
+            delete m;
+        });
+        // Pipeline State
+        material->blendable_ = materialData.pipelineState.blendable;
+        material->backFaceCulling_ = materialData.pipelineState.backFaceCulling;
+        material->frontFaceCulling_ = materialData.pipelineState.frontFaceCulling;
+        material->depthTest_ = materialData.pipelineState.depthTest;
+
+        material->uniforms_.metallic = materialData.uniforms.metallic;
+        material->uniforms_.roughness = materialData.uniforms.roughness;
+        material->uniforms_.emissiveFactor = materialData.uniforms.emissiveFactor;
+        material->uniforms_.clearCoat = materialData.uniforms.clearCoat;
+        material->uniforms_.clearCoatRoughness = materialData.uniforms.clearCoatRoughness;
+        material->uniforms_.albedo = ParseStringToVector3(materialData.uniforms.albedo);
+        material->uniforms_.textureTiling = ParseStringToVector2(materialData.uniforms.textureTiling);
+        material->uniforms_.textureOffset = ParseStringToVector2(materialData.uniforms.textureOffset);
+
+        // Uniforms
+        auto* waitCounter = new std::atomic_int(6);
+        auto* pOnMaterial = new std::function<void(std::shared_ptr<LoongMaterial>)>(std::move(onMaterial));
+        LoadTexture(ret, waitCounter, material, albedoMap, materialData.uniforms.albedoMap, pOnMaterial);
+        LoadTexture(ret, waitCounter, material, normalMap, materialData.uniforms.normalMap, pOnMaterial);
+        LoadTexture(ret, waitCounter, material, metallicMap, materialData.uniforms.metallicMap, pOnMaterial);
+        LoadTexture(ret, waitCounter, material, roughnessMap, materialData.uniforms.roughnessMap, pOnMaterial);
+        LoadTexture(ret, waitCounter, material, emissiveMap, materialData.uniforms.emissiveMap, pOnMaterial);
+        LoadTexture(ret, waitCounter, material, ambientOcclusionMap, materialData.uniforms.ambientOcclusionMap, pOnMaterial);
+        return true;
     });
-    // Pipeline State
-    material->blendable_ = materialData.pipelineState.blendable;
-    material->backFaceCulling_ = materialData.pipelineState.backFaceCulling;
-    material->frontFaceCulling_ = materialData.pipelineState.frontFaceCulling;
-    material->depthTest_ = materialData.pipelineState.depthTest;
-
-    // Uniforms
-    material->uniforms_.albedoMap = LoadTexture(materialData.uniforms.albedoMap);
-    material->uniforms_.normalMap = LoadTexture(materialData.uniforms.normalMap);
-    material->uniforms_.metallicMap = LoadTexture(materialData.uniforms.metallicMap);
-    material->uniforms_.roughnessMap = LoadTexture(materialData.uniforms.roughnessMap);
-    material->uniforms_.emissiveMap = LoadTexture(materialData.uniforms.emissiveMap);
-    material->uniforms_.ambientOcclusionMap = LoadTexture(materialData.uniforms.ambientOcclusionMap);
-    material->uniforms_.metallic = materialData.uniforms.metallic;
-    material->uniforms_.roughness = materialData.uniforms.roughness;
-    material->uniforms_.emissiveFactor = materialData.uniforms.emissiveFactor;
-    material->uniforms_.clearCoat = materialData.uniforms.clearCoat;
-    material->uniforms_.clearCoatRoughness = materialData.uniforms.clearCoatRoughness;
-    material->uniforms_.albedo = ParseStringToVector3(materialData.uniforms.albedo);
-    material->uniforms_.textureTiling = ParseStringToVector2(materialData.uniforms.textureTiling);
-    material->uniforms_.textureOffset = ParseStringToVector2(materialData.uniforms.textureOffset);
-
-    return material;
+    return ret;
 }
 
 inline const std::string& GetTexturePath(LoongTexture* tex)
@@ -283,7 +310,7 @@ bool LoongMaterialLoader::Write(const std::string& filePath, const LoongMaterial
     }
 
     auto count = FS::LoongFileSystem::StoreFileContent(filePath, dataToWrite.data(), dataToWrite.size());
-    if (size_t(count )!= dataToWrite.size()) {
+    if (size_t(count) != dataToWrite.size()) {
         LOONG_ERROR("Failed to write material '{}': {}", filePath, FS::LoongFileSystem::GetLastError());
         return false;
     }
