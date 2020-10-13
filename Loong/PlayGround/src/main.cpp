@@ -92,7 +92,7 @@ struct PSInput
 {
     float4 Pos          : SV_POSITION;
     float2 Uv           : TEX_COORD;
-    float3 WorldNormal  : NORMAL;
+    //float3 WorldNormal  : NORMAL;
     float4 WorldPos     : POSITIONT;
     //float3 CameraPos    ;
     //float3x3 TBN        ;
@@ -351,7 +351,7 @@ void StartApp(int argc, char** argv)
     config.title = "Play Ground";
     auto window = Loong::Window::LoongApplication::CreateWindow(config);
 
-    Loong::RHI::ScopedDriver rhiDriver(window->GetGlfwWindow(), Loong::RHI::RENDER_DEVICE_TYPE_VULKAN);
+    Loong::RHI::ScopedDriver rhiDriver(window->GetGlfwWindow(), Loong::RHI::RENDER_DEVICE_TYPE_D3D12);
     assert(bool(rhiDriver));
 
     Loong::Resource::ScopedDriver resourceDriver;
