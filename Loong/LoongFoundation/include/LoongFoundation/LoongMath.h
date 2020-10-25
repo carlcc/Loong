@@ -72,9 +72,9 @@ const struct {
 } TwoPi;
 
 // clang-format off
-const Vector3 kForward { 0.0F,  0.0F, -1.0F }; // NOLINT(cert-err58-cpp)
-const Vector3 kRight   { 1.0F,  0.0F,  0.0F }; // NOLINT(cert-err58-cpp)
-const Vector3 kUp      { 0.0F,  1.0F,  0.0F }; // NOLINT(cert-err58-cpp)
+const Vector3 kForward { 0.0F,  0.0F, 1.0F }; // NOLINT(cert-err58-cpp)
+const Vector3 kRight   { 1.0F,  0.0F, 0.0F }; // NOLINT(cert-err58-cpp)
+const Vector3 kUp      { 0.0F,  1.0F, 0.0F }; // NOLINT(cert-err58-cpp)
 // clang-format on
 
 template <class T>
@@ -225,8 +225,8 @@ LG_NODISCARD inline Vector3 QuatToEuler(const Quat& q)
 LG_NODISCARD inline Quat EulerToQuat(const Vector3& euler)
 {
     return glm::eulerAngleYXZ(euler.y, euler.x, euler.z);
-    return Rotate(Quat(Identity), kUp, euler.z) * Rotate(Quat(Identity), kUp, euler.x) * Rotate(Quat(Identity), kUp, euler.y);
-    return glm::quat(euler);
+    // return Rotate(Quat(Identity), kUp, euler.z) * Rotate(Quat(Identity), kUp, euler.x) * Rotate(Quat(Identity), kUp, euler.y);
+    // return glm::quat(euler);
 }
 
 template <class T>

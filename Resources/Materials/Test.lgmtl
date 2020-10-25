@@ -1,24 +1,24 @@
 {
-    "pipelineState": {
-        "blendable": false,
-        "backFaceCulling": true,
-        "frontFaceCulling": false,
-        "depthTest": true
-    },
-    "uniforms": {
-        "albedoMap": "/Textures/DamagedHelmet_0.jpg",
-        "normalMap": "",
-        "metallicMap": "",
-        "roughnessMap": "",
-        "emissiveMap": "",
-        "ambientOcclusionMap": "",
-        "albedo": "0 0 0",
-        "textureTiling": "0 0",
-        "textureOffset": "0 0",
-        "metallic": 0.0,
-        "roughness": 0.0,
-        "emissiveFactor": 0.0,
-        "clearCoat": 0.0,
-        "clearCoatRoughness": 0.0
-    }
+	"pipelineState": {
+		"blendable": false,
+		"backFaceCulling": true,
+		"frontFaceCulling": false,
+		"depthTest": true
+	},
+	"uniforms": {
+		"albedoMap": "/Textures/DamagedHelmet_0.jpg",
+		"normalMap": "/Textures/DamagedHelmet_2.jpg",
+		"metallicMap": "/Textures/DamagedHelmet_1_2..jpg",
+		"roughnessMap": "/Textures/DamagedHelmet_1_1..jpg",
+		"emissiveMap": "/Textures/DamagedHelmet_4.jpg",
+		"ambientOcclusionMap": "",
+		"albedo": "0 0 0",
+		"textureTiling": "0 0",
+		"textureOffset": "0 0",
+		"metallic": 0.0,
+		"roughness": 0.0,
+		"emissiveFactor": 0.0,
+		"clearCoat": 0.0,
+		"clearCoatRoughness": 0.0
+	}
 }

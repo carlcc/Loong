@@ -61,7 +61,6 @@ bool Flags::ParseCommandLine(int argc, char** argv)
         }
     }
 
-    bool ret = true;
     for (int index = 1; index < argc; ++index) {
         std::string command = argv[index];
         auto it = kCommandHandlerMap.find(command);

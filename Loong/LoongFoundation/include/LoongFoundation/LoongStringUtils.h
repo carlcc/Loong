@@ -107,12 +107,12 @@ public:
 
     static void ToLower(std::string& s)
     {
-        std::transform(std::begin(s), std::end(s), std::begin(s), [](char c) -> int { return std::tolower(c); });
+        std::transform(std::begin(s), std::end(s), std::begin(s), [](char c) -> char { return (char)std::tolower(c); });
     }
 
     static void ToUpper(std::string& s)
     {
-        std::transform(std::begin(s), std::end(s), std::begin(s), [](char c) -> int { return std::toupper(c); });
+        std::transform(std::begin(s), std::end(s), std::begin(s), [](char c) -> char { return (char)std::toupper(c); });
     }
 };
 

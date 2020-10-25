@@ -15,6 +15,7 @@
 #include <RefCntAutoPtr.hpp>
 #include <RenderDevice.h>
 #include <ScreenCapture.hpp>
+#include <ShaderMacroHelper.hpp>
 #include <SwapChain.h>
 
 struct GLFWwindow;

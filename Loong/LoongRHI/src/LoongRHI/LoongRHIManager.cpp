@@ -409,6 +409,10 @@ RHI::RefCntAutoPtr<RHI::IPipelineState> LoongRHIManager::CreateGraphicsPSOForCur
     psoDesc.ResourceLayout = resourceLayout;
 
     RefCntAutoPtr<IPipelineState> pso;
+
+    if (pPS == nullptr || pVS == nullptr) {
+        return pso;
+    }
     device->CreatePipelineState(psoCreateInfo, &pso);
 
     return pso;

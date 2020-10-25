@@ -58,14 +58,16 @@ static void ProcessMesh(const void* transform, const struct aiMesh* mesh, const 
     for (uint32_t i = 0; i < mesh->mNumVertices; ++i) {
         aiVector3D position = meshTransformation * mesh->mVertices[i];
         Math::Vector3 normal = rotTransform * AiVector2LoongVector(mesh->mNormals ? mesh->mNormals[i] : aiVector3D(0.0f, 0.0f, 0.0f));
-        aiVector3D texCoords = mesh->mTextureCoords[0] ? mesh->mTextureCoords[0][i] : aiVector3D(0.0f, 0.0f, 0.0f);
+        aiVector3D texCoords0 = mesh->mTextureCoords[0] ? mesh->mTextureCoords[0][i] : aiVector3D(0.0f, 0.0f, 0.0f);
+        aiVector3D texCoords1 = mesh->mTextureCoords[0] ? mesh->mTextureCoords[0][i] : aiVector3D(0.0f, 0.0f, 0.0f);
         aiVector3D tangent = mesh->mTangents ? meshTransformation * mesh->mTangents[i] : aiVector3D(0.0f, 0.0f, 0.0f);
         aiVector3D bitangent = mesh->mBitangents ? meshTransformation * mesh->mBitangents[i] : aiVector3D(0.0f, 0.0f, 0.0f);
 
         outVertices.push_back(
             {
                 { position.x, position.y, position.z },
-                { texCoords.x, texCoords.y },
+                { texCoords0.x, texCoords0.y },
+                { texCoords1.x, texCoords1.y },
                 { normal.x, normal.y, normal.z },
                 { tangent.x, tangent.y, tangent.z },
                 { bitangent.x, bitangent.y, bitangent.z },
