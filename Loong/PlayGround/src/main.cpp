@@ -11,11 +11,11 @@
 #include <LoongAsset/LoongModel.h>
 #include <LoongFileSystem/Driver.h>
 #include <LoongFileSystem/LoongFileSystem.h>
-#include <LoongFoundation/LoongTransform.h>
 #include <LoongFoundation/Driver.h>
 #include <LoongFoundation/LoongAssert.h>
 #include <LoongFoundation/LoongPathUtils.h>
 #include <LoongFoundation/LoongThreadPool.h>
+#include <LoongFoundation/LoongTransform.h>
 #include <LoongResource/Driver.h>
 #include <LoongResource/LoongGpuMesh.h>
 #include <LoongResource/LoongGpuModel.h>
@@ -61,8 +61,7 @@ struct PSLightUniforms {
     Light ub_Lights[MAX_LIGHT_COUNT];
 };
 
-struct PSMaterialUniforms
-{
+struct PSMaterialUniforms {
     RHI::float2 ub_TextureOffset;
     RHI::float2 ub_TextureTiling;
     RHI::float3 ub_Albedo;
@@ -84,7 +83,7 @@ RHI::float4x4 Mat4ToFloat4x4(const Math::Matrix4& m)
 
 RHI::float3 Vec3ToFloat3(const Math::Vector3& v)
 {
-    return {v.x, v.y, v.z};
+    return { v.x, v.y, v.z };
 }
 
 class LoongEditor : public Foundation::LoongHasSlots {
@@ -107,8 +106,8 @@ public:
         clock_.Reset();
         vsConstants_ = RHI::LoongRHIManager::CreateUniformBuffer("VS constants CB", sizeof(UniformConstants));
         psLightUniforms_ = RHI::LoongRHIManager::CreateUniformBuffer("VS constants CB", sizeof(PSLightUniforms));
-        psMaterialUniforms_= RHI::LoongRHIManager::CreateUniformBuffer("VS constants CB", sizeof(PSMaterialUniforms));
-        
+        psMaterialUniforms_ = RHI::LoongRHIManager::CreateUniformBuffer("VS constants CB", sizeof(PSMaterialUniforms));
+
         CreatePSO();
         InitResources();
         cameraTransform_.SetPosition({ 0, 0, -4 });
@@ -417,8 +416,7 @@ void LoongEditor::OnUpdate()
 
         cameraTransform_.SetRotation(Math::EulerToQuat(euler));
         window_->SetMouseMode(Window::LoongWindow::MouseMode::kHidden);
-    }
-    else {
+    } else {
         window_->SetMouseMode(Window::LoongWindow::MouseMode::kNormal);
     }
 
@@ -450,7 +448,7 @@ void LoongEditor::OnUpdate()
 
     {
         if (input.IsKeyReleaseEvent(Window::LoongKeyCode::kKey1)) {
-            cameraTransform_.SetPosition({0,0,-4});
+            cameraTransform_.SetPosition({ 0, 0, -4 });
         }
         if (input.IsKeyReleaseEvent(Window::LoongKeyCode::kKey2)) {
             cameraTransform_.SetRotation(Math::Identity);
@@ -460,7 +458,6 @@ void LoongEditor::OnUpdate()
         clearColor_[1] = forward.g;
         clearColor_[2] = forward.b;
     }
-
 
     using float4x4 = RHI::float4x4;
 

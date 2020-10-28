@@ -231,12 +231,19 @@ tpl::Task<std::shared_ptr<LoongMaterial>> LoongMaterialLoader::CreateAsync(const
             material->uniforms_.textureTiling = ParseStringToVector2(materialData.uniforms.textureTiling);
             material->uniforms_.textureOffset = ParseStringToVector2(materialData.uniforms.textureOffset);
 
-            auto albedoTask = LoongResourceManager::GetTextureAsync(materialData.uniforms.albedoMap);
-            auto normalTask = LoongResourceManager::GetTextureAsync(materialData.uniforms.normalMap);
-            auto metallicTask = LoongResourceManager::GetTextureAsync(materialData.uniforms.metallicMap);
-            auto roughnessTask = LoongResourceManager::GetTextureAsync(materialData.uniforms.roughnessMap);
-            auto emissiveTask = LoongResourceManager::GetTextureAsync(materialData.uniforms.emissiveMap);
-            auto ambientOcclusionTask = LoongResourceManager::GetTextureAsync(materialData.uniforms.ambientOcclusionMap);
+            static auto LoadTextureTask = [](const std::string& path) {
+                if (path.empty()) {
+                    return tpl::MakeTaskFromValue<TextureRef>(nullptr, nullptr);
+                } else {
+                    return LoongResourceManager::GetTextureAsync(path);
+                }
+            };
+            auto albedoTask = LoadTextureTask(materialData.uniforms.albedoMap);
+            auto normalTask = LoadTextureTask(materialData.uniforms.normalMap);
+            auto metallicTask = LoadTextureTask(materialData.uniforms.metallicMap);
+            auto roughnessTask = LoadTextureTask(materialData.uniforms.roughnessMap);
+            auto emissiveTask = LoadTextureTask(materialData.uniforms.emissiveMap);
+            auto ambientOcclusionTask = LoadTextureTask(materialData.uniforms.ambientOcclusionMap);
 
             auto task = tpl::MakeTask(
                 [material](const auto& albedoTask, const auto& normalTask, const auto& metallicTask,
