@@ -6,12 +6,9 @@
 
 #include "LoongFoundation/LoongMacros.h"
 #include "LoongRHI/LoongRHIManager.h"
+#include <TPL/TPL.h>
 #include <memory>
 #include <string>
-
-namespace Loong::Foundation {
-class LoongThreadTask;
-}
 
 namespace Loong::Resource {
 
@@ -28,14 +25,14 @@ public:
 
     static void Uninitialize();
 
-    using OnTextureLoadCallback = std::function<void(std::shared_ptr<LoongTexture>)>;
-    static std::shared_ptr<Foundation::LoongThreadTask> GetTextureAsync(const std::string& path, OnTextureLoadCallback&& cb);
+    using TextureRef = std::shared_ptr<LoongTexture>;
+    static tpl::Task<TextureRef> GetTextureAsync(const std::string& path);
 
-    using OnModelLoadCallback = std::function<void(std::shared_ptr<LoongGpuModel>)>;
-    static std::shared_ptr<Foundation::LoongThreadTask> GetModelAsync(const std::string& path, OnModelLoadCallback&& cb);
+    using ModelRef = std::shared_ptr<LoongGpuModel>;
+    static tpl::Task<ModelRef> GetModelAsync(const std::string& path);
 
-    using OnMaterialLoadCallback = std::function<void(std::shared_ptr<LoongMaterial>)>;
-    static std::shared_ptr<Foundation::LoongThreadTask> GetMaterialAsync(const std::string& path, OnMaterialLoadCallback&& cb);
+    using MaterialRef = std::shared_ptr<LoongMaterial>;
+    static tpl::Task<MaterialRef> GetMaterialAsync(const std::string& path);
 
     LG_NODISCARD static std::shared_ptr<LoongGpuMesh> GetSkyboxMesh();
 };

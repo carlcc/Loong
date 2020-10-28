@@ -234,8 +234,9 @@ public:
     void InitResources()
     {
         LOONG_INFO("Loading texture...");
-        Resource::LoongResourceManager::GetMaterialAsync("/Materials/Test.lgmtl", [this](const std::shared_ptr<Resource::LoongMaterial>& mtl) {
+        Resource::LoongResourceManager::GetMaterialAsync("/Materials/Test.lgmtl").Then([this](const auto& mtlTask) {
             LOONG_ASSERT(!Window::LoongApplication::IsInMainThread(), "");
+            auto mtl = mtlTask.GetFuture().GetValue();
             albedoTexture_ = mtl->GetAlbedoMap();
             normalTexture_ = mtl->GetNormalMap();
             roughnessTexture_ = mtl->GetRoughnessMap();
@@ -250,9 +251,9 @@ public:
             });
         });
 
-        Resource::LoongResourceManager::GetModelAsync("/Models/DamagedHelmet.lgmdl", [this](const std::shared_ptr<Resource::LoongGpuModel>& model) {
+        Resource::LoongResourceManager::GetModelAsync("/Models/DamagedHelmet.lgmdl").Then([this](const auto& modelTask) {
             LOONG_ASSERT(!Window::LoongApplication::IsInMainThread(), "");
-            model_ = model;
+            model_ = modelTask.GetFuture().GetValue();
         });
     }
 

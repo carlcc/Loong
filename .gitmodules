@@ -4,3 +4,6 @@
 [submodule "thirdparty/JsonMapper"]
 	path = thirdparty/JsonMapper
 	url = https://github.com/carlcc/JsonMapper.git
+[submodule "thirdparty/TPL"]
+	path = thirdparty/TPL
+	url = https://github.com/carlcc/TPL.git

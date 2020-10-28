@@ -5,6 +5,7 @@
 #pragma once
 
 #include "LoongFoundation/LoongMacros.h"
+#include <TPL/TPL.h>
 #include <functional>
 #include <memory>
 #include <string>
@@ -21,7 +22,7 @@ class LoongMaterialLoader {
 public:
     LoongMaterialLoader() = delete;
 
-    static std::shared_ptr<Foundation::LoongThreadTask> CreateAsync(const std::string& filePath, const std::function<void(const std::string&)>& onDestroy, std::function<void(std::shared_ptr<LoongMaterial>)>&& onMaterial);
+    static tpl::Task<std::shared_ptr<LoongMaterial>> CreateAsync(const std::string& filePath, const std::function<void(const std::string&)>& onDestroy);
 
     static bool Write(const std::string& filePath, const LoongMaterial* material);
 };

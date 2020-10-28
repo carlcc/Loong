@@ -14,6 +14,11 @@ PUBLIC
     ${GLM_INCLUDE_DIR}
 )
 
+target_link_libraries(LoongFoundation
+PUBLIC
+    TPL
+)
+
 
 source_group("src" FILES ${SOURCE})
 source_group("include" FILES ${INCLUDE})

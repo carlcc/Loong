@@ -85,3 +85,5 @@ add_subdirectory(DiligentTools EXCLUDE_FROM_ALL)
 
 set(JSON_MAPPER_RAPIDJSON_INCLUDE_PATH ${CMAKE_CURRENT_LIST_DIR}/rapidjson/include())
 add_subdirectory(JsonMapper)
+
+add_subdirectory(TPL EXCLUDE_FROM_ALL)

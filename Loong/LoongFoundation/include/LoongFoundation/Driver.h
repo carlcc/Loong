@@ -11,6 +11,9 @@ namespace Loong::Foundation {
 struct ScopedDriver {
     explicit ScopedDriver(int threadNum = 0)
     {
+        if (threadNum == 0) {
+            threadNum = (int)std::thread::hardware_concurrency();
+        }
         threadPoolSuc_ = LoongThreadPool::Initialize(threadNum);
     }
     ScopedDriver(const ScopedDriver&) = delete;
