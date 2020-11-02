@@ -23,4 +23,5 @@ LoongWindow
         LoongAsset
         LoongFileSystem
         LoongResource
+        LoongGui
         )

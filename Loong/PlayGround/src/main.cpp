@@ -23,7 +23,10 @@
 #include <LoongResource/LoongResourceManager.h>
 #include <LoongResource/LoongTexture.h>
 #include <LoongResource/loader/LoongMaterialLoader.h>
+#include <LoongFileSystem/LoongFile.h>
 #include <cassert>
+#include <LoongGui/imgui_impl_diligentengine.h>
+#include <LoongGui/imgui_impl_glfw.h>
 #include <iostream>
 
 namespace Loong {
@@ -90,6 +93,58 @@ class LoongEditor : public Foundation::LoongHasSlots {
 public:
     std::shared_ptr<Resource::LoongGpuModel> model_ { nullptr };
     Window::LoongWindow* window_ { nullptr };
+    Gui::ImGuiDiligentEngineIntergration* imgui_ { nullptr };
+
+    void InitImGui()
+    {
+        IMGUI_CHECKVERSION();
+        ImGui::CreateContext();
+        ImGuiIO& io = ImGui::GetIO();
+        (void)io;
+        io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard; // Enable Keyboard Controls
+        //io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
+        io.ConfigFlags |= ImGuiConfigFlags_DockingEnable; // Enable Docking
+        // io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable; // Enable Multi-Viewport / Platform Windows
+        //io.ConfigViewportsNoAutoMerge = true;
+        //io.ConfigViewportsNoTaskBarIcon = true;
+
+        // Setup Dear ImGui style
+        ImGui::StyleColorsDark();
+        //ImGui::StyleColorsClassic();
+
+        // When viewports are enabled we tweak WindowRounding/WindowBg so platform windows can look identical to regular ones.
+        ImGuiStyle& style = ImGui::GetStyle();
+        if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable) {
+            style.WindowRounding = 0.0f;
+            style.Colors[ImGuiCol_WindowBg].w = 1.0f;
+        }
+
+        auto device = RHI::LoongRHIManager::GetDevice();
+        auto swapchainDesc = RHI::LoongRHIManager::GetPrimarySwapChain()->GetDesc();
+        // Setup Platform/Renderer bindings
+        // const char* glsl_version = "#version 150";
+        ImGui_ImplGlfw_InitForDiligentEngine(window_->GetGlfwWindow(), true);
+        imgui_ = new Gui::ImGuiDiligentEngineIntergration(device, swapchainDesc.ColorBufferFormat, swapchainDesc.DepthBufferFormat);
+
+        // ImGui_ImplOpenGL3_Init(glsl_version);
+
+        // Load Fonts
+        // - If no fonts are loaded, dear imgui will use the default font. You can also load multiple fonts and use ImGui::PushFont()/PopFont() to select them.
+        // - AddFontFromFileTTF() will return the ImFont* so you can store it if you need to select the font among multiple.
+        // - If the file cannot be loaded, the function will return NULL. Please handle those errors in your application (e.g. use an assertion, or display an error and quit).
+        // - The fonts will be rasterized at a given size (w/ oversampling) and stored into a texture when calling ImFontAtlas::Build()/GetTexDataAsXXXX(), which ImGui_ImplXXXX_NewFrame below will call.
+        // - Read 'docs/FONTS.txt' for more instructions and details.
+        // - Remember that in C/C++ if you want to include a backslash \ in a string literal you need to write a double backslash \\ !
+        //io.Fonts->AddFontDefault();
+        //io.Fonts->AddFontFromFileTTF("../../misc/fonts/Roboto-Medium.ttf", 16.0f);
+        //io.Fonts->AddFontFromFileTTF("../../misc/fonts/Cousine-Regular.ttf", 15.0f);
+        //io.Fonts->AddFontFromFileTTF("../../misc/fonts/DroidSans.ttf", 16.0f);
+        //io.Fonts->AddFontFromFileTTF("../../misc/fonts/ProggyTiny.ttf", 10.0f);
+        //ImFont* font = io.Fonts->AddFontFromFileTTF("c:\\Windows\\Fonts\\ArialUni.ttf", 18.0f, NULL, io.Fonts->GetGlyphRangesJapanese());
+        // io.Fonts->AddFontFromFileTTF("resource/fonts/wqymicroheimono.ttf", 16.0f);
+        //IM_ASSERT(font != NULL);
+    }
+
     bool Initialize(Window::LoongWindow* window, RHI::RefCntAutoPtr<RHI::ISwapChain> swapChain)
     {
         window_ = window;
@@ -111,6 +166,8 @@ public:
         CreatePSO();
         InitResources();
         cameraTransform_.SetPosition({ 0, 0, -4 });
+
+        InitImGui();
         return true;
     }
 
@@ -256,7 +313,96 @@ public:
         });
     }
 
-    void OnUpdate();
+    void OnUpdate()
+    {
+        LOONG_ASSERT(Window::LoongApplication::IsInMainThread(), "");
+        clock_.Update();
+        {
+            int width, height;
+            window_->GetFrameBufferSize(width, height);
+            imgui_->NewFrame(width, height);
+            ImGui_ImplGlfw_NewFrame();
+            ImGui::NewFrame();
+
+            if (ImGui::Begin("TestWindow")) {
+                ImGui::Button("A button");
+            }
+            ImGui::End();
+        }
+
+        if (window_->GetInputManager().IsKeyReleaseEvent(Window::LoongKeyCode::kKeyM)) {
+            auto* mat = new Resource::LoongMaterial;
+            Resource::LoongMaterialLoader::Write("/Materials/test.lgmtl", mat);
+        }
+        if (window_->GetInputManager().IsKeyReleaseEvent(Window::LoongKeyCode::kKeyR)) {
+            CreatePSO();
+        }
+        auto euler = Math::QuatToEuler(cameraTransform_.GetRotation());
+        const auto& input = window_->GetInputManager();
+
+        if (input.IsMouseButtonPressed(Window::LoongMouseButton::kButtonRight)) {
+            euler.x += input.GetMouseDelta().y / 200.0F; // pitch
+            euler.y += input.GetMouseDelta().x / 200.0F; // yaw
+            euler.z = 0.0F;
+            euler.x = Math::Clamp(euler.x, -float(Math::HalfPi) + 0.1F, float(Math::HalfPi) - 0.1F);
+
+            cameraTransform_.SetRotation(Math::EulerToQuat(euler));
+            window_->SetMouseMode(Window::LoongWindow::MouseMode::kHidden);
+        } else {
+            window_->SetMouseMode(Window::LoongWindow::MouseMode::kNormal);
+        }
+
+        {
+            Math::Vector3 dir { 0.0F };
+            if (input.IsKeyPressed(Window::LoongKeyCode::kKeyW)) {
+                dir += cameraTransform_.GetForward();
+            }
+            if (input.IsKeyPressed(Window::LoongKeyCode::kKeyS)) {
+                dir -= cameraTransform_.GetForward();
+            }
+            if (input.IsKeyPressed(Window::LoongKeyCode::kKeyA)) {
+                dir -= cameraTransform_.GetRight();
+            }
+            if (input.IsKeyPressed(Window::LoongKeyCode::kKeyD)) {
+                dir += cameraTransform_.GetRight();
+            }
+            if (input.IsKeyPressed(Window::LoongKeyCode::kKeyE)) {
+                dir += Math::kUp;
+            }
+            if (input.IsKeyPressed(Window::LoongKeyCode::kKeyQ)) {
+                dir -= Math::kUp;
+            }
+            if (input.IsKeyPressed(Window::LoongKeyCode::kKeyLeftShift) || input.IsKeyPressed(Window::LoongKeyCode::kKeyRightShift)) {
+                dir *= 5.0F;
+            }
+            cameraTransform_.Translate(dir * clock_.DeltaTime() * 2.0F);
+        }
+
+        {
+            if (input.IsKeyReleaseEvent(Window::LoongKeyCode::kKey1)) {
+                cameraTransform_.SetPosition({ 0, 0, -4 });
+            }
+            if (input.IsKeyReleaseEvent(Window::LoongKeyCode::kKey2)) {
+                cameraTransform_.SetRotation(Math::Identity);
+            }
+            auto forward = cameraTransform_.GetForward();
+            clearColor_[0] = forward.r;
+            clearColor_[1] = forward.g;
+            clearColor_[2] = forward.b;
+        }
+
+        using float4x4 = RHI::float4x4;
+
+        uniforms_.ub_Model = float4x4::Identity(); // float4x4::RotationY(clock_.ElapsedTime()) * float4x4::RotationX(-RHI::PI_F * 0.1f);
+        // Camera is at (0, 0, -4) looking along the Z axis
+        uniforms_.ub_View = Mat4ToFloat4x4(Math::Inverse(cameraTransform_.GetTransformMatrix()));
+        uniforms_.ub_Projection = float4x4::Projection(RHI::PI_F / 4.0f, frameBufferAspect_, 0.001f, 1000.f, false);
+        uniforms_.ub_ViewPos = Vec3ToFloat3(cameraTransform_.GetPosition());
+        uniforms_.ub_MVP = uniforms_.ub_Model * uniforms_.ub_View * uniforms_.ub_Projection;
+        uniforms_.ub_Time = clock_.ElapsedTime();
+
+        ImGui::EndFrame();
+    }
 
     void OnRender()
     {
@@ -327,6 +473,8 @@ public:
             drawAttrs.Flags = Diligent::DRAW_FLAG_VERIFY_ALL;
             immediateContext->DrawIndexed(drawAttrs);
         }
+        ImGui::Render();
+        imgui_->RenderDrawData(RHI::LoongRHIManager::GetImmediateContext(), ImGui::GetDrawData());
     }
 
     void OnPresent()
@@ -376,99 +524,6 @@ public:
     UniformConstants uniforms_ {};
 };
 
-class LoongEditor2 : public LoongEditor {
-public:
-    void OnClose1() override
-    {
-        Window::LoongApplication::DestroyWindow(window_);
-    }
-};
-
-void LoongEditor::OnUpdate()
-{
-    LOONG_ASSERT(Window::LoongApplication::IsInMainThread(), "");
-    clock_.Update();
-    if (window_->GetInputManager().IsKeyReleaseEvent(Window::LoongKeyCode::kKeyN)) {
-        auto* ed = new LoongEditor2;
-        auto* win = Window::LoongApplication::CreateWindow({}, [ed](auto* w) {
-            delete ed;
-        });
-        ed->Initialize(win, RHI::LoongRHIManager::CreateSwapChain(win->GetGlfwWindow()));
-        ed->clearColor_[0] = (1.0F + sin(clock_.ElapsedTime())) / 2.0F;
-        ed->clearColor_[1] = (1.0F + sin(clock_.ElapsedTime() * 1.3f)) / 2.0F;
-        ed->clearColor_[2] = (1.0F + sin(clock_.ElapsedTime() * 1.5f)) / 2.0F;
-    }
-    if (window_->GetInputManager().IsKeyReleaseEvent(Window::LoongKeyCode::kKeyM)) {
-        auto* mat = new Resource::LoongMaterial;
-        Resource::LoongMaterialLoader::Write("/Materials/test.lgmtl", mat);
-    }
-    if (window_->GetInputManager().IsKeyReleaseEvent(Window::LoongKeyCode::kKeyR)) {
-        CreatePSO();
-    }
-    auto euler = Math::QuatToEuler(cameraTransform_.GetRotation());
-    const auto& input = window_->GetInputManager();
-
-    if (input.IsMouseButtonPressed(Window::LoongMouseButton::kButtonRight)) {
-        euler.x += input.GetMouseDelta().y / 200.0F; // pitch
-        euler.y += input.GetMouseDelta().x / 200.0F; // yaw
-        euler.z = 0.0F;
-        euler.x = Math::Clamp(euler.x, -float(Math::HalfPi) + 0.1F, float(Math::HalfPi) - 0.1F);
-
-        cameraTransform_.SetRotation(Math::EulerToQuat(euler));
-        window_->SetMouseMode(Window::LoongWindow::MouseMode::kHidden);
-    } else {
-        window_->SetMouseMode(Window::LoongWindow::MouseMode::kNormal);
-    }
-
-    {
-        Math::Vector3 dir { 0.0F };
-        if (input.IsKeyPressed(Window::LoongKeyCode::kKeyW)) {
-            dir += cameraTransform_.GetForward();
-        }
-        if (input.IsKeyPressed(Window::LoongKeyCode::kKeyS)) {
-            dir -= cameraTransform_.GetForward();
-        }
-        if (input.IsKeyPressed(Window::LoongKeyCode::kKeyA)) {
-            dir -= cameraTransform_.GetRight();
-        }
-        if (input.IsKeyPressed(Window::LoongKeyCode::kKeyD)) {
-            dir += cameraTransform_.GetRight();
-        }
-        if (input.IsKeyPressed(Window::LoongKeyCode::kKeyE)) {
-            dir += Math::kUp;
-        }
-        if (input.IsKeyPressed(Window::LoongKeyCode::kKeyQ)) {
-            dir -= Math::kUp;
-        }
-        if (input.IsKeyPressed(Window::LoongKeyCode::kKeyLeftShift) || input.IsKeyPressed(Window::LoongKeyCode::kKeyRightShift)) {
-            dir *= 5.0F;
-        }
-        cameraTransform_.Translate(dir * clock_.DeltaTime() * 2.0F);
-    }
-
-    {
-        if (input.IsKeyReleaseEvent(Window::LoongKeyCode::kKey1)) {
-            cameraTransform_.SetPosition({ 0, 0, -4 });
-        }
-        if (input.IsKeyReleaseEvent(Window::LoongKeyCode::kKey2)) {
-            cameraTransform_.SetRotation(Math::Identity);
-        }
-        auto forward = cameraTransform_.GetForward();
-        clearColor_[0] = forward.r;
-        clearColor_[1] = forward.g;
-        clearColor_[2] = forward.b;
-    }
-
-    using float4x4 = RHI::float4x4;
-
-    uniforms_.ub_Model = float4x4::Identity(); // float4x4::RotationY(clock_.ElapsedTime()) * float4x4::RotationX(-RHI::PI_F * 0.1f);
-    // Camera is at (0, 0, -4) looking along the Z axis
-    uniforms_.ub_View = Mat4ToFloat4x4(Math::Inverse(cameraTransform_.GetTransformMatrix()));
-    uniforms_.ub_Projection = float4x4::Projection(RHI::PI_F / 4.0f, frameBufferAspect_, 0.001f, 1000.f, false);
-    uniforms_.ub_ViewPos = Vec3ToFloat3(cameraTransform_.GetPosition());
-    uniforms_.ub_MVP = uniforms_.ub_Model * uniforms_.ub_View * uniforms_.ub_Projection;
-    uniforms_.ub_Time = clock_.ElapsedTime();
-}
 }
 
 void StartApp(int argc, char** argv)

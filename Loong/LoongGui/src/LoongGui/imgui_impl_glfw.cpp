@@ -40,7 +40,7 @@
 //  2016-10-15: Misc: Added a void* user_data parameter to Clipboard function handlers.
 
 #include <imgui.h>
-#include "imgui_impl_glfw.h"
+#include "LoongGui/imgui_impl_glfw.h"
 
 // GLFW
 #include <GLFW/glfw3.h>
@@ -69,7 +69,8 @@ enum GlfwClientApi
 {
     GlfwClientApi_Unknown,
     GlfwClientApi_OpenGL,
-    GlfwClientApi_Vulkan
+    GlfwClientApi_Vulkan,
+    GlfwClientApi_Diligent,
 };
 static GLFWwindow*          g_Window = NULL;    // Main window
 static GlfwClientApi        g_ClientApi = GlfwClientApi_Unknown;
@@ -253,6 +254,11 @@ static bool ImGui_ImplGlfw_Init(GLFWwindow* window, bool install_callbacks, Glfw
 
     g_ClientApi = client_api;
     return true;
+}
+
+bool ImGui_ImplGlfw_InitForDiligentEngine(GLFWwindow* window, bool install_callbacks)
+{
+    return ImGui_ImplGlfw_Init(window, install_callbacks, GlfwClientApi_Diligent);
 }
 
 bool ImGui_ImplGlfw_InitForOpenGL(GLFWwindow* window, bool install_callbacks)
