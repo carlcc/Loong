@@ -16,6 +16,7 @@
 #include <LoongFoundation/LoongPathUtils.h>
 #include <LoongFoundation/LoongThreadPool.h>
 #include <LoongFoundation/LoongTransform.h>
+#include <LoongGui/LoongImGuiIntegration.h>
 #include <LoongResource/Driver.h>
 #include <LoongResource/LoongGpuMesh.h>
 #include <LoongResource/LoongGpuModel.h>
@@ -23,11 +24,9 @@
 #include <LoongResource/LoongResourceManager.h>
 #include <LoongResource/LoongTexture.h>
 #include <LoongResource/loader/LoongMaterialLoader.h>
-#include <LoongFileSystem/LoongFile.h>
 #include <cassert>
-#include <LoongGui/imgui_impl_diligentengine.h>
-#include <LoongGui/imgui_impl_glfw.h>
 #include <iostream>
+#include <imgui.h>
 
 namespace Loong {
 
@@ -93,57 +92,7 @@ class LoongEditor : public Foundation::LoongHasSlots {
 public:
     std::shared_ptr<Resource::LoongGpuModel> model_ { nullptr };
     Window::LoongWindow* window_ { nullptr };
-    Gui::ImGuiDiligentEngineIntergration* imgui_ { nullptr };
-
-    void InitImGui()
-    {
-        IMGUI_CHECKVERSION();
-        ImGui::CreateContext();
-        ImGuiIO& io = ImGui::GetIO();
-        (void)io;
-        io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard; // Enable Keyboard Controls
-        //io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
-        io.ConfigFlags |= ImGuiConfigFlags_DockingEnable; // Enable Docking
-        // io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable; // Enable Multi-Viewport / Platform Windows
-        //io.ConfigViewportsNoAutoMerge = true;
-        //io.ConfigViewportsNoTaskBarIcon = true;
-
-        // Setup Dear ImGui style
-        ImGui::StyleColorsDark();
-        //ImGui::StyleColorsClassic();
-
-        // When viewports are enabled we tweak WindowRounding/WindowBg so platform windows can look identical to regular ones.
-        ImGuiStyle& style = ImGui::GetStyle();
-        if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable) {
-            style.WindowRounding = 0.0f;
-            style.Colors[ImGuiCol_WindowBg].w = 1.0f;
-        }
-
-        auto device = RHI::LoongRHIManager::GetDevice();
-        auto swapchainDesc = RHI::LoongRHIManager::GetPrimarySwapChain()->GetDesc();
-        // Setup Platform/Renderer bindings
-        // const char* glsl_version = "#version 150";
-        ImGui_ImplGlfw_InitForDiligentEngine(window_->GetGlfwWindow(), true);
-        imgui_ = new Gui::ImGuiDiligentEngineIntergration(device, swapchainDesc.ColorBufferFormat, swapchainDesc.DepthBufferFormat);
-
-        // ImGui_ImplOpenGL3_Init(glsl_version);
-
-        // Load Fonts
-        // - If no fonts are loaded, dear imgui will use the default font. You can also load multiple fonts and use ImGui::PushFont()/PopFont() to select them.
-        // - AddFontFromFileTTF() will return the ImFont* so you can store it if you need to select the font among multiple.
-        // - If the file cannot be loaded, the function will return NULL. Please handle those errors in your application (e.g. use an assertion, or display an error and quit).
-        // - The fonts will be rasterized at a given size (w/ oversampling) and stored into a texture when calling ImFontAtlas::Build()/GetTexDataAsXXXX(), which ImGui_ImplXXXX_NewFrame below will call.
-        // - Read 'docs/FONTS.txt' for more instructions and details.
-        // - Remember that in C/C++ if you want to include a backslash \ in a string literal you need to write a double backslash \\ !
-        //io.Fonts->AddFontDefault();
-        //io.Fonts->AddFontFromFileTTF("../../misc/fonts/Roboto-Medium.ttf", 16.0f);
-        //io.Fonts->AddFontFromFileTTF("../../misc/fonts/Cousine-Regular.ttf", 15.0f);
-        //io.Fonts->AddFontFromFileTTF("../../misc/fonts/DroidSans.ttf", 16.0f);
-        //io.Fonts->AddFontFromFileTTF("../../misc/fonts/ProggyTiny.ttf", 10.0f);
-        //ImFont* font = io.Fonts->AddFontFromFileTTF("c:\\Windows\\Fonts\\ArialUni.ttf", 18.0f, NULL, io.Fonts->GetGlyphRangesJapanese());
-        // io.Fonts->AddFontFromFileTTF("resource/fonts/wqymicroheimono.ttf", 16.0f);
-        //IM_ASSERT(font != NULL);
-    }
+    std::shared_ptr<Gui::LoongImGuiIntegration> imgui_ { nullptr };
 
     bool Initialize(Window::LoongWindow* window, RHI::RefCntAutoPtr<RHI::ISwapChain> swapChain)
     {
@@ -167,7 +116,7 @@ public:
         InitResources();
         cameraTransform_.SetPosition({ 0, 0, -4 });
 
-        InitImGui();
+        imgui_ = std::make_shared<Gui::LoongImGuiIntegration>(window_->GetGlfwWindow(), RHI::LoongRHIManager::GetDevice(), swapChain_);
         return true;
     }
 
@@ -318,14 +267,12 @@ public:
         LOONG_ASSERT(Window::LoongApplication::IsInMainThread(), "");
         clock_.Update();
         {
-            int width, height;
-            window_->GetFrameBufferSize(width, height);
-            imgui_->NewFrame(width, height);
-            ImGui_ImplGlfw_NewFrame();
-            ImGui::NewFrame();
+            imgui_->NewFrame();
 
             if (ImGui::Begin("TestWindow")) {
-                ImGui::Button("A button");
+                if (ImGui::Button("A button")) {
+                    LOONG_INFO("Button clicked");
+                }
             }
             ImGui::End();
         }
@@ -401,7 +348,7 @@ public:
         uniforms_.ub_MVP = uniforms_.ub_Model * uniforms_.ub_View * uniforms_.ub_Projection;
         uniforms_.ub_Time = clock_.ElapsedTime();
 
-        ImGui::EndFrame();
+        imgui_->EndFrame();
     }
 
     void OnRender()
@@ -421,60 +368,59 @@ public:
         immediateContext->ClearRenderTarget(pRTV, clearColor_, RHI::RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
         immediateContext->ClearDepthStencil(pDSV, RHI::CLEAR_DEPTH_FLAG, 1.f, 0, RHI::RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
 
-        if (albedoTexture_ == nullptr || model_ == nullptr || pso_ == nullptr) {
-            return;
+        if (albedoTexture_ != nullptr && model_ != nullptr && pso_ != nullptr) {
+
+            {
+                // Map the buffer and write current world-view-projection matrix
+                RHI::MapHelper<UniformConstants> uniforms(immediateContext, vsConstants_, RHI::MAP_WRITE, RHI::MAP_FLAG_DISCARD);
+                uniforms->ub_View = uniforms_.ub_View.Transpose();
+                uniforms->ub_Projection = uniforms_.ub_Projection.Transpose();
+                uniforms->ub_Model = uniforms_.ub_Model.Transpose();
+                uniforms->ub_MVP = uniforms_.ub_MVP.Transpose();
+                uniforms->ub_ViewPos = uniforms_.ub_ViewPos;
+                uniforms->ub_Time = uniforms_.ub_Time;
+            }
+
+            {
+                // Map the buffer and write current world-view-projection matrix
+                RHI::MapHelper<PSMaterialUniforms> uniforms(immediateContext, psMaterialUniforms_, RHI::MAP_WRITE, RHI::MAP_FLAG_DISCARD);
+                uniforms->ub_ClearCoat = 0.0F;
+                uniforms->ub_Reflectance = { 1.0F, 1.0F, 1.0F };
+                uniforms->ub_TextureOffset = { 0.0F, 0.0F };
+                uniforms->ub_TextureTiling = { 1.0F, 1.0F };
+                uniforms->ub_EmissiveFactor = 1.0F;
+            }
+
+            {
+                // Map the buffer and write current world-view-projection matrix
+                RHI::MapHelper<PSLightUniforms> uniforms(immediateContext, psLightUniforms_, RHI::MAP_WRITE, RHI::MAP_FLAG_DISCARD);
+                uniforms->ub_LightsCount = 1.0F;
+                uniforms->ub_Lights[0].color = { 1.0F, 1.0F, 1.0F };
+                uniforms->ub_Lights[0].falloffRadius = 20.0F;
+                uniforms->ub_Lights[0].lightType = 0.0F;
+                uniforms->ub_Lights[0].pos = uniforms_.ub_ViewPos;
+                uniforms->ub_Lights[0].intencity = 19.0F;
+                uniforms->ub_Lights[0].dir = uniforms_.ub_ViewPos;
+            }
+
+            immediateContext->SetPipelineState(pso_);
+            immediateContext->CommitShaderResources(srb_, RHI::RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
+            uint32_t offset = 0;
+            for (auto* mesh : model_->GetMeshes()) {
+                RHI::IBuffer* buffers[] = { mesh->GetVBO() };
+                immediateContext->SetVertexBuffers(0, 1, buffers, &offset, RHI::RESOURCE_STATE_TRANSITION_MODE_TRANSITION, RHI::SET_VERTEX_BUFFERS_FLAG_RESET);
+                immediateContext->SetIndexBuffer(mesh->GetIBO(), 0, RHI::RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
+
+                RHI::DrawIndexedAttribs drawAttrs;
+
+                drawAttrs.IndexType = RHI::VT_UINT32;
+                drawAttrs.NumIndices = mesh->GetIndexCount();
+                drawAttrs.Flags = Diligent::DRAW_FLAG_VERIFY_ALL;
+                immediateContext->DrawIndexed(drawAttrs);
+            }
         }
 
-        {
-            // Map the buffer and write current world-view-projection matrix
-            RHI::MapHelper<UniformConstants> uniforms(immediateContext, vsConstants_, RHI::MAP_WRITE, RHI::MAP_FLAG_DISCARD);
-            uniforms->ub_View = uniforms_.ub_View.Transpose();
-            uniforms->ub_Projection = uniforms_.ub_Projection.Transpose();
-            uniforms->ub_Model = uniforms_.ub_Model.Transpose();
-            uniforms->ub_MVP = uniforms_.ub_MVP.Transpose();
-            uniforms->ub_ViewPos = uniforms_.ub_ViewPos;
-            uniforms->ub_Time = uniforms_.ub_Time;
-        }
-
-        {
-            // Map the buffer and write current world-view-projection matrix
-            RHI::MapHelper<PSMaterialUniforms> uniforms(immediateContext, psMaterialUniforms_, RHI::MAP_WRITE, RHI::MAP_FLAG_DISCARD);
-            uniforms->ub_ClearCoat = 0.0F;
-            uniforms->ub_Reflectance = { 1.0F, 1.0F, 1.0F };
-            uniforms->ub_TextureOffset = { 0.0F, 0.0F };
-            uniforms->ub_TextureTiling = { 1.0F, 1.0F };
-            uniforms->ub_EmissiveFactor = 1.0F;
-        }
-
-        {
-            // Map the buffer and write current world-view-projection matrix
-            RHI::MapHelper<PSLightUniforms> uniforms(immediateContext, psLightUniforms_, RHI::MAP_WRITE, RHI::MAP_FLAG_DISCARD);
-            uniforms->ub_LightsCount = 1.0F;
-            uniforms->ub_Lights[0].color = { 1.0F, 1.0F, 1.0F };
-            uniforms->ub_Lights[0].falloffRadius = 20.0F;
-            uniforms->ub_Lights[0].lightType = 0.0F;
-            uniforms->ub_Lights[0].pos = uniforms_.ub_ViewPos;
-            uniforms->ub_Lights[0].intencity = 19.0F;
-            uniforms->ub_Lights[0].dir = uniforms_.ub_ViewPos;
-        }
-
-        immediateContext->SetPipelineState(pso_);
-        immediateContext->CommitShaderResources(srb_, RHI::RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
-        uint32_t offset = 0;
-        for (auto* mesh : model_->GetMeshes()) {
-            RHI::IBuffer* buffers[] = { mesh->GetVBO() };
-            immediateContext->SetVertexBuffers(0, 1, buffers, &offset, RHI::RESOURCE_STATE_TRANSITION_MODE_TRANSITION, RHI::SET_VERTEX_BUFFERS_FLAG_RESET);
-            immediateContext->SetIndexBuffer(mesh->GetIBO(), 0, RHI::RESOURCE_STATE_TRANSITION_MODE_TRANSITION);
-
-            RHI::DrawIndexedAttribs drawAttrs;
-
-            drawAttrs.IndexType = RHI::VT_UINT32;
-            drawAttrs.NumIndices = mesh->GetIndexCount();
-            drawAttrs.Flags = Diligent::DRAW_FLAG_VERIFY_ALL;
-            immediateContext->DrawIndexed(drawAttrs);
-        }
-        ImGui::Render();
-        imgui_->RenderDrawData(RHI::LoongRHIManager::GetImmediateContext(), ImGui::GetDrawData());
+        imgui_->Render(RHI::LoongRHIManager::GetImmediateContext());
     }
 
     void OnPresent()
@@ -544,7 +490,7 @@ void StartApp(int argc, char** argv)
     config.title = "Play Ground";
     auto window = Loong::Window::LoongApplication::CreateWindow(config);
 
-    Loong::RHI::ScopedDriver rhiDriver(window->GetGlfwWindow(), Loong::RHI::RENDER_DEVICE_TYPE_D3D12);
+    Loong::RHI::ScopedDriver rhiDriver(window->GetGlfwWindow(), Loong::RHI::RENDER_DEVICE_TYPE_VULKAN);
     assert(bool(rhiDriver));
 
     Loong::Resource::ScopedDriver resourceDriver;
@@ -557,8 +503,6 @@ void StartApp(int argc, char** argv)
     });
 
     Loong::Window::LoongApplication::Run();
-
-    Loong::RHI::LoongRHIManager::Uninitialize();
 }
 
 int main(int argc, char** argv)

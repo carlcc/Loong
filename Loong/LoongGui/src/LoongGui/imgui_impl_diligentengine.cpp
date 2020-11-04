@@ -1,9 +1,8 @@
-#include "LoongGui/imgui_impl_diligentengine.h"
+#include "imgui_impl_diligentengine.h"
 
 namespace Loong::Gui {
 
-    
-ImGuiDiligentEngineIntergration::ImGuiDiligentEngineIntergration(
+ImGuiImplDiligentEngine::ImGuiImplDiligentEngine(
     RHI::IRenderDevice* device, RHI::TEXTURE_FORMAT backBufferFmt, RHI::TEXTURE_FORMAT depthBufferFmt)
     : device_(device)
     , backBufferFmt_(backBufferFmt)
@@ -11,7 +10,7 @@ ImGuiDiligentEngineIntergration::ImGuiDiligentEngineIntergration(
 {
 }
 
-void ImGuiDiligentEngineIntergration::NewFrame(uint32_t surfaceWidth, uint32_t surfaceHeight)
+void ImGuiImplDiligentEngine::NewFrame(uint32_t surfaceWidth, uint32_t surfaceHeight)
 {
     if (pso_ == nullptr) {
         CreateDeviceObjects();
@@ -20,14 +19,14 @@ void ImGuiDiligentEngineIntergration::NewFrame(uint32_t surfaceWidth, uint32_t s
     renderSurfaceHeight_ = surfaceHeight;
 }
 
-void ImGuiDiligentEngineIntergration::EndFrame()
+void ImGuiImplDiligentEngine::EndFrame()
 {
 }
 
-void ImGuiDiligentEngineIntergration::RenderDrawData(RHI::IDeviceContext* context, ImDrawData* drawData)
+void ImGuiImplDiligentEngine::RenderDrawData(RHI::IDeviceContext* context, ImDrawData* drawData)
 {
     // Avoid rendering when minimized
-    if (drawData == nullptr || drawData->DisplaySize.x <= 0.0f || drawData->DisplaySize.y <= 0.0f)
+    if (drawData == nullptr || drawData->TotalIdxCount == 0 || drawData->DisplaySize.x <= 0.0f || drawData->DisplaySize.y <= 0.0f)
         return;
 
     // Create and grow vertex/index buffers if needed
@@ -183,7 +182,7 @@ void ImGuiDiligentEngineIntergration::RenderDrawData(RHI::IDeviceContext* contex
     }
 }
 
-void ImGuiDiligentEngineIntergration::InvalidateDeviceObjects()
+void ImGuiImplDiligentEngine::InvalidateDeviceObjects()
 {
     vbo_.Release();
     ibo_.Release();
@@ -237,7 +236,7 @@ float4 main(in PSInput PSIn) : SV_Target
 }
 )";
 
-void ImGuiDiligentEngineIntergration::CreateDeviceObjects()
+void ImGuiImplDiligentEngine::CreateDeviceObjects()
 {
     InvalidateDeviceObjects();
 
@@ -329,7 +328,7 @@ void ImGuiDiligentEngineIntergration::CreateDeviceObjects()
     CreateFontsTexture();
 }
 
-void ImGuiDiligentEngineIntergration::CreateFontsTexture()
+void ImGuiImplDiligentEngine::CreateFontsTexture()
 {
     // Build texture atlas
     ImGuiIO& io = ImGui::GetIO();

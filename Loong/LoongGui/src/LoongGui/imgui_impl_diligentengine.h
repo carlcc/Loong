@@ -5,9 +5,9 @@
 
 namespace Loong::Gui {
 
-class ImGuiDiligentEngineIntergration {
+class ImGuiImplDiligentEngine {
 public:
-    ImGuiDiligentEngineIntergration(RHI::IRenderDevice* device, RHI::TEXTURE_FORMAT backBufferFmt, RHI::TEXTURE_FORMAT depthBufferFmt);
+    ImGuiImplDiligentEngine(RHI::IRenderDevice* device, RHI::TEXTURE_FORMAT backBufferFmt, RHI::TEXTURE_FORMAT depthBufferFmt);
 
     void NewFrame(uint32_t surfaceWidth, uint32_t surfaceHeight);
 

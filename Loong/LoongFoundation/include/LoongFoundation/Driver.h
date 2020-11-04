@@ -5,6 +5,7 @@
 #pragma once
 
 #include "LoongFoundation/LoongThreadPool.h"
+#include <thread>
 
 namespace Loong::Foundation {
 

@@ -18,7 +18,6 @@ PUBLIC
     LoongFoundation
     LoongRHI
     imgui
-    glad
 )
 
 source_group("src" FILES ${SOURCE})
