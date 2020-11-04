@@ -259,19 +259,18 @@ void ImGuiImplDiligentEngine::CreateDeviceObjects()
         device_->CreateShader(shaderCI, &pPS);
     }
 
-    RHI::PipelineStateCreateInfo psoCreateInfo {};
+    RHI::GraphicsPipelineStateCreateInfo psoCreateInfo {};
     RHI::PipelineStateDesc& psoDesc = psoCreateInfo.PSODesc;
-
     psoDesc.Name = "ImGUI PSO";
-    auto& graphicsPipeline = psoDesc.GraphicsPipeline;
+    auto& graphicsPipeline = psoCreateInfo.GraphicsPipeline;
 
     graphicsPipeline.NumRenderTargets = 1;
     graphicsPipeline.RTVFormats[0] = backBufferFmt_;
     graphicsPipeline.DSVFormat = depthBufferFmt_;
     graphicsPipeline.PrimitiveTopology = RHI::PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
 
-    graphicsPipeline.pVS = pVS;
-    graphicsPipeline.pPS = pPS;
+    psoCreateInfo.pVS = pVS;
+    psoCreateInfo.pPS = pPS;
 
     graphicsPipeline.RasterizerDesc.CullMode = RHI::CULL_MODE_NONE;
     graphicsPipeline.RasterizerDesc.ScissorEnable = true;
@@ -307,13 +306,13 @@ void ImGuiImplDiligentEngine::CreateDeviceObjects()
     samLinearWrap.AddressV = RHI::TEXTURE_ADDRESS_WRAP;
     samLinearWrap.AddressW = RHI::TEXTURE_ADDRESS_WRAP;
 
-    RHI::StaticSamplerDesc staticSamplers[] {
+    RHI::ImmutableSamplerDesc immutableSamplers[] {
         { RHI::SHADER_TYPE_PIXEL, "Texture", samLinearWrap },
     };
-    psoDesc.ResourceLayout.StaticSamplers = staticSamplers;
-    psoDesc.ResourceLayout.NumStaticSamplers = _countof(staticSamplers);
+    psoDesc.ResourceLayout.ImmutableSamplers = immutableSamplers;
+    psoDesc.ResourceLayout.NumImmutableSamplers = _countof(immutableSamplers);
 
-    device_->CreatePipelineState(psoCreateInfo, &pso_);
+    device_->CreateGraphicsPipelineState(psoCreateInfo, &pso_);
 
      {
         RHI::BufferDesc buffDesc;
@@ -343,7 +342,7 @@ void ImGuiImplDiligentEngine::CreateFontsTexture()
     fontTexDesc.Height = static_cast<uint32_t>(height);
     fontTexDesc.Format = RHI::TEX_FORMAT_RGBA8_UNORM;
     fontTexDesc.BindFlags = RHI::BIND_SHADER_RESOURCE;
-    fontTexDesc.Usage = RHI::USAGE_STATIC;
+    fontTexDesc.Usage = RHI::USAGE_IMMUTABLE;
 
     RHI::TextureSubResData Mip0Data[] = { { pixels, fontTexDesc.Width * 4 } };
     RHI::TextureData InitData(Mip0Data, _countof(Mip0Data));

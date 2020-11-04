@@ -7,3 +7,9 @@
 [submodule "thirdparty/TPL"]
 	path = thirdparty/TPL
 	url = https://github.com/carlcc/TPL.git
+[submodule "thirdparty/DiligentCore"]
+	path = thirdparty/DiligentCore
+	url = https://github.com/DiligentGraphics/DiligentCore.git
+[submodule "thirdparty/DiligentTools"]
+	path = thirdparty/DiligentTools
+	url = https://github.com/DiligentGraphics/DiligentTools.git

@@ -49,10 +49,10 @@ public:
         USAGE usage = USAGE_DYNAMIC, BIND_FLAGS bindFlags = BIND_UNIFORM_BUFFER, CPU_ACCESS_FLAGS cpuAccessFlags = CPU_ACCESS_WRITE);
 
     LG_NODISCARD static RefCntAutoPtr<IBuffer> CreateVertexBuffer(const char* bufferName, uint32_t size, const void* initialData = nullptr,
-        USAGE usage = USAGE_STATIC, BIND_FLAGS bindFlags = BIND_VERTEX_BUFFER);
+        USAGE usage = USAGE_IMMUTABLE, BIND_FLAGS bindFlags = BIND_VERTEX_BUFFER);
 
     LG_NODISCARD static RefCntAutoPtr<IBuffer> CreateIndexBuffer(const char* bufferName, uint32_t size, const void* initialData = nullptr,
-        USAGE usage = USAGE_STATIC, BIND_FLAGS bindFlags = BIND_INDEX_BUFFER)
+        USAGE usage = USAGE_IMMUTABLE, BIND_FLAGS bindFlags = BIND_INDEX_BUFFER)
     {
         return CreateVertexBuffer(bufferName, size, initialData, usage, bindFlags);
     }

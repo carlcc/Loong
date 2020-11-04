@@ -25,8 +25,8 @@
 #include <LoongResource/LoongTexture.h>
 #include <LoongResource/loader/LoongMaterialLoader.h>
 #include <cassert>
-#include <iostream>
 #include <imgui.h>
+#include <iostream>
 
 namespace Loong {
 
@@ -175,7 +175,7 @@ public:
             RHI::FILTER_TYPE_LINEAR, RHI::FILTER_TYPE_LINEAR, RHI::FILTER_TYPE_LINEAR,
             RHI::TEXTURE_ADDRESS_WRAP, RHI::TEXTURE_ADDRESS_WRAP, RHI::TEXTURE_ADDRESS_WRAP
         };
-        RHI::StaticSamplerDesc shaderSamplers[] {
+        RHI::ImmutableSamplerDesc shaderSamplers[] {
             { RHI::SHADER_TYPE_PIXEL, "g_Albedo", samplerConfig },
             { RHI::SHADER_TYPE_PIXEL, "g_Normal", samplerConfig },
             { RHI::SHADER_TYPE_PIXEL, "g_Roughness", samplerConfig },
@@ -184,8 +184,8 @@ public:
         };
         resourceLayout.Variables = shaderVariables;
         resourceLayout.NumVariables = _countof(shaderVariables);
-        resourceLayout.StaticSamplers = shaderSamplers;
-        resourceLayout.NumStaticSamplers = _countof(shaderSamplers);
+        resourceLayout.ImmutableSamplers = shaderSamplers;
+        resourceLayout.NumImmutableSamplers = _countof(shaderSamplers);
 
         pso_ = RHI::LoongRHIManager::CreateGraphicsPSOForCurrentSwapChain(swapChain_, "TexturedCube", vs, ps, inputLayout, resourceLayout, true, Diligent::CULL_MODE_BACK);
         if (pso_ == nullptr) {
@@ -209,30 +209,29 @@ public:
 
     void SetShaderResourceBinding()
     {
-        auto srv = albedoTexture_->GetTexture()->GetDefaultView(RHI::TEXTURE_VIEW_SHADER_RESOURCE);
-        auto var = srb_->GetVariableByName(RHI::SHADER_TYPE_PIXEL, "g_Albedo");
-        if (var != nullptr) {
-            var->Set(srv);
-        }
-        var = srb_->GetVariableByName(RHI::SHADER_TYPE_PIXEL, "g_Normal");
-        if (var != nullptr) {
-            srv = normalTexture_->GetTexture()->GetDefaultView(RHI::TEXTURE_VIEW_SHADER_RESOURCE);
-            var->Set(srv);
-        }
-        var = srb_->GetVariableByName(RHI::SHADER_TYPE_PIXEL, "g_Roughness");
-        if (var != nullptr) {
-            srv = roughnessTexture_->GetTexture()->GetDefaultView(RHI::TEXTURE_VIEW_SHADER_RESOURCE);
-            var->Set(srv);
-        }
-        var = srb_->GetVariableByName(RHI::SHADER_TYPE_PIXEL, "g_Metallic");
-        if (var != nullptr) {
-            srv = metallicTexture_->GetTexture()->GetDefaultView(RHI::TEXTURE_VIEW_SHADER_RESOURCE);
-            var->Set(srv);
-        }
-        var = srb_->GetVariableByName(RHI::SHADER_TYPE_PIXEL, "g_Emissive");
-        if (var != nullptr) {
-            srv = emissiveTexture_->GetTexture()->GetDefaultView(RHI::TEXTURE_VIEW_SHADER_RESOURCE);
-            var->Set(srv);
+        std::shared_ptr<Resource::LoongTexture> textures[] {
+            albedoTexture_,
+            normalTexture_,
+            roughnessTexture_,
+            metallicTexture_,
+            emissiveTexture_,
+        };
+        const char* shaderVarNames[] {
+            "g_Albedo",
+            "g_Normal",
+            "g_Roughness",
+            "g_Metallic",
+            "g_Emissive",
+        };
+        for (int i = 0; i < _countof(shaderVarNames); ++i) {
+            auto tex = textures[i];
+            if (tex == nullptr || tex->GetTexture() == nullptr) {
+                continue;
+            }
+            auto var = srb_->GetVariableByName(RHI::SHADER_TYPE_PIXEL, shaderVarNames[i]);
+            if (var != nullptr) {
+                var->Set(tex->GetTexture()->GetDefaultView(RHI::TEXTURE_VIEW_SHADER_RESOURCE));
+            }
         }
     }
 
@@ -294,7 +293,7 @@ public:
             euler.x = Math::Clamp(euler.x, -float(Math::HalfPi) + 0.1F, float(Math::HalfPi) - 0.1F);
 
             cameraTransform_.SetRotation(Math::EulerToQuat(euler));
-            window_->SetMouseMode(Window::LoongWindow::MouseMode::kHidden);
+            window_->SetMouseMode(Window::LoongWindow::MouseMode::kDisabled);
         } else {
             window_->SetMouseMode(Window::LoongWindow::MouseMode::kNormal);
         }
@@ -505,9 +504,25 @@ void StartApp(int argc, char** argv)
     Loong::Window::LoongApplication::Run();
 }
 
+#ifdef ELIMINATE_CONSOLE_WINDOW
+#ifdef APIENTRY
+#undef APIENTRY
+#endif
+#include <Windows.h>
+void Stealth()
+{
+    HWND Stealth;
+    AllocConsole();
+    Stealth = FindWindowA("ConsoleWindowClass", NULL);
+    ShowWindow(Stealth, 0);
+}
+#endif
+
 int main(int argc, char** argv)
 {
-
+#ifdef ELIMINATE_CONSOLE_WINDOW
+    Stealth();
+#endif
     auto listener = Loong::Foundation::Logger::Get().SubscribeLog([](const Loong::Foundation::LogItem& logItem) {
         std::cout << "[" << logItem.level << "]: " << logItem.message << " (" << logItem.location << ")" << std::endl;
     });

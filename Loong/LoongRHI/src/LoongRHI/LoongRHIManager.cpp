@@ -370,7 +370,7 @@ RHI::RefCntAutoPtr<RHI::IPipelineState> LoongRHIManager::CreateGraphicsPSOForCur
 {
     auto& device = gRhiImpl.device_;
 
-    RHI::PipelineStateCreateInfo psoCreateInfo;
+    RHI::GraphicsPipelineStateCreateInfo psoCreateInfo;
     RHI::PipelineStateDesc& psoDesc = psoCreateInfo.PSODesc;
 
     // Pipeline state name is used by the engine to report issues.
@@ -381,17 +381,17 @@ RHI::RefCntAutoPtr<RHI::IPipelineState> LoongRHIManager::CreateGraphicsPSOForCur
     psoDesc.PipelineType = RHI::PIPELINE_TYPE_GRAPHICS;
 
     // This tutorial will render to a single render target
-    psoDesc.GraphicsPipeline.NumRenderTargets = 1;
+    psoCreateInfo.GraphicsPipeline.NumRenderTargets = 1;
     // Set render target format which is the format of the swap chain's color buffer
-    psoDesc.GraphicsPipeline.RTVFormats[0] = swapChain->GetDesc().ColorBufferFormat;
+    psoCreateInfo.GraphicsPipeline.RTVFormats[0] = swapChain->GetDesc().ColorBufferFormat;
     // Use the depth buffer format from the swap chain
-    psoDesc.GraphicsPipeline.DSVFormat = swapChain->GetDesc().DepthBufferFormat;
+    psoCreateInfo.GraphicsPipeline.DSVFormat = swapChain->GetDesc().DepthBufferFormat;
     // Primitive topology defines what kind of primitives will be rendered by this pipeline state
-    psoDesc.GraphicsPipeline.PrimitiveTopology = topology;
+    psoCreateInfo.GraphicsPipeline.PrimitiveTopology = topology;
     // No back face culling for this tutorial
-    psoDesc.GraphicsPipeline.RasterizerDesc.CullMode = cullMode;
+    psoCreateInfo.GraphicsPipeline.RasterizerDesc.CullMode = cullMode;
     // Disable depth testing
-    psoDesc.GraphicsPipeline.DepthStencilDesc.DepthEnable = depthEnabled;
+    psoCreateInfo.GraphicsPipeline.DepthStencilDesc.DepthEnable = depthEnabled;
 
     // Create a vertex shader
     RHI::RefCntAutoPtr<RHI::IShader> pVS;
@@ -402,10 +402,10 @@ RHI::RefCntAutoPtr<RHI::IPipelineState> LoongRHIManager::CreateGraphicsPSOForCur
     device->CreateShader(ps, &pPS);
 
     // Finally, create the pipeline state
-    psoDesc.GraphicsPipeline.pVS = pVS;
-    psoDesc.GraphicsPipeline.pPS = pPS;
+    psoCreateInfo.pVS = pVS;
+    psoCreateInfo.pPS = pPS;
 
-    psoDesc.GraphicsPipeline.InputLayout = inputLayout;
+    psoCreateInfo.GraphicsPipeline.InputLayout = inputLayout;
     psoDesc.ResourceLayout = resourceLayout;
 
     RefCntAutoPtr<IPipelineState> pso;
@@ -413,7 +413,7 @@ RHI::RefCntAutoPtr<RHI::IPipelineState> LoongRHIManager::CreateGraphicsPSOForCur
     if (pPS == nullptr || pVS == nullptr) {
         return pso;
     }
-    device->CreatePipelineState(psoCreateInfo, &pso);
+    device->CreateGraphicsPipelineState(psoCreateInfo, &pso);
 
     return pso;
 }
