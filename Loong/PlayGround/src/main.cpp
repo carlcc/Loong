@@ -13,9 +13,12 @@
 #include <LoongFileSystem/LoongFileSystem.h>
 #include <LoongFoundation/Driver.h>
 #include <LoongFoundation/LoongAssert.h>
+#include <LoongFoundation/LoongFormat.h>
 #include <LoongFoundation/LoongPathUtils.h>
 #include <LoongFoundation/LoongThreadPool.h>
 #include <LoongFoundation/LoongTransform.h>
+#include <LoongGui/LoongGuiButton.h>
+#include <LoongGui/LoongGuiWindow.h>
 #include <LoongGui/LoongImGuiIntegration.h>
 #include <LoongResource/Driver.h>
 #include <LoongResource/LoongGpuMesh.h>
@@ -93,6 +96,7 @@ public:
     std::shared_ptr<Resource::LoongGpuModel> model_ { nullptr };
     Window::LoongWindow* window_ { nullptr };
     std::shared_ptr<Gui::LoongImGuiIntegration> imgui_ { nullptr };
+    Gui::LoongGuiWindow guiWindow_ {};
 
     bool Initialize(Window::LoongWindow* window, RHI::RefCntAutoPtr<RHI::ISwapChain> swapChain)
     {
@@ -117,7 +121,16 @@ public:
         cameraTransform_.SetPosition({ 0, 0, -4 });
 
         imgui_ = std::make_shared<Gui::LoongImGuiIntegration>(window_->GetGlfwWindow(), RHI::LoongRHIManager::GetDevice(), swapChain_);
+        auto btn = guiWindow_.AddChild<Gui::LoongGuiButton>();
+        btn->SetLabel("A Gui Button");
+        btn->SubscribeOnClicked(this, &LoongEditor::OnButtonClicked);
         return true;
+    }
+
+    void OnButtonClicked(Gui::LoongGuiWidget* btn)
+    {
+        static int sCount = 1;
+        btn->SetLabel(Foundation::Format("You clicked me for {} times", sCount++));
     }
 
     void CreatePSO()
@@ -265,16 +278,8 @@ public:
     {
         LOONG_ASSERT(Window::LoongApplication::IsInMainThread(), "");
         clock_.Update();
-        {
-            imgui_->NewFrame();
-
-            if (ImGui::Begin("TestWindow")) {
-                if (ImGui::Button("A button")) {
-                    LOONG_INFO("Button clicked");
-                }
-            }
-            ImGui::End();
-        }
+        imgui_->NewFrame();
+        guiWindow_.Draw();
 
         if (window_->GetInputManager().IsKeyReleaseEvent(Window::LoongKeyCode::kKeyM)) {
             auto* mat = new Resource::LoongMaterial;

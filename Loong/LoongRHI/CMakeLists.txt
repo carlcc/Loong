@@ -16,8 +16,8 @@ if (WIN32)
 elseif (APPLE)
     set(LOONG_PLATFORM_GRAPHICS_IMPLS
         # Metal has not been implemented
-        Diligent-GraphicsEngineMetal-static
-        Diligent-GraphicsEngineMetalInterface
+        # Diligent-GraphicsEngineMetal-static
+        # Diligent-GraphicsEngineMetalInterface
         Diligent-GraphicsEngineVk-static
         Diligent-GraphicsEngineVkInterface
     )
