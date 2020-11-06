@@ -53,8 +53,7 @@ protected:
     bool hasLineBreak_ { true };
 
     Math::Vector2 position_ { 0.F, 0.F };
-    Math::Vector2 minSize { 0.F, 0.F };
-    Math::Vector2 maxSize_ { 0.F, 0.F };
+    Math::Vector2 size_ { 100.F, 100.F };
 };
 
 }

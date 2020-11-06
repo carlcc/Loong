@@ -18,6 +18,7 @@
 #include <LoongFoundation/LoongThreadPool.h>
 #include <LoongFoundation/LoongTransform.h>
 #include <LoongGui/LoongGuiButton.h>
+#include <LoongGui/LoongGuiImage.h>
 #include <LoongGui/LoongGuiWindow.h>
 #include <LoongGui/LoongImGuiIntegration.h>
 #include <LoongResource/Driver.h>
@@ -124,6 +125,7 @@ public:
         auto btn = guiWindow_.AddChild<Gui::LoongGuiButton>();
         btn->SetLabel("A Gui Button");
         btn->SubscribeOnClicked(this, &LoongEditor::OnButtonClicked);
+
         return true;
     }
 
@@ -244,6 +246,8 @@ public:
             auto var = srb_->GetVariableByName(RHI::SHADER_TYPE_PIXEL, shaderVarNames[i]);
             if (var != nullptr) {
                 var->Set(tex->GetTexture()->GetDefaultView(RHI::TEXTURE_VIEW_SHADER_RESOURCE));
+                auto img = guiWindow_.AddChild<Gui::LoongGuiImage>();
+                img->SetTexture(tex);
             }
         }
     }

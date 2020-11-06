@@ -6,6 +6,7 @@
 
 #include "LoongFoundation/LoongMacros.h"
 #include "LoongRHI/LoongRHIManager.h"
+#include <memory>
 #include <string>
 
 namespace Loong::Resource {
@@ -35,5 +36,7 @@ private:
     std::string path_ {};
     friend class LoongTextureLoader;
 };
+
+using LoongTextureRef = std::shared_ptr<LoongTexture>;
 
 }
