@@ -111,15 +111,15 @@ void ImGuiImplDiligentEngine::RenderDrawData(RHI::IDeviceContext* context, ImDra
         context->SetBlendFactors(blend_factor);
 
         RHI::Viewport vp;
-        vp.Width = static_cast<float>(renderSurfaceWidth_) * drawData->FramebufferScale.x;
-        vp.Height = static_cast<float>(renderSurfaceHeight_) * drawData->FramebufferScale.y;
+        vp.Width = static_cast<float>(renderSurfaceWidth_) / drawData->FramebufferScale.x;
+        vp.Height = static_cast<float>(renderSurfaceHeight_) / drawData->FramebufferScale.y;
         vp.MinDepth = 0.0f;
         vp.MaxDepth = 1.0f;
         vp.TopLeftX = vp.TopLeftY = 0;
         context->SetViewports(1,
             &vp,
-            static_cast<uint32_t>(renderSurfaceWidth_ * drawData->FramebufferScale.x),
-            static_cast<uint32_t>(renderSurfaceHeight_* drawData->FramebufferScale.y));
+            static_cast<uint32_t>(renderSurfaceWidth_ / drawData->FramebufferScale.x),
+            static_cast<uint32_t>(renderSurfaceHeight_ / drawData->FramebufferScale.y));
     };
 
     SetupRenderState();
@@ -144,10 +144,10 @@ void ImGuiImplDiligentEngine::RenderDrawData(RHI::IDeviceContext* context, ImDra
             } else {
                 // Apply scissor/clipping rectangle
                 RHI::float4 ClipRect {
-                    (pcmd->ClipRect.x - drawData->DisplayPos.x) * drawData->FramebufferScale.x,
-                    (pcmd->ClipRect.y - drawData->DisplayPos.y) * drawData->FramebufferScale.y,
-                    (pcmd->ClipRect.z - drawData->DisplayPos.x) * drawData->FramebufferScale.x,
-                    (pcmd->ClipRect.w - drawData->DisplayPos.y) * drawData->FramebufferScale.y,
+                    (pcmd->ClipRect.x - drawData->DisplayPos.x),
+                    (pcmd->ClipRect.y - drawData->DisplayPos.y),
+                    (pcmd->ClipRect.z - drawData->DisplayPos.x),
+                    (pcmd->ClipRect.w - drawData->DisplayPos.y),
                 };
 
                 RHI::Rect r {
@@ -158,8 +158,8 @@ void ImGuiImplDiligentEngine::RenderDrawData(RHI::IDeviceContext* context, ImDra
                 };
                 context->SetScissorRects(1,
                     &r,
-                    static_cast<uint32_t>(renderSurfaceWidth_ * drawData->FramebufferScale.x),
-                    static_cast<uint32_t>(renderSurfaceHeight_ * drawData->FramebufferScale.y));
+                    static_cast<uint32_t>(renderSurfaceWidth_),
+                    static_cast<uint32_t>(renderSurfaceHeight_));
 
                 // Bind texture
                 auto* pTextureView = reinterpret_cast<RHI::ITextureView*>(pcmd->TextureId);
