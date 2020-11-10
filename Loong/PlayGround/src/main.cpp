@@ -123,8 +123,12 @@ public:
 
         imgui_ = std::make_shared<Gui::LoongImGuiIntegration>(window_->GetGlfwWindow(), RHI::LoongRHIManager::GetDevice(), swapChain_);
         auto btn = guiWindow_.AddChild<Gui::LoongGuiButton>();
+        btn->SetName("Button1");
         btn->SetLabel("A Gui Button");
         btn->SubscribeOnClicked(this, &LoongEditor::OnButtonClicked);
+
+        guiWindow_.SubscribeOnSizeChange(this, &LoongEditor::OnGuiWindowSizeOrPos);
+        guiWindow_.SubscribeOnPositionChange(this, &LoongEditor::OnGuiWindowSizeOrPos);
 
         return true;
     }
@@ -133,6 +137,14 @@ public:
     {
         static int sCount = 1;
         btn->SetLabel(Foundation::Format("You clicked me for {} times", sCount++));
+    }
+
+    void OnGuiWindowSizeOrPos(Gui::LoongGuiWindow* win, const Math::Vector2& size)
+    {
+        auto btn = win->GetChildByName("Button1");
+        if (btn != nullptr) {
+            btn->SetLabel(Foundation::Format("Window's size or pos is {{{},{}}}", size.x, size.y));
+        }
     }
 
     void CreatePSO()
@@ -305,6 +317,19 @@ public:
             window_->SetMouseMode(Window::LoongWindow::MouseMode::kDisabled);
         } else {
             window_->SetMouseMode(Window::LoongWindow::MouseMode::kNormal);
+        }
+
+        if (input.IsKeyReleaseEvent(Window::LoongKeyCode::kKeyEqual)) {
+            guiWindow_.SetSize(guiWindow_.GetSize() + Math::Vector2 { 10.F, 10.F });
+        }
+        if (input.IsKeyReleaseEvent(Window::LoongKeyCode::kKeyMinus)) {
+            guiWindow_.SetSize(guiWindow_.GetSize() - Math::Vector2 { 10.F, 10.F });
+        }
+        if (input.IsKeyReleaseEvent(Window::LoongKeyCode::kKeyUp)) {
+            guiWindow_.SetPosition(guiWindow_.GetPosition() - Math::Vector2 { 10.F, 10.F });
+        }
+        if (input.IsKeyReleaseEvent(Window::LoongKeyCode::kKeyDown)) {
+            guiWindow_.SetPosition(guiWindow_.GetPosition() + Math::Vector2 { 10.F, 10.F });
         }
 
         {

@@ -9,8 +9,9 @@
 namespace Loong::Gui {
 
 class LoongGuiButton : public LoongGuiWidget {
-public:
+    LOONG_GUI_OBJECT(LoongGuiButton, "Button", LoongGuiWidget);
 
+public:
     LOONG_DECLARE_SIGNAL(OnClicked, LoongGuiWidget*); // The sender
 
 protected:

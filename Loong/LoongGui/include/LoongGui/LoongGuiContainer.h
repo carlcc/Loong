@@ -11,10 +11,14 @@
 namespace Loong::Gui {
 
 class LoongGuiContainer : public LoongGuiWidget {
+    LOONG_GUI_OBJECT(LoongGuiContainer, "Container", LoongGuiWidget);
+
 public:
     void RemoveChild(LoongGuiWidget* widget);
 
     void RemoveAllChildren();
+
+    LoongGuiWidget* GetChildByName(const std::string& name, bool recursive = false);
 
     template <class WidgetType, class... ARGS>
     WidgetType* AddChild(ARGS&&... args)

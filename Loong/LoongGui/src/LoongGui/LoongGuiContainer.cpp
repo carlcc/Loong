@@ -42,4 +42,28 @@ void LoongGuiContainer::DrawThis()
     }
 }
 
+LoongGuiWidget* LoongGuiContainer::GetChildByName(const std::string& name, bool recursive)
+{
+    if (recursive) {
+        for (auto& child : children_) {
+            if (child.widget->GetName() == name) {
+                return child.widget;
+            }
+            if (child.widget->IsInstanceOf<LoongGuiContainer>()) {
+                auto w = static_cast<LoongGuiContainer*>(child.widget)->GetChildByName(name, true); // NOLINT(cppcoreguidelines-pro-type-static-cast-downcast)
+                if (w != nullptr) {
+                    return w;
+                }
+            }
+        }
+    } else {
+        for (auto& child : children_) {
+            if (child.widget->GetName() == name) {
+                return child.widget;
+            }
+        }
+    }
+    return nullptr;
+}
+
 }

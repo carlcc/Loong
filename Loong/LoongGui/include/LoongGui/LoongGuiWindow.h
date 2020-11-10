@@ -9,8 +9,13 @@
 namespace Loong::Gui {
 
 class LoongGuiWindow : public LoongGuiContainer {
+    LOONG_GUI_OBJECT(LoongGuiWindow, "Window", LoongGuiContainer);
+
 public:
     void DrawThis() override;
+
+    LOONG_DECLARE_SIGNAL(OnSizeChange, LoongGuiWindow*, const Math::Vector2&); // new size
+    LOONG_DECLARE_SIGNAL(OnPositionChange, LoongGuiWindow*, const Math::Vector2&); // new position
 
 protected:
     // window flags

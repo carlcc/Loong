@@ -10,6 +10,8 @@
 namespace Loong::Gui {
 
 class LoongGuiImage : public LoongGuiWidget {
+    LOONG_GUI_OBJECT(LoongGuiImage, "Image", LoongGuiWidget);
+
 public:
     LG_NODISCARD Resource::LoongTextureRef GetTexture() const { return texture_; }
 
