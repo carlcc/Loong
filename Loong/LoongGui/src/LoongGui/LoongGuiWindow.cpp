@@ -18,6 +18,19 @@ void LoongGuiWindow::DrawThis()
         ImGui::SetNextWindowPos(ToImVec2(position_), ImGuiCond_Always);
         posChangedByApi_ = false;
     }
+    int windowFlags = ImGuiWindowFlags_None;
+
+    // clang-format off
+    if (!isResizable_)   { windowFlags |= ImGuiWindowFlags_NoResize;                                         }
+    if (!isMovable_)     { windowFlags |= ImGuiWindowFlags_NoMove;                                           }
+    if (!isDockable_)    { windowFlags |= ImGuiWindowFlags_NoDocking;                                        }
+    if (!hasBackground_) { windowFlags |= ImGuiWindowFlags_NoBackground;                                     }
+    if (!isCollapsable_) { windowFlags |= ImGuiWindowFlags_NoCollapse;                                       }
+    if (!allowInputs_)   { windowFlags |= ImGuiWindowFlags_NoInputs;                                         }
+    if (!isScrollable)   { windowFlags |= ImGuiWindowFlags_NoScrollWithMouse | ImGuiWindowFlags_NoScrollbar; }
+    if (!hasTitleBar_)   { windowFlags |= ImGuiWindowFlags_NoTitleBar;                                       }
+    // clang-format on
+
     if (ImGui::Begin(labelAndId_.c_str(), visible, 0)) {
         LoongGuiContainer::DrawThis();
 

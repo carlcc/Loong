@@ -114,6 +114,16 @@ public:
     {
         std::transform(std::begin(s), std::end(s), std::begin(s), [](char c) -> char { return (char)std::toupper(c); });
     }
+
+    template <class T>
+    static T ParseTo(std::string_view s)
+    {
+        std::stringstream ss;
+        ss << s;
+        T t;
+        ss >> t;
+        return t;
+    }
 };
 
 }

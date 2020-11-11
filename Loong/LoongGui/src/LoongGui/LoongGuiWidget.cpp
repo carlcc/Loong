@@ -33,12 +33,14 @@ void LoongGuiWidget::Draw()
 
 void LoongGuiWidget::SetParent(LoongGuiContainer* parent)
 {
-    if (parent_ != nullptr) {
-        parent_->RemoveChild(this);
+    auto oldParent = parent_.lock();
+    if (oldParent != nullptr) {
+        oldParent->RemoveChild(this);
     }
-    parent_ = parent;
-    if (parent_ != nullptr) {
-        parent_->AddChild(this);
+    auto newParent = std::static_pointer_cast<LoongGuiContainer>(parent->SharedFromThis());
+    parent_ = newParent;
+    if (newParent != nullptr) {
+        newParent->AddChild(this);
     }
 }
 

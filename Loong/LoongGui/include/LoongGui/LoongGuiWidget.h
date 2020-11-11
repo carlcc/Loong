@@ -8,7 +8,9 @@
 #include "LoongFoundation/LoongMath.h"
 #include "LoongFoundation/LoongSigslotHelper.h"
 #include <atomic>
+#include <memory>
 #include <string>
+#include <type_traits>
 
 namespace Loong::Gui {
 
@@ -47,13 +49,17 @@ class LoongGuiWidget {
 public:
     explicit LoongGuiWidget();
 
+    std::weak_ptr<LoongGuiWidget> WeakFromThis() { return weakThis_; }
+
+    std::shared_ptr<LoongGuiWidget> SharedFromThis() { return weakThis_.lock(); }
+
     void SetLabel(const std::string& label);
 
     const std::string& GetLabel() { return label_; }
 
     void SetParent(LoongGuiContainer* parent);
 
-    LG_NODISCARD LoongGuiContainer* GetParent() const { return parent_; }
+    LG_NODISCARD LoongGuiContainer* GetParent() const { return parent_.lock().get(); }
 
     LG_NODISCARD bool HasParent() const { return GetParent() != nullptr; }
 
@@ -110,10 +116,12 @@ protected:
 protected:
     static std::atomic_int64_t sIdCounter;
 
+    std::weak_ptr<LoongGuiWidget> weakThis_ {};
+
     const std::string id_ {};
     std::string label_ {};
     std::string labelAndId_ {};
-    LoongGuiContainer* parent_ { nullptr };
+    std::weak_ptr<LoongGuiContainer> parent_ {};
 
     std::string name_ {};
     bool isEnabled_ { true };
@@ -124,5 +132,19 @@ protected:
     // Used to tell the draw method whether it should tell imgui to use a new position or size
     bool sizeChangedByApi_ { false };
     bool posChangedByApi_ { false };
+
+    template <class T, class... ARGS>
+    friend std::shared_ptr<T> MakeGuiWidget(ARGS&&... args);
 };
+
+template <class T, class... ARGS>
+std::shared_ptr<T> MakeGuiWidget(ARGS&&... args)
+{
+    static_assert(std::is_base_of_v<LoongGuiWidget, T>);
+    auto sp = std::make_shared<T>(std::forward<ARGS>(args)...);
+    auto w = static_cast<LoongGuiWidget*>(sp.get());
+    w->weakThis_ = sp;
+    return sp;
+}
+
 }

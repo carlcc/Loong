@@ -6,6 +6,7 @@
 #include "imgui_impl_glfw.h"
 #include <GLFW/glfw3.h>
 #include <imgui.h>
+#include <imgui_internal.h>
 
 namespace Loong::Gui {
 
@@ -14,7 +15,7 @@ LoongImGuiIntegration::LoongImGuiIntegration(GLFWwindow* glfwWindow, RHI::IRende
     , window_ { glfwWindow }
 {
     IMGUI_CHECKVERSION();
-    ImGui::CreateContext();
+    imguiContext_ = ImGui::CreateContext();
     ImGuiIO& io = ImGui::GetIO();
     (void)io;
 
@@ -63,6 +64,7 @@ LoongImGuiIntegration::~LoongImGuiIntegration()
 {
     delete imgui_;
     imgui_ = nullptr;
+    ImGui::Shutdown((ImGuiContext*)imguiContext_);
     ImGui_ImplGlfw_Shutdown();
 }
 

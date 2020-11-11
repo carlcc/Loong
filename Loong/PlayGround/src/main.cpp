@@ -19,6 +19,7 @@
 #include <LoongFoundation/LoongTransform.h>
 #include <LoongGui/LoongGuiButton.h>
 #include <LoongGui/LoongGuiImage.h>
+#include <LoongGui/LoongGuiInflator.h>
 #include <LoongGui/LoongGuiWindow.h>
 #include <LoongGui/LoongImGuiIntegration.h>
 #include <LoongResource/Driver.h>
@@ -96,8 +97,8 @@ class LoongEditor : public Foundation::LoongHasSlots {
 public:
     std::shared_ptr<Resource::LoongGpuModel> model_ { nullptr };
     Window::LoongWindow* window_ { nullptr };
-    std::shared_ptr<Gui::LoongImGuiIntegration> imgui_ { nullptr };
-    Gui::LoongGuiWindow guiWindow_ {};
+    std::shared_ptr<Gui::LoongImGuiIntegration> renderBackend_ { nullptr };
+    std::shared_ptr<Gui::LoongGuiWindow> guiWindow_ {};
 
     bool Initialize(Window::LoongWindow* window, RHI::RefCntAutoPtr<RHI::ISwapChain> swapChain)
     {
@@ -121,16 +122,25 @@ public:
         InitResources();
         cameraTransform_.SetPosition({ 0, 0, -4 });
 
-        imgui_ = std::make_shared<Gui::LoongImGuiIntegration>(window_->GetGlfwWindow(), RHI::LoongRHIManager::GetDevice(), swapChain_);
-        auto btn = guiWindow_.AddChild<Gui::LoongGuiButton>();
-        btn->SetName("Button1");
-        btn->SetLabel("A Gui Button");
-        btn->SubscribeOnClicked(this, &LoongEditor::OnButtonClicked);
+        renderBackend_ = std::make_shared<Gui::LoongImGuiIntegration>(window_->GetGlfwWindow(), RHI::LoongRHIManager::GetDevice(), swapChain_);
 
-        guiWindow_.SubscribeOnSizeChange(this, &LoongEditor::OnGuiWindowSizeOrPos);
-        guiWindow_.SubscribeOnPositionChange(this, &LoongEditor::OnGuiWindowSizeOrPos);
+        CreateGui();
 
         return true;
+    }
+
+    void CreateGui()
+    {
+        //        guiWindow_ = Gui::MakeGuiWidget<Gui::LoongGuiWindow>();
+        //        auto btn = guiWindow_->AddChild<Gui::LoongGuiButton>();
+        //        btn->SetName("Button1");
+        //        btn->SetLabel("A Gui Button");
+        //        btn->SubscribeOnClicked(this, &LoongEditor::OnButtonClicked);
+        Gui::LoongGuiInflator inflator;
+        guiWindow_ = inflator.InflateAs<Gui::LoongGuiWindow>("/Gui/sample_gui.xml");
+
+        guiWindow_->SubscribeOnSizeChange(this, &LoongEditor::OnGuiWindowSizeOrPos);
+        guiWindow_->SubscribeOnPositionChange(this, &LoongEditor::OnGuiWindowSizeOrPos);
     }
 
     void OnButtonClicked(Gui::LoongGuiWidget* btn)
@@ -258,7 +268,7 @@ public:
             auto var = srb_->GetVariableByName(RHI::SHADER_TYPE_PIXEL, shaderVarNames[i]);
             if (var != nullptr) {
                 var->Set(tex->GetTexture()->GetDefaultView(RHI::TEXTURE_VIEW_SHADER_RESOURCE));
-                auto img = guiWindow_.AddChild<Gui::LoongGuiImage>();
+                auto img = guiWindow_->AddChild<Gui::LoongGuiImage>();
                 img->SetTexture(tex);
             }
         }
@@ -294,8 +304,8 @@ public:
     {
         LOONG_ASSERT(Window::LoongApplication::IsInMainThread(), "");
         clock_.Update();
-        imgui_->NewFrame();
-        guiWindow_.Draw();
+        renderBackend_->NewFrame();
+        guiWindow_->Draw();
 
         if (window_->GetInputManager().IsKeyReleaseEvent(Window::LoongKeyCode::kKeyM)) {
             auto* mat = new Resource::LoongMaterial;
@@ -320,16 +330,19 @@ public:
         }
 
         if (input.IsKeyReleaseEvent(Window::LoongKeyCode::kKeyEqual)) {
-            guiWindow_.SetSize(guiWindow_.GetSize() + Math::Vector2 { 10.F, 10.F });
+            guiWindow_->SetSize(guiWindow_->GetSize() + Math::Vector2 { 10.F, 10.F });
         }
         if (input.IsKeyReleaseEvent(Window::LoongKeyCode::kKeyMinus)) {
-            guiWindow_.SetSize(guiWindow_.GetSize() - Math::Vector2 { 10.F, 10.F });
+            guiWindow_->SetSize(guiWindow_->GetSize() - Math::Vector2 { 10.F, 10.F });
         }
         if (input.IsKeyReleaseEvent(Window::LoongKeyCode::kKeyUp)) {
-            guiWindow_.SetPosition(guiWindow_.GetPosition() - Math::Vector2 { 10.F, 10.F });
+            guiWindow_->SetPosition(guiWindow_->GetPosition() - Math::Vector2 { 10.F, 10.F });
         }
         if (input.IsKeyReleaseEvent(Window::LoongKeyCode::kKeyDown)) {
-            guiWindow_.SetPosition(guiWindow_.GetPosition() + Math::Vector2 { 10.F, 10.F });
+            guiWindow_->SetPosition(guiWindow_->GetPosition() + Math::Vector2 { 10.F, 10.F });
+        }
+        if (input.IsKeyReleaseEvent(Window::LoongKeyCode::kKeyU)) {
+            CreateGui();
         }
 
         {
@@ -381,7 +394,7 @@ public:
         uniforms_.ub_MVP = uniforms_.ub_Model * uniforms_.ub_View * uniforms_.ub_Projection;
         uniforms_.ub_Time = clock_.ElapsedTime();
 
-        imgui_->EndFrame();
+        renderBackend_->EndFrame();
     }
 
     void OnRender()
@@ -453,7 +466,7 @@ public:
             }
         }
 
-        imgui_->Render(RHI::LoongRHIManager::GetImmediateContext());
+        renderBackend_->Render(RHI::LoongRHIManager::GetImmediateContext());
     }
 
     void OnPresent()

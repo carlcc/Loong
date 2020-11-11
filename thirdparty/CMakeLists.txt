@@ -74,6 +74,8 @@ INTERFACE
     assimp
     )
 
+add_subdirectory(pugixml EXCLUDE_FROM_ALL)
+
 add_subdirectory(rapidjson)
 
 add_subdirectory(nativefiledialog)

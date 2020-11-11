@@ -19,6 +19,7 @@ PUBLIC
     LoongRHI
     LoongResource
     imgui
+    pugixml
 )
 
 source_group("src" FILES ${SOURCE})

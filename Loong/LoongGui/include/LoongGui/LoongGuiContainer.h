@@ -6,6 +6,7 @@
 
 #include "LoongFoundation/LoongMacros.h"
 #include "LoongGui/LoongGuiWidget.h"
+#include <memory>
 #include <vector>
 
 namespace Loong::Gui {
@@ -14,16 +15,17 @@ class LoongGuiContainer : public LoongGuiWidget {
     LOONG_GUI_OBJECT(LoongGuiContainer, "Container", LoongGuiWidget);
 
 public:
-    void RemoveChild(LoongGuiWidget* widget);
+    using WidgetRef = std::shared_ptr<LoongGuiWidget>;
+    void RemoveChild(const LoongGuiWidget* widget);
 
     void RemoveAllChildren();
 
-    LoongGuiWidget* GetChildByName(const std::string& name, bool recursive = false);
+    WidgetRef GetChildByName(const std::string& name, bool recursive = false);
 
     template <class WidgetType, class... ARGS>
-    WidgetType* AddChild(ARGS&&... args)
+    std::shared_ptr<WidgetType> AddChild(ARGS&&... args)
     {
-        auto* w = new WidgetType(std::forward<ARGS>(args)...);
+        auto w = MakeGuiWidget<WidgetType>(std::forward<ARGS>(args)...);
         w->SetParent(this);
         return w;
     }
@@ -32,15 +34,11 @@ protected:
     void DrawThis() override;
 
 private:
-    void AddChild(LoongGuiWidget* child, bool owns = false);
+    void AddChild(LoongGuiWidget* child);
     friend class LoongGuiWidget;
 
 protected:
-    struct ChildWidget {
-        LoongGuiWidget* widget;
-        bool owns;
-    };
-    std::vector<ChildWidget> children_ {};
+    std::vector<WidgetRef> children_ {};
 };
 
 }

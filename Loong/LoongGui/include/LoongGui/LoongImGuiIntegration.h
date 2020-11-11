@@ -32,6 +32,7 @@ public:
 
 private:
     ImGuiImplDiligentEngine* imgui_ { nullptr };
+    void* imguiContext_ { nullptr };
     GLFWwindow* window_ { nullptr };
 };
 

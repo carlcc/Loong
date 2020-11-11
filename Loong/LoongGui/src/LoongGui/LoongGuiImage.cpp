@@ -10,7 +10,9 @@ void LoongGuiImage::DrawThis()
 {
     // TODO: display a black texture if this->texture_ is null
     RHI::ITextureView* tv = texture_ == nullptr ? nullptr : texture_->GetTexture()->GetDefaultView(RHI::TEXTURE_VIEW_SHADER_RESOURCE);
-    ImGui::Image(tv, ImVec2 { size_.x, size_.y });
+    if (tv != nullptr) {
+        ImGui::Image(tv, ImVec2 { size_.x, size_.y });
+    }
 }
 
 }
