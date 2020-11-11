@@ -22,6 +22,13 @@ public:
 
     WidgetRef GetChildByName(const std::string& name, bool recursive = false);
 
+    template <class T>
+    std::shared_ptr<T> GetChildByNameAs(const std::string& name, bool recursive = false)
+    {
+        auto sp = GetChildByName(name, recursive);
+        return std::static_pointer_cast<T>(sp);
+    }
+
     template <class WidgetType, class... ARGS>
     std::shared_ptr<WidgetType> AddChild(ARGS&&... args)
     {

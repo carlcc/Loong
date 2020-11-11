@@ -4,12 +4,12 @@
 
 #pragma once
 
-#include "LoongGui/LoongGuiWidget.h"
+#include "LoongGui/LoongGuiText.h"
 
 namespace Loong::Gui {
 
-class LoongGuiButton : public LoongGuiWidget {
-    LOONG_GUI_OBJECT(LoongGuiButton, "Button", LoongGuiWidget);
+class LoongGuiButton : public LoongGuiText {
+    LOONG_GUI_OBJECT(LoongGuiButton, "Button", LoongGuiText);
 
 public:
     LOONG_DECLARE_SIGNAL(OnClicked, LoongGuiWidget*); // The sender

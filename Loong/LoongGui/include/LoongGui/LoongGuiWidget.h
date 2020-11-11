@@ -128,7 +128,7 @@ protected:
     bool hasLineBreak_ { true };
 
     Math::Vector2 position_ { 0.F, 0.F };
-    Math::Vector2 size_ { 100.F, 100.F };
+    Math::Vector2 size_ { 0.F, 0.F };
     // Used to tell the draw method whether it should tell imgui to use a new position or size
     bool sizeChangedByApi_ { false };
     bool posChangedByApi_ { false };

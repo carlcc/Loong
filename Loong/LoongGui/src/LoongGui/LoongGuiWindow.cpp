@@ -31,7 +31,7 @@ void LoongGuiWindow::DrawThis()
     if (!hasTitleBar_)   { windowFlags |= ImGuiWindowFlags_NoTitleBar;                                       }
     // clang-format on
 
-    if (ImGui::Begin(labelAndId_.c_str(), visible, 0)) {
+    if (ImGui::Begin(labelAndId_.c_str(), visible, windowFlags)) {
         LoongGuiContainer::DrawThis();
 
         auto newPos = ImGui::GetWindowPos();

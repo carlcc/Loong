@@ -10,6 +10,7 @@
 #include "LoongFoundation/LoongStringUtils.h"
 #include "LoongGui/LoongGuiButton.h"
 #include "LoongGui/LoongGuiImage.h"
+#include "LoongGui/LoongGuiText.h"
 #include "LoongGui/LoongGuiWindow.h"
 #include "LoongResource/LoongResourceManager.h"
 #include <pugixml.hpp>
@@ -52,6 +53,7 @@ private:
                 return Gui::MakeGuiWidget<LoongGuiWindow>();
             } });
         REGISTER_GUI_CREATOR(LoongGuiImage);
+        REGISTER_GUI_CREATOR(LoongGuiText);
     }
 
 private:
@@ -85,14 +87,14 @@ static ProcessResult ParseWidgetAttributes(pugi::xml_attribute& attr, LoongGuiWi
         widget->SetLabel(attr.value());
         return ProcessResult::kOk;
     } else if (strcmp(attr.name(), "size") == 0) {
-        CHECK_COMMA_SEPARATED(sizeProps, attr.value(), 2, "size property should be width and height separated by a comma(,)");
+        CHECK_COMMA_SEPARATED(sizeProps, attr.value(), 2, "size attribute should be width and height separated by a comma(,)");
 
         auto w = Foundation::LoongStringUtils::ParseTo<float>(sizeProps[0]);
         auto h = Foundation::LoongStringUtils::ParseTo<float>(sizeProps[1]);
         widget->SetSize({ w, h });
         return ProcessResult::kOk;
     } else if (strcmp(attr.name(), "pos") == 0) {
-        CHECK_COMMA_SEPARATED(posProps, attr.value(), 2, "pos property should be x and y separated by a comma(,)");
+        CHECK_COMMA_SEPARATED(posProps, attr.value(), 2, "pos attribute should be x and y separated by a comma(,)");
 
         auto x = Foundation::LoongStringUtils::ParseTo<float>(posProps[0]);
         auto y = Foundation::LoongStringUtils::ParseTo<float>(posProps[1]);
@@ -160,10 +162,37 @@ static ProcessResult ParseImageAttributes(pugi::xml_attribute& attr, LoongGuiWid
     }
     auto* img = static_cast<LoongGuiImage*>(widget); // NOLINT(cppcoreguidelines-pro-type-static-cast-downcast)
     if (strcmp(attr.name(), "texture") == 0) {
-        Resource::LoongResourceManager::GetTextureAsync(attr.value()).Then([img](const tpl::Task<Resource::LoongTextureRef>& task) {
+        Resource::LoongResourceManager::GetTextureAsync(attr.value()).Then([img, sp = img->SharedFromThis()](const tpl::Task<Resource::LoongTextureRef>& task) {
             auto tex = task.GetFuture().GetValue();
             img->SetTexture(tex);
         });
+        return ProcessResult::kOk;
+    }
+    return ProcessResult::kNotProcessed;
+}
+
+static ProcessResult ParseTextAttributes(pugi::xml_attribute& attr, LoongGuiWidget* widget)
+{
+    if (!widget->IsInstanceOf<LoongGuiText>()) {
+        return ProcessResult::kNotProcessed;
+    }
+    auto* text = static_cast<LoongGuiText*>(widget); // NOLINT(cppcoreguidelines-pro-type-static-cast-downcast)
+    if (strcmp(attr.name(), "useCustomColor") == 0) {
+        CHECK_TRUE_FALSE(isTrue, attr.name(), attr.value());
+        text->SetUseCustomColor(isTrue);
+        return ProcessResult::kOk;
+    } else if (strcmp(attr.name(), "nowrap") == 0) {
+        CHECK_TRUE_FALSE(isTrue, attr.name(), attr.value());
+        text->SetNoWrap(isTrue);
+        return ProcessResult::kOk;
+    }
+    if (strcmp(attr.name(), "color") == 0) {
+        CHECK_COMMA_SEPARATED(colorProps, attr.value(), 4, "color attribute should be width and height separated by a comma(,)");
+        auto r = Foundation::LoongStringUtils::ParseTo<float>(colorProps[0]);
+        auto g = Foundation::LoongStringUtils::ParseTo<float>(colorProps[1]);
+        auto b = Foundation::LoongStringUtils::ParseTo<float>(colorProps[2]);
+        auto a = Foundation::LoongStringUtils::ParseTo<float>(colorProps[3]);
+        text->SetColor({ r, g, b, a });
         return ProcessResult::kOk;
     }
     return ProcessResult::kNotProcessed;
@@ -203,6 +232,11 @@ static ProcessResult ParseAttributes(pugi::xml_node node, LoongGuiWidget* widget
             continue;
         }
         if (auto res = ParseImageAttributes(attr, widget); res == ProcessResult::kError) {
+            return ProcessResult::kError;
+        } else if (res == ProcessResult::kOk) {
+            continue;
+        }
+        if (auto res = ParseTextAttributes(attr, widget); res == ProcessResult::kError) {
             return ProcessResult::kError;
         } else if (res == ProcessResult::kOk) {
             continue;

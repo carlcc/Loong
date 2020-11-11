@@ -131,16 +131,15 @@ public:
 
     void CreateGui()
     {
-        //        guiWindow_ = Gui::MakeGuiWidget<Gui::LoongGuiWindow>();
-        //        auto btn = guiWindow_->AddChild<Gui::LoongGuiButton>();
-        //        btn->SetName("Button1");
-        //        btn->SetLabel("A Gui Button");
-        //        btn->SubscribeOnClicked(this, &LoongEditor::OnButtonClicked);
         Gui::LoongGuiInflator inflator;
         guiWindow_ = inflator.InflateAs<Gui::LoongGuiWindow>("/Gui/sample_gui.xml");
 
         guiWindow_->SubscribeOnSizeChange(this, &LoongEditor::OnGuiWindowSizeOrPos);
         guiWindow_->SubscribeOnPositionChange(this, &LoongEditor::OnGuiWindowSizeOrPos);
+
+        auto btn = guiWindow_->GetChildByNameAs<Gui::LoongGuiButton>("Button1");
+        btn->SetLabel("A Gui Button");
+        btn->SubscribeOnClicked(this, &LoongEditor::OnButtonClicked);
     }
 
     void OnButtonClicked(Gui::LoongGuiWidget* btn)
@@ -151,7 +150,7 @@ public:
 
     void OnGuiWindowSizeOrPos(Gui::LoongGuiWindow* win, const Math::Vector2& size)
     {
-        auto btn = win->GetChildByName("Button1");
+        auto btn = win->GetChildByName("Text1");
         if (btn != nullptr) {
             btn->SetLabel(Foundation::Format("Window's size or pos is {{{},{}}}", size.x, size.y));
         }

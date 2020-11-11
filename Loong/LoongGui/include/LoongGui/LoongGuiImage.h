@@ -13,6 +13,8 @@ class LoongGuiImage : public LoongGuiWidget {
     LOONG_GUI_OBJECT(LoongGuiImage, "Image", LoongGuiWidget);
 
 public:
+    LoongGuiImage();
+
     LG_NODISCARD Resource::LoongTextureRef GetTexture() const { return texture_; }
 
     void SetTexture(Resource::LoongTextureRef texture) { texture_ = std::move(texture); }

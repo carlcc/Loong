@@ -6,6 +6,11 @@
 
 namespace Loong::Gui {
 
+LoongGuiImage::LoongGuiImage()
+{
+    size_ = { 100.F, 100.F };
+}
+
 void LoongGuiImage::DrawThis()
 {
     // TODO: display a black texture if this->texture_ is null

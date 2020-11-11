@@ -29,14 +29,24 @@ inline bool operator!=(const ImVec2& imvec, const Math::Vector2& v2)
     return !(imvec == v2);
 }
 
-ImVec2 ToImVec2(const Math::Vector2& v2)
+inline ImVec2 ToImVec2(const Math::Vector2& v2)
 {
     return { v2.x, v2.y };
 }
 
-Math::Vector2 ToVector2(ImVec2& imvec)
+inline Math::Vector2 ToVector2(ImVec2& imvec)
 {
     return { imvec.x, imvec.y };
+}
+
+inline ImVec4 ToImVec4(const Math::Vector4& v4)
+{
+    return { v4.x, v4.y, v4.z, v4.w };
+}
+
+inline Math::Vector4 ToVector4(ImVec4& imvec)
+{
+    return { imvec.x, imvec.y, imvec.z, imvec.w };
 }
 
 }

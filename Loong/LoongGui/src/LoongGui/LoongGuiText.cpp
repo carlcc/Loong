@@ -2,19 +2,21 @@
 // Copyright (c) 2020 Carl Chen. All rights reserved.
 //
 
-#include "LoongGui/LoongGuiButton.h"
+#include "LoongGui/LoongGuiText.h"
 #include "imgui_utils.h"
 #include <imgui.h>
 
 namespace Loong::Gui {
 
-void LoongGuiButton::DrawThis()
+void LoongGuiText::DrawThis()
 {
     if (useCustomColor_) {
         ImGui::PushStyleColor(ImGuiCol_Text, ToImVec4(color_));
     }
-    if (ImGui::Button(labelAndId_.c_str(), ToImVec2(size_))) {
-        OnClickedSignal_.emit(this);
+    if (isNowrap_) {
+        ImGui::Text("%s", label_.c_str());
+    } else {
+        ImGui::TextWrapped("%s", label_.c_str());
     }
     if (useCustomColor_) {
         ImGui::PopStyleColor();
