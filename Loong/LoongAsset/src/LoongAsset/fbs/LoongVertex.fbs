@@ -1,0 +1,26 @@
+namespace Loong.Asset.Fbs;
+
+struct Vec2 {
+  x:float;
+  y:float;
+}
+
+struct Vec3 {
+  x:float;
+  y:float;
+  z:float;
+}
+
+struct AABB {
+    Min : Vec3;
+    Max : Vec3;
+}
+
+struct Vertex {
+    Position : Vec3;
+    Uv0      : Vec2;
+    Uv1      : Vec2;
+    Normal   : Vec3;
+    Tangent  : Vec3;
+    Bitangent: Vec3;
+}

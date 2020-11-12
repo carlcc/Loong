@@ -15,7 +15,6 @@
 #include "LoongFoundation/LoongLogger.h"
 #include "LoongFoundation/LoongMath.h"
 #include "LoongFoundation/LoongPathUtils.h"
-#include "LoongFoundation/LoongSerializer.h"
 #include <assimp/matrix4x4.h>
 #include <assimp/postprocess.h>
 #include <assimp/scene.h>
@@ -114,13 +113,6 @@ bool ExportModelFiles(const aiScene* scene)
     std::string outputPath = flags.outputDir + '/' + flags.modelPath + '/' + outputFileName;
     outputPath = Foundation::LoongPathUtils::Normalize(outputPath);
 
-    FILE* ofs = fopen(outputPath.c_str(), "wb");
-    if (ofs == nullptr) {
-        LOONG_ERROR("Export model to file '{}' failed: Can not open the output file");
-        return false;
-    }
-    OnScopeExit { fclose(ofs); };
-
     std::vector<Asset::LoongMesh*> meshes;
     std::vector<std::string> materials;
 
@@ -131,22 +123,7 @@ bool ExportModelFiles(const aiScene* scene)
 
     Asset::LoongModel model(std::move(meshes), std::move(materials));
 
-    struct FileOutputStream : public Foundation::LoongArchiveOutputStream {
-        explicit FileOutputStream(FILE* fout)
-            : fout_(fout)
-        {
-        }
-        bool operator()(void* d, size_t l)
-        {
-            return fwrite(d, l, 1, fout_) == 1;
-        }
-
-    private:
-        FILE* fout_ { nullptr };
-    };
-    FileOutputStream outputStream(ofs);
-
-    return Foundation::Serialize(model, outputStream);
+    return model.WriteToFilePhysical(outputPath);
 }
 
 }

@@ -16,8 +16,8 @@ class LoongMesh;
 
 class LoongModel {
 public:
-    explicit LoongModel(const std::string& path);
-    explicit LoongModel(std::vector<LoongMesh*>&& meshes, std::vector<std::string>&& materialNames)
+    LoongModel() = default;
+    LoongModel(std::vector<LoongMesh*>&& meshes, std::vector<std::string>&& materialNames)
         : meshes_(std::move(meshes))
         , materialNames_(std::move(materialNames))
     {
@@ -36,13 +36,16 @@ public:
 
     explicit operator bool() const { return meshes_.size() > 0 || materialNames_.size() > 0; }
 
-    template <class Archive>
-    bool Serialize(Archive& archive) { return archive(meshes_, materialNames_, aabb_); }
+    bool LoadFromFile(const std::string& vfsPath);
+
+    bool WriteToFilePhysical(const std::string& physicalPath) const;
 
 private:
     void UpdateAABB();
 
     void Clear();
+
+    bool WriteToBuffer(void* flatbuffer, const std::string& path) const;
 
 private:
     std::vector<LoongMesh*> meshes_ {};

@@ -47,8 +47,8 @@ struct ResourceLoaderInternal<std::shared_ptr<LoongGpuModel>> {
     static tpl::Task<std::shared_ptr<LoongGpuModel>> Load(const std::string& path)
     {
         return tpl::MakeTaskAndStart([path]() -> std::shared_ptr<LoongGpuModel> {
-            Asset::LoongModel model(path);
-            if (!model) {
+            Asset::LoongModel model;
+            if (!model.LoadFromFile(path)) {
                 LOONG_ERROR("Load model '{}' failed", path);
                 return nullptr;
             }

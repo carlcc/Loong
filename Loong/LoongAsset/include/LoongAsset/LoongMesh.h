@@ -25,9 +25,6 @@ public:
 
     LG_NODISCARD const Math::AABB& GetAABB() const { return aabb_; }
 
-    template <class Archive>
-    bool Serialize(Archive& archive) { return archive(vertices_, indices_, materialIndex_, aabb_); }
-
 private:
     void UpdateAABB();
 

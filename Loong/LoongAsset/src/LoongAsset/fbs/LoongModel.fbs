@@ -1,0 +1,20 @@
+include "LoongVertex.fbs";
+
+namespace Loong.Asset.Fbs;
+
+file_identifier "LMDL";
+
+table LoongMesh {
+    Vertices      : [Vertex] (id : 0);
+    Indices       : [uint32] (id : 1);
+    MaterialIndex : uint32   (id : 2);
+    Aabb          : AABB     (id : 3);
+}
+
+table LoongModel {
+    Meshes        : [LoongMesh]   (id : 0);
+    MaterialNames : [string]      (id : 1);
+    Aabb          : AABB          (id : 2);
+}
+
+root_type LoongModel;
