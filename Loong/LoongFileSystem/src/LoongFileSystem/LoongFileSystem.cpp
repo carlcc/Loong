@@ -38,7 +38,7 @@ bool LoongFileSystem::SetWriteDir(const std::string& sysPath)
     return 0 != PHYSFS_setWriteDir(sysPath.c_str());
 }
 
-const char *LoongFileSystem::GetWriteDir()
+const char* LoongFileSystem::GetWriteDir()
 {
     return PHYSFS_getWriteDir();
 }
@@ -179,6 +179,50 @@ int64_t LoongFileSystem::LoadFileContent(const std::string& path, void* bufferVo
         }
     }
     return totalCount;
+}
+
+std::vector<uint8_t> LoongFileSystem::LoadFileContent(const std::string& path, bool& succeed)
+{
+    std::vector<uint8_t> buffer;
+    auto fileSize = GetFileSize(path);
+    if (fileSize == -1) {
+        LOONG_ERROR("Load file '{}' failed: Get file size failed", path);
+        succeed = false;
+        return buffer;
+    }
+    buffer.resize(fileSize);
+
+    fileSize = LoadFileContent(path, buffer.data(), buffer.size());
+    if (fileSize != buffer.size()) {
+        LOONG_ERROR("Load file '{}' failed: load file content failed", path);
+        succeed = false;
+        return buffer;
+    }
+
+    succeed = true;
+    return buffer;
+}
+
+std::string LoongFileSystem::LoadFileContentAsString(const std::string& path, bool& succeed)
+{
+    std::string buffer;
+    auto fileSize = GetFileSize(path);
+    if (fileSize == -1) {
+        LOONG_ERROR("Load file '{}' failed: Get file size failed", path);
+        succeed = false;
+        return buffer;
+    }
+    buffer.resize(fileSize);
+
+    fileSize = LoadFileContent(path, buffer.data(), buffer.size());
+    if (fileSize != buffer.size()) {
+        LOONG_ERROR("Load file '{}' failed: load file content failed", path);
+        succeed = false;
+        return buffer;
+    }
+
+    succeed = true;
+    return buffer;
 }
 
 int64_t LoongFileSystem::StoreFileContent(const std::string& path, const void* bufferVoid, uint64_t bufferSize)

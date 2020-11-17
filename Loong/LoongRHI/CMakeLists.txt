@@ -54,6 +54,7 @@ PRIVATE:
 target_link_libraries(LoongRHI
 PUBLIC
     LoongFoundation
+    LoongFileSystem
     Diligent-BuildSettings
     Diligent-GraphicsEngine
     ${LOONG_PLATFORM_GRAPHICS_IMPLS}
@@ -62,6 +63,7 @@ PUBLIC
     Diligent-TargetPlatform
     Diligent-TextureLoader
     glfw
+    pugixml
 )
 
 source_group("src" FILES ${SOURCE} ${LOONG_PLATFORM_SRC_FILES})

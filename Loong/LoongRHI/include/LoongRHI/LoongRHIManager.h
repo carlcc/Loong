@@ -45,6 +45,8 @@ public:
         InputLayoutDesc inputLayout, PipelineResourceLayoutDesc resourceLayout = {}, bool depthEnabled = true,
         CULL_MODE cullMode = CULL_MODE_BACK, PRIMITIVE_TOPOLOGY topology = PRIMITIVE_TOPOLOGY_TRIANGLE_LIST);
 
+    LG_NODISCARD static RHI::RefCntAutoPtr<RHI::IPipelineState> LoadPSO(const std::string& vfsPath);
+
     LG_NODISCARD static RefCntAutoPtr<IBuffer> CreateUniformBuffer(const char* bufferName, uint32_t size, const void* initialData = nullptr,
         USAGE usage = USAGE_DYNAMIC, BIND_FLAGS bindFlags = BIND_UNIFORM_BUFFER, CPU_ACCESS_FLAGS cpuAccessFlags = CPU_ACCESS_WRITE);
 

@@ -3,10 +3,16 @@
 //
 #include "LoongRHI/LoongRHIManager.h"
 #include "GetNativeWindow.h"
+#include "LoongFileSystem/LoongFileSystem.h"
+#include "LoongFoundation/LoongAssert.h"
 #include "LoongFoundation/LoongLogger.h"
+#include "LoongFoundation/LoongStringUtils.h"
 #include <GraphicsUtilities.h>
 #include <TextureUtilities.h>
 #include <cassert>
+#include <cstring>
+#include <pugixml.hpp>
+#include <unordered_map>
 #if D3D11_SUPPORTED
 #include <EngineFactoryD3D11.h>
 #endif
@@ -408,14 +414,389 @@ RHI::RefCntAutoPtr<RHI::IPipelineState> LoongRHIManager::CreateGraphicsPSOForCur
     psoCreateInfo.GraphicsPipeline.InputLayout = inputLayout;
     psoDesc.ResourceLayout = resourceLayout;
 
-    RefCntAutoPtr<IPipelineState> pso;
-
     if (pPS == nullptr || pVS == nullptr) {
-        return pso;
+        return {};
     }
+    RefCntAutoPtr<IPipelineState> pso;
     device->CreateGraphicsPipelineState(psoCreateInfo, &pso);
 
     return pso;
+}
+
+// A helper class to map strings to enum values
+class PsoEnumMap {
+private:
+    PsoEnumMap() = default;
+
+    std::unordered_map<std::string, RHI::PRIMITIVE_TOPOLOGY> topology_ {
+        { "TRIANGLE_LIST", PRIMITIVE_TOPOLOGY_TRIANGLE_LIST },
+        { "TRIANGLE_STRIP", PRIMITIVE_TOPOLOGY_TRIANGLE_STRIP },
+        { "LINE_LIST", PRIMITIVE_TOPOLOGY_LINE_LIST },
+        { "LINE_STRIP", PRIMITIVE_TOPOLOGY_LINE_STRIP },
+        { "POINT_LIST", PRIMITIVE_TOPOLOGY_POINT_LIST },
+    };
+    std::unordered_map<std::string, RHI::CULL_MODE> cullMode_ {
+        { "BACK", CULL_MODE_BACK },
+        { "FRONT", CULL_MODE_FRONT },
+        { "NONE", CULL_MODE_NONE },
+    };
+    std::unordered_map<std::string, RHI::TEXTURE_FORMAT> textureFormat_ {
+        { "BGRA8_UNORM_SRGB", TEX_FORMAT_BGRA8_UNORM_SRGB },
+        { "RGBA8_UNORM_SRGB", TEX_FORMAT_RGBA8_UNORM_SRGB },
+        { "D32_FLOAT", TEX_FORMAT_D32_FLOAT },
+        { "D24_UNORM_S8_UINT", TEX_FORMAT_D24_UNORM_S8_UINT },
+    };
+    std::unordered_map<std::string, RHI::COMPARISON_FUNCTION> comparisonFunc_ {
+        { "LESS", COMPARISON_FUNC_LESS },
+        { "EQUAL", COMPARISON_FUNC_EQUAL },
+        { "LESS_EQUAL", COMPARISON_FUNC_LESS_EQUAL },
+        { "GREATER", COMPARISON_FUNC_GREATER },
+        { "GREATER_EQUAL", COMPARISON_FUNC_GREATER_EQUAL },
+        { "NOT_EQUAL", COMPARISON_FUNC_NOT_EQUAL },
+        { "NEVER", COMPARISON_FUNC_NEVER },
+        { "ALWAYS", COMPARISON_FUNC_ALWAYS },
+    };
+    std::unordered_map<std::string, RHI::VALUE_TYPE> valueType_ {
+        { "INT8", VT_INT8 },
+        { "INT16", VT_INT16 },
+        { "INT32", VT_INT32 },
+        { "UINT8", VT_UINT8 },
+        { "UINT16", VT_UINT16 },
+        { "UINT32", VT_UINT32 },
+        { "FLOAT16", VT_FLOAT16 },
+        { "FLOAT32", VT_FLOAT32 },
+    };
+    std::unordered_map<std::string, RHI::SHADER_RESOURCE_VARIABLE_TYPE> shaderResourceVarType_ {
+        { "MUTABLE", SHADER_RESOURCE_VARIABLE_TYPE_MUTABLE },
+        { "STATIC", SHADER_RESOURCE_VARIABLE_TYPE_STATIC },
+        { "DYNAMIC", SHADER_RESOURCE_VARIABLE_TYPE_DYNAMIC },
+    };
+    std::unordered_map<std::string, RHI::FILTER_TYPE> filterType_ {
+        { "POINT", FILTER_TYPE_POINT },
+        { "LINEAR", FILTER_TYPE_LINEAR },
+        { "ANISOTROPIC", FILTER_TYPE_ANISOTROPIC },
+        { "COMPARISON_POINT", FILTER_TYPE_COMPARISON_POINT },
+        { "COMPARISON_LINEAR", FILTER_TYPE_COMPARISON_LINEAR },
+        { "COMPARISON_ANISOTROPIC", FILTER_TYPE_COMPARISON_ANISOTROPIC },
+    };
+    std::unordered_map<std::string, RHI::TEXTURE_ADDRESS_MODE> addressMode_ {
+        { "WRAP", TEXTURE_ADDRESS_WRAP },
+        { "BORDER", TEXTURE_ADDRESS_BORDER },
+        { "CLAMP", TEXTURE_ADDRESS_CLAMP },
+        { "MIRROR", TEXTURE_ADDRESS_MIRROR },
+        { "MIRROR_ONCE", TEXTURE_ADDRESS_MIRROR_ONCE },
+    };
+    std::unordered_map<std::string, RHI::SHADER_TYPE> shaderType_ {
+        { "VERTEX", SHADER_TYPE_VERTEX },
+        { "PIXEL", SHADER_TYPE_PIXEL },
+        { "GEOMETRY", SHADER_TYPE_GEOMETRY },
+        { "HULL", SHADER_TYPE_HULL },
+        { "DOMAIN", SHADER_TYPE_DOMAIN },
+        { "COMPUTE", SHADER_TYPE_COMPUTE },
+        { "AMPLIFICATION", SHADER_TYPE_AMPLIFICATION },
+        { "MESH", SHADER_TYPE_MESH },
+    };
+
+public:
+    static const PsoEnumMap& Get()
+    {
+        static PsoEnumMap m;
+        return m;
+    }
+
+#define DEFINE_GET_FUNC(funcName, mapVar, undefinedVar) \
+    static auto funcName(const std::string& name)       \
+    {                                                   \
+        auto it = Get().mapVar.find(name);              \
+        if (it == Get().mapVar.end()) {                 \
+            return undefinedVar;                        \
+        }                                               \
+        return it->second;                              \
+    }
+
+    DEFINE_GET_FUNC(GetTopology, topology_, PRIMITIVE_TOPOLOGY_UNDEFINED)
+    DEFINE_GET_FUNC(GetCullMode, cullMode_, CULL_MODE_UNDEFINED)
+    DEFINE_GET_FUNC(GetTextureFormat, textureFormat_, TEX_FORMAT_UNKNOWN)
+    DEFINE_GET_FUNC(GetComparisonFunc, comparisonFunc_, COMPARISON_FUNC_UNKNOWN)
+    DEFINE_GET_FUNC(GetValueType, valueType_, VT_UNDEFINED)
+    DEFINE_GET_FUNC(GetShaderResourceVarType, shaderResourceVarType_, SHADER_RESOURCE_VARIABLE_TYPE_NUM_TYPES)
+    DEFINE_GET_FUNC(GetFilterType, filterType_, FILTER_TYPE_UNKNOWN)
+    DEFINE_GET_FUNC(GetAddressMode, addressMode_, TEXTURE_ADDRESS_UNKNOWN)
+    DEFINE_GET_FUNC(GetShaderType, shaderType_, SHADER_TYPE_UNKNOWN)
+};
+
+#define CHECK_ENUM_VALUE(var, node, getFunc, attrName, invalidValue)                                                                   \
+    auto var = invalidValue;                                                                                                           \
+    {                                                                                                                                  \
+        const auto* val = node.attribute(attrName).value();                                                                            \
+        var = PsoEnumMap::getFunc(val);                                                                                                \
+        if (var == invalidValue) {                                                                                                     \
+            LOONG_ERROR("Load PSO '{}' failed: Unknown '" attrName "' value '{}' for node '{}'", vfsPath, attrName, val, node.path()); \
+            return {};                                                                                                                 \
+        }                                                                                                                              \
+    }                                                                                                                                  \
+    do {                                                                                                                               \
+    } while (false)
+
+#define CHECK_TRUE_FALSE(var, node, attrName)                                                                                         \
+    bool var = false;                                                                                                                 \
+    {                                                                                                                                 \
+        const char* val = node.attribute(attrName).value();                                                                           \
+        var = strcasecmp(val, "true") == 0;                                                                                           \
+        if (!var && strcasecmp(val, "false") != 0) {                                                                                  \
+            LOONG_ERROR("Node {}'s attribute {}'s value is neither 'true' nor 'false', use false by default", node.path(), attrName); \
+        }                                                                                                                             \
+    }                                                                                                                                 \
+    do {                                                                                                                              \
+    } while (false)
+
+#define CHECK_INT_VALUE(var, node, attrName)                                                                                                                  \
+    int var = 0;                                                                                                                                              \
+    {                                                                                                                                                         \
+        const char* val = node.attribute(attrName).value();                                                                                                   \
+        char* endPtr = nullptr;                                                                                                                               \
+        var = strtol(val, &endPtr, 10);                                                                                                                       \
+        if (endPtr[0] != '\0') {                                                                                                                              \
+            LOONG_ERROR("Load PSO '{}' failed: attribute '" attrName "' value '{}' for node '{}' should be an integer", vfsPath, attrName, val, node.path()); \
+            return {};                                                                                                                                        \
+        }                                                                                                                                                     \
+    }
+
+static RHI::RefCntAutoPtr<RHI::IPipelineState> CreateGraphicsPipeline(const std::string& vfsPath, pugi::xml_node node, RHI::IRenderDevice& device)
+{
+    RHI::GraphicsPipelineStateCreateInfo psoCreateInfo;
+    RHI::PipelineStateDesc& psoDesc = psoCreateInfo.PSODesc;
+
+    psoDesc.Name = node.attribute("name").value();
+    psoDesc.PipelineType = RHI::PIPELINE_TYPE_GRAPHICS;
+
+    CHECK_ENUM_VALUE(primitiveTopology, node, GetTopology, "primitiveTopology", PRIMITIVE_TOPOLOGY_UNDEFINED);
+    psoCreateInfo.GraphicsPipeline.PrimitiveTopology = primitiveTopology;
+
+    CHECK_ENUM_VALUE(cullMode, node, GetCullMode, "cullMode", CULL_MODE_UNDEFINED);
+    psoCreateInfo.GraphicsPipeline.RasterizerDesc.CullMode = cullMode;
+
+    // <RenderTarget> tags
+    if (auto renderTargets = node.children("RenderTarget"); true) {
+        int numRenderTarget = 0;
+        for (auto& renderTarget : renderTargets) {
+            CHECK_ENUM_VALUE(textureFormat, renderTarget, GetTextureFormat, "format", TEX_FORMAT_UNKNOWN);
+            psoCreateInfo.GraphicsPipeline.RTVFormats[numRenderTarget] = textureFormat;
+            ++numRenderTarget;
+        }
+        if (numRenderTarget > 8) {
+            LOONG_ERROR("Load PSO '{}' failed: too many 'RenderTarget's", vfsPath);
+            return {};
+        }
+        psoCreateInfo.GraphicsPipeline.NumRenderTargets = numRenderTarget;
+    }
+
+    // <DepthStencil> tag
+    if (auto depthStencil = node.child("DepthStencil"); depthStencil.empty()) {
+        LOONG_ERROR("Load PSO '{}' failed: exactly one 'DepthStencil' tag is needed under 'GraphicsPipeline'", vfsPath);
+        return {};
+    } else {
+        CHECK_ENUM_VALUE(depthStencilFormat, depthStencil, GetTextureFormat, "format", TEX_FORMAT_UNKNOWN);
+        psoCreateInfo.GraphicsPipeline.DSVFormat = depthStencilFormat;
+
+        // <DepthTest> tag
+        auto depthTest = depthStencil.child("DepthTest");
+        if (!depthTest.empty()) {
+            CHECK_TRUE_FALSE(depthTestEnabled, depthTest, "enabled");
+            CHECK_TRUE_FALSE(deptWriteEnabled, depthTest, "write");
+            CHECK_ENUM_VALUE(cmpFunc, depthTest, GetComparisonFunc, "func", COMPARISON_FUNC_UNKNOWN);
+            psoCreateInfo.GraphicsPipeline.DepthStencilDesc.DepthEnable = depthTestEnabled;
+            psoCreateInfo.GraphicsPipeline.DepthStencilDesc.DepthWriteEnable = deptWriteEnabled;
+            psoCreateInfo.GraphicsPipeline.DepthStencilDesc.DepthFunc = cmpFunc;
+        }
+        // <StencilTest> tag
+        auto stencilTest = depthStencil.child("StencilTest");
+        if (!stencilTest.empty()) {
+            CHECK_TRUE_FALSE(enabled, stencilTest, "enabled");
+            CHECK_INT_VALUE(readMask, stencilTest, "readMask");
+            CHECK_INT_VALUE(writeMask, stencilTest, "writeMask");
+            psoCreateInfo.GraphicsPipeline.DepthStencilDesc.StencilEnable = enabled;
+            psoCreateInfo.GraphicsPipeline.DepthStencilDesc.StencilReadMask = readMask;
+            psoCreateInfo.GraphicsPipeline.DepthStencilDesc.StencilWriteMask = writeMask;
+        }
+    }
+
+    // <Shaders> tag
+    std::vector<RHI::RefCntAutoPtr<RHI::IShader>> shaderObjects; // We need to keep them valid before pso created
+    if (auto shaders = node.child("Shaders"); true) {
+        struct ShaderSource {
+            RHI::ShaderMacroHelper macros;
+            std::string source;
+        };
+        auto CreateShaderDesc = [&vfsPath](pugi::xml_node shaderNode, RHI::ShaderCreateInfo& sci, ShaderSource& shaderSource) -> bool {
+            if (auto attr = shaderNode.attribute("entry"); attr.empty() || strcmp(attr.value(), "") == 0) {
+                LOONG_ERROR("Load PSO '{}' failed: missing 'entry' attribute for '{}'", vfsPath, shaderNode.path());
+                return false;
+            } else {
+                sci.EntryPoint = attr.value();
+            }
+
+            sci.SourceLanguage = RHI::SHADER_SOURCE_LANGUAGE_HLSL;
+            sci.UseCombinedTextureSamplers = true;
+            sci.Desc.Name = shaderNode.attribute("name").value();
+
+            if (auto srcFile = shaderNode.attribute("sourceFile"); !srcFile.empty() && strcmp(srcFile.value(), "") != 0) {
+                bool suc = false;
+                shaderSource.source = FS::LoongFileSystem::LoadFileContentAsString(srcFile.value(), suc);
+                if (!suc) {
+                    LOONG_ERROR("Load PSO '{}' failed: load source file '{}' failed", vfsPath, srcFile.value());
+                    return false;
+                }
+                sci.Source = shaderSource.source.c_str();
+            } else {
+                // TODO: Try to get source from other attribute
+                LOONG_ERROR("Load PSO '{}' failed: missing shader source ('sourceFile' attribute) for '{}'", vfsPath, shaderNode.path());
+                return false;
+            }
+
+            auto definitions = shaderNode.children("Definition");
+            if (definitions.begin() != definitions.end()) {
+                RHI::ShaderMacroHelper& psMacros = shaderSource.macros;
+                for (auto def : definitions) {
+                    const char* name = def.attribute("name").value();
+                    if (strcmp(name, "") == 0) {
+                        LOONG_ERROR("Load PSO '{}' failed: empty definition 'name' for '{}'", vfsPath, shaderNode.path());
+                        return false;
+                    }
+                    const char* value = def.attribute("value").value();
+                    if (strcmp(value, "") == 0) {
+                        LOONG_ERROR("Load PSO '{}' failed: empty definition 'value' for '{}'", vfsPath, shaderNode.path());
+                        return false;
+                    }
+                    psMacros.AddShaderMacro(name, value);
+                }
+                sci.Macros = psMacros;
+            }
+            return true;
+        };
+
+        for (auto shaderNode : shaders) {
+            RHI::ShaderCreateInfo sci {};
+            ShaderSource shaderSource; // we need to keep this object alive before shader is created
+            if (!CreateShaderDesc(shaderNode, sci, shaderSource)) {
+                return {};
+            }
+            if (strcmp(shaderNode.name(), "PS") == 0) {
+                // Pixel shader
+                sci.Desc.ShaderType = RHI::SHADER_TYPE_PIXEL;
+            } else if (strcmp(shaderNode.name(), "VS") == 0) {
+                // Vertex shader
+                sci.Desc.ShaderType = RHI::SHADER_TYPE_VERTEX;
+            } else {
+                LOONG_WARNING("Shader node '{}' of type '{}' is not supported yet", shaderNode.path(), shaderNode.name());
+                continue;
+            }
+
+            RHI::RefCntAutoPtr<RHI::IShader> pShader;
+            device.CreateShader(sci, &pShader);
+            if (pShader == nullptr) {
+                LOONG_ERROR("Load PSO '{}' failed: create shader for '{}' failed", vfsPath, shaderNode.path());
+                return {};
+            }
+            shaderObjects.push_back(pShader);
+
+            if (strcmp(shaderNode.name(), "PS") == 0) {
+                // Pixel shader
+                psoCreateInfo.pPS = pShader;
+            } else if (strcmp(shaderNode.name(), "VS") == 0) {
+                // Vertex shader
+                psoCreateInfo.pVS = pShader;
+            } else {
+                LOONG_ASSERT(false, "Impossible");
+            }
+        }
+    }
+
+    // <InputLayout> tag
+    RHI::InputLayoutDesc& inputLayout = psoCreateInfo.GraphicsPipeline.InputLayout;
+    std::vector<RHI::LayoutElement> inputLayoutElements;
+    if (auto elementNodes = node.child("InputLayout").children("Element"); elementNodes.begin() == elementNodes.end()) {
+        LOONG_ERROR("Load PSO '{}' failed: empty input layout", vfsPath);
+        return {};
+    } else {
+        for (auto eleNode : elementNodes) {
+            CHECK_INT_VALUE(index, eleNode, "index");
+            CHECK_INT_VALUE(slot, eleNode, "slot");
+            CHECK_INT_VALUE(numComp, eleNode, "numComp");
+            CHECK_ENUM_VALUE(valueType, eleNode, GetValueType, "valueType", VT_UNDEFINED);
+            CHECK_TRUE_FALSE(normalized, eleNode, "normalized");
+            inputLayoutElements.emplace_back((uint32_t)index, (uint32_t)slot, (uint32_t)numComp, valueType, normalized);
+        }
+        inputLayout.NumElements = (uint32_t)inputLayoutElements.size();
+        inputLayout.LayoutElements = inputLayoutElements.data();
+    }
+
+    // <ResourceLayout> tag
+    RHI::PipelineResourceLayoutDesc& resourceLayout = psoDesc.ResourceLayout;
+    resourceLayout.DefaultVariableType = RHI::SHADER_RESOURCE_VARIABLE_TYPE_STATIC;
+    std::vector<RHI::ShaderResourceVariableDesc> shaderVariables;
+    std::vector<RHI::ImmutableSamplerDesc> shaderSamplers;
+    if (auto elementNodes = node.child("ResourceLayout"); true) {
+        for (auto eleNode : elementNodes) {
+            CHECK_ENUM_VALUE(shaderType, eleNode, GetShaderType, "shaderType", SHADER_TYPE_UNKNOWN);
+            CHECK_ENUM_VALUE(type, eleNode, GetShaderResourceVarType, "type", SHADER_RESOURCE_VARIABLE_TYPE_NUM_TYPES);
+            CHECK_ENUM_VALUE(minFilter, eleNode, GetFilterType, "minFilter", FILTER_TYPE_UNKNOWN);
+            CHECK_ENUM_VALUE(magFilter, eleNode, GetFilterType, "magFilter", FILTER_TYPE_UNKNOWN);
+            CHECK_ENUM_VALUE(mipFilter, eleNode, GetFilterType, "mipFilter", FILTER_TYPE_UNKNOWN);
+            CHECK_ENUM_VALUE(addrU, eleNode, GetAddressMode, "addrU", TEXTURE_ADDRESS_UNKNOWN);
+            CHECK_ENUM_VALUE(addrV, eleNode, GetAddressMode, "addrW", TEXTURE_ADDRESS_UNKNOWN);
+            CHECK_ENUM_VALUE(addrW, eleNode, GetAddressMode, "addrW", TEXTURE_ADDRESS_UNKNOWN);
+
+            const char* name = eleNode.attribute("name").value();
+            if (strcmp(name, "") == 0) {
+                LOONG_ERROR("Load PSO '{}' failed: empty shader resource name for node '{}'", vfsPath, eleNode.path());
+                return {};
+            }
+            shaderVariables.emplace_back(shaderType, name, type);
+            shaderSamplers.push_back({ shaderType, name, { minFilter, magFilter, mipFilter, addrU, addrV, addrW } });
+        }
+    }
+    resourceLayout.Variables = shaderVariables.data();
+    resourceLayout.NumVariables = uint32_t(shaderVariables.size());
+    resourceLayout.ImmutableSamplers = shaderSamplers.data();
+    resourceLayout.NumImmutableSamplers = uint32_t(shaderSamplers.size());
+
+    RHI::RefCntAutoPtr<RHI::IPipelineState> pso;
+    device.CreateGraphicsPipelineState(psoCreateInfo, &pso);
+    if (pso == nullptr) {
+        LOONG_ERROR("Load PSO '{}' failed: create failed", vfsPath);
+    }
+    return pso;
+}
+
+RHI::RefCntAutoPtr<RHI::IPipelineState> LoongRHIManager::LoadPSO(const std::string& vfsPath)
+{
+    bool succeed;
+    auto buffer = FS::LoongFileSystem::LoadFileContent(vfsPath, succeed);
+    if (!succeed) {
+        LOONG_ERROR("Load PSO '{}' failed: load file failed", vfsPath);
+        return {};
+    }
+
+    pugi::xml_document doc;
+    pugi::xml_parse_result result = doc.load_buffer(buffer.data(), buffer.size());
+    if (!result) {
+        LOONG_ERROR("Load PSO failed: '{}' failed: parse xml failed", vfsPath);
+        return {};
+    }
+
+    auto node = doc.root().first_child();
+    if (node.empty()) {
+        LOONG_ERROR("Load PSO failed: '{}' failed: empty PSO file", vfsPath);
+        return {};
+    }
+    constexpr const char* kGraphicsPipeline = "GraphicsPipeline";
+    if (strcmp(node.name(), kGraphicsPipeline) == 0) {
+        auto& device = *gRhiImpl.device_;
+        return CreateGraphicsPipeline(vfsPath, node, device);
+    }
+    LOONG_ERROR("Load PSO failed: '{}' failed: pipeline object of which the type is not '{}' is not supported yet", vfsPath, kGraphicsPipeline);
+    return {};
 }
 
 RefCntAutoPtr<IBuffer> LoongRHIManager::CreateUniformBuffer(const char* bufferName, uint32_t size, const void* initialData, USAGE usage, BIND_FLAGS bindFlags, CPU_ACCESS_FLAGS cpuAccessFlags)
@@ -452,5 +833,4 @@ RefCntAutoPtr<ITexture> LoongRHIManager::CreateTextureFromFile(const char* file,
     Diligent::CreateTextureFromFile(file, loadInfo, gRhiImpl.device_, &texture);
     return texture;
 }
-
 }

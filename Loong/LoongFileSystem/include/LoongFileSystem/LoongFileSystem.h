@@ -78,6 +78,10 @@ public:
 
     static int64_t LoadFileContent(const std::string& path, void* buffer, uint64_t bufferSize);
 
+    static std::vector<uint8_t> LoadFileContent(const std::string& path, bool& succeed);
+
+    static std::string LoadFileContentAsString(const std::string& path, bool& succeed);
+
     static int64_t StoreFileContent(const std::string& path, const void* buffer, uint64_t bufferSize);
 
     enum class ErrorCode {

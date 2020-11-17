@@ -158,72 +158,7 @@ public:
 
     void CreatePSO()
     {
-        std::string shaderSourceCode;
-        shaderSourceCode.resize(64000);
-        auto actualCount = FS::LoongFileSystem::LoadFileContent("/Shaders/PlayGround.hlsl", shaderSourceCode.data(), shaderSourceCode.size());
-        shaderSourceCode.resize(actualCount);
-
-        RHI::ShaderMacroHelper vsMacros;
-        vsMacros.AddShaderMacro("IS_VERTEX_SHADER", "1");
-        RHI::ShaderCreateInfo vs;
-        vs.SourceLanguage = RHI::SHADER_SOURCE_LANGUAGE_HLSL;
-        vs.UseCombinedTextureSamplers = true;
-        vs.Desc.ShaderType = RHI::SHADER_TYPE_VERTEX;
-        vs.EntryPoint = "main";
-        vs.Desc.Name = "Cube vertex shader";
-        vs.Macros = vsMacros;
-        vs.Source = shaderSourceCode.c_str();
-
-        RHI::ShaderMacroHelper psMacros;
-        psMacros.AddShaderMacro("IS_PIXEL_SHADER", "1");
-        RHI::ShaderCreateInfo ps;
-        ps.SourceLanguage = RHI::SHADER_SOURCE_LANGUAGE_HLSL;
-        ps.UseCombinedTextureSamplers = true;
-        ps.Desc.ShaderType = RHI::SHADER_TYPE_PIXEL;
-        ps.EntryPoint = "main";
-        ps.Desc.Name = "Cube pixel shader";
-        ps.Macros = psMacros;
-        ps.Source = shaderSourceCode.c_str();
-
-        RHI::LayoutElement layoutElements[] {
-            RHI::LayoutElement { 0, 0, 3, RHI::VT_FLOAT32, false },
-            RHI::LayoutElement { 1, 0, 2, RHI::VT_FLOAT32, false },
-            RHI::LayoutElement { 2, 0, 2, RHI::VT_FLOAT32, false },
-            RHI::LayoutElement { 3, 0, 3, RHI::VT_FLOAT32, false },
-            RHI::LayoutElement { 4, 0, 3, RHI::VT_FLOAT32, false },
-            RHI::LayoutElement { 5, 0, 3, RHI::VT_FLOAT32, false },
-        };
-        RHI::InputLayoutDesc inputLayout {};
-        inputLayout.LayoutElements = layoutElements;
-        inputLayout.NumElements = _countof(layoutElements);
-
-        RHI::PipelineResourceLayoutDesc resourceLayout;
-        resourceLayout.DefaultVariableType = RHI::SHADER_RESOURCE_VARIABLE_TYPE_STATIC;
-        RHI::ShaderResourceVariableDesc shaderVariables[] {
-            { RHI::SHADER_TYPE_PIXEL, "g_Albedo", RHI::SHADER_RESOURCE_VARIABLE_TYPE_MUTABLE },
-            { RHI::SHADER_TYPE_PIXEL, "g_Normal", RHI::SHADER_RESOURCE_VARIABLE_TYPE_MUTABLE },
-            { RHI::SHADER_TYPE_PIXEL, "g_Roughness", RHI::SHADER_RESOURCE_VARIABLE_TYPE_MUTABLE },
-            { RHI::SHADER_TYPE_PIXEL, "g_Metallic", RHI::SHADER_RESOURCE_VARIABLE_TYPE_MUTABLE },
-            { RHI::SHADER_TYPE_PIXEL, "g_Emissive", RHI::SHADER_RESOURCE_VARIABLE_TYPE_MUTABLE },
-        };
-
-        RHI::SamplerDesc samplerConfig {
-            RHI::FILTER_TYPE_LINEAR, RHI::FILTER_TYPE_LINEAR, RHI::FILTER_TYPE_LINEAR,
-            RHI::TEXTURE_ADDRESS_WRAP, RHI::TEXTURE_ADDRESS_WRAP, RHI::TEXTURE_ADDRESS_WRAP
-        };
-        RHI::ImmutableSamplerDesc shaderSamplers[] {
-            { RHI::SHADER_TYPE_PIXEL, "g_Albedo", samplerConfig },
-            { RHI::SHADER_TYPE_PIXEL, "g_Normal", samplerConfig },
-            { RHI::SHADER_TYPE_PIXEL, "g_Roughness", samplerConfig },
-            { RHI::SHADER_TYPE_PIXEL, "g_Metallic", samplerConfig },
-            { RHI::SHADER_TYPE_PIXEL, "g_Emissive", samplerConfig },
-        };
-        resourceLayout.Variables = shaderVariables;
-        resourceLayout.NumVariables = _countof(shaderVariables);
-        resourceLayout.ImmutableSamplers = shaderSamplers;
-        resourceLayout.NumImmutableSamplers = _countof(shaderSamplers);
-
-        pso_ = RHI::LoongRHIManager::CreateGraphicsPSOForCurrentSwapChain(swapChain_, "TexturedCube", vs, ps, inputLayout, resourceLayout, true, Diligent::CULL_MODE_BACK);
+        pso_ = RHI::LoongRHIManager::LoadPSO("/Pipeline/SamplePipelineStateObject.xml");
         if (pso_ == nullptr) {
             LOONG_ERROR("Create pso failed");
             return;
@@ -377,10 +312,6 @@ public:
             if (input.IsKeyReleaseEvent(Window::LoongKeyCode::kKey2)) {
                 cameraTransform_.SetRotation(Math::Identity);
             }
-            auto forward = cameraTransform_.GetForward();
-            clearColor_[0] = forward.r;
-            clearColor_[1] = forward.g;
-            clearColor_[2] = forward.b;
         }
 
         using float4x4 = RHI::float4x4;
