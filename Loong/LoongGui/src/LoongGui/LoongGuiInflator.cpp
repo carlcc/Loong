@@ -68,6 +68,8 @@ enum class ProcessResult : uint8_t {
 
 static std::shared_ptr<LoongGuiWidget> ParseXmlNode(pugi::xml_node node, LoongGuiContainer* parent);
 
+using SU = Foundation::LoongStringUtils;
+
 #define CHECK_COMMA_SEPARATED(outputVar, val, substrCount, errorMsg)                         \
     std::vector<std::string_view> outputVar = Foundation::LoongStringUtils::Split(val, ','); \
     if (outputVar.size() != substrCount) {                                                   \
@@ -75,8 +77,8 @@ static std::shared_ptr<LoongGuiWidget> ParseXmlNode(pugi::xml_node node, LoongGu
         return ProcessResult::kError;                                                        \
     }
 #define CHECK_TRUE_FALSE(isTrue, key, val)                                    \
-    bool isTrue = strcasecmp(val, "true") == 0;                               \
-    if (!isTrue && strcasecmp(val, "false") != 0) {                           \
+    bool isTrue = SU::EqualsIgnoreCase(val, "true");                          \
+    if (!isTrue && SU::EqualsIgnoreCase(val, "false") != 0) {                 \
         LOONG_ERROR("{}'s value is neither 'true' nor 'false', ignore", key); \
         return ProcessResult::kOk;                                            \
     }
@@ -269,7 +271,7 @@ std::shared_ptr<LoongGuiWidget> LoongGuiInflator::Inflate(const std::string& vfs
     buffer.resize(fileSize);
     fileSize = FS::LoongFileSystem::LoadFileContent(vfsPath, buffer.data(), buffer.size());
 
-    if (fileSize != buffer.size()) {
+    if (fileSize != (int64_t)buffer.size()) {
         LOONG_ERROR("Load GUI file '{}' failed: Read file failed", vfsPath);
         return nullptr;
     }

@@ -124,6 +124,41 @@ public:
         ss >> t;
         return t;
     }
+
+    static int Compare(std::string_view s1, std::string_view s2)
+    {
+        return s1.compare(s2);
+    }
+
+    static int CompareIgnoreCase(std::string_view s1, std::string_view s2)
+    {
+        auto n = std::min(s1.length(), s2.length());
+        for (size_t i = 0; i < n; ++i) {
+            auto ch1 = (uint8_t)std::tolower(s1[0]);
+            auto ch2 = (uint8_t)std::tolower(s2[0]);
+            if (ch1 < ch2) {
+                return -1;
+            } else if (ch1 > ch2) {
+                return 1;
+            }
+        }
+        if (s1.length() < s2.length()) {
+            return -1;
+        } else if (s1.length() > s2.length()) {
+            return 1;
+        }
+        return 0;
+    }
+
+    static bool Equals(std::string_view s1, std::string_view s2)
+    {
+        return s1 == s2;
+    }
+
+    static bool EqualsIgnoreCase(std::string_view s1, std::string_view s2)
+    {
+        return s1.length() == s2.length() && CompareIgnoreCase(s1, s2) == 0;
+    }
 };
 
 }

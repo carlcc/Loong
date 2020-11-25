@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<GraphicsPipeline name="SamplePSO" primitiveTopology="TRIANGLE_LIST" cullMode="BACK">
+    <!-- You can specify more than one RenderTarget -->
+    <RenderTarget format="BGRA8_UNORM_SRGB"/>
+    <DepthStencil format="D32_FLOAT">
+        <DepthTest enabled="true" write="true" func="LESS"/>
+        <StencilTest enabled="false" readMask="255" writeMask="255"/>
+    </DepthStencil>
+
+    <Shaders>
+        <VS sourceFile="/Shaders/PlayGround.hlsl"
+            name="SamplePSOVS"
+            entry="main"
+        >
+            <Definition name="IS_VERTEX_SHADER" value="1"/>
+        </VS>
+        <PS sourceFile="/Shaders/PlayGround.hlsl"
+            name="SamplePSOPS"
+            entry="main"
+        >
+            <Definition name="IS_PIXEL_SHADER" value="1"/>
+        </PS>
+    </Shaders>
+    <InputLayout>
+        <Element index="0" slot="0" numComp="3" valueType="FLOAT32" normalized="false"/>
+        <Element index="1" slot="0" numComp="2" valueType="FLOAT32" normalized="false"/>
+        <Element index="2" slot="0" numComp="2" valueType="FLOAT32" normalized="false"/>
+        <Element index="3" slot="0" numComp="3" valueType="FLOAT32" normalized="false"/>
+        <Element index="4" slot="0" numComp="3" valueType="FLOAT32" normalized="false"/>
+        <Element index="5" slot="0" numComp="3" valueType="FLOAT32" normalized="false"/>
+    </InputLayout>
+    <ResourceLayout>
+        <Element shaderType="PIXEL" name="g_Albedo" type="MUTABLE"
+                 minFilter="LINEAR" magFilter="LINEAR" mipFilter="LINEAR" addrU="WRAP" addV="WRAP" addrW="WRAP"/>
+        <Element shaderType="PIXEL" name="g_Normal" type="MUTABLE"
+                 minFilter="LINEAR" magFilter="LINEAR" mipFilter="LINEAR" addrU="WRAP" addV="WRAP" addrW="WRAP"/>
+        <Element shaderType="PIXEL" name="g_Roughness" type="MUTABLE"
+                 minFilter="LINEAR" magFilter="LINEAR" mipFilter="LINEAR" addrU="WRAP" addV="WRAP" addrW="WRAP"/>
+        <Element shaderType="PIXEL" name="g_Metallic" type="MUTABLE"
+                 minFilter="LINEAR" magFilter="LINEAR" mipFilter="LINEAR" addrU="WRAP" addV="WRAP" addrW="WRAP"/>
+        <Element shaderType="PIXEL" name="g_Emissive" type="MUTABLE"
+                 minFilter="LINEAR" magFilter="LINEAR" mipFilter="LINEAR" addrU="WRAP" addV="WRAP" addrW="WRAP"/>
+    </ResourceLayout>
+</GraphicsPipeline>

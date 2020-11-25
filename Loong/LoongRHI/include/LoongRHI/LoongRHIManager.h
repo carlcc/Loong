@@ -47,6 +47,8 @@ public:
 
     LG_NODISCARD static RHI::RefCntAutoPtr<RHI::IPipelineState> LoadPSO(const std::string& vfsPath);
 
+    LG_NODISCARD static RHI::RefCntAutoPtr<RHI::IRenderPass> LoadRenderPass(const std::string& vfsPath);
+
     LG_NODISCARD static RefCntAutoPtr<IBuffer> CreateUniformBuffer(const char* bufferName, uint32_t size, const void* initialData = nullptr,
         USAGE usage = USAGE_DYNAMIC, BIND_FLAGS bindFlags = BIND_UNIFORM_BUFFER, CPU_ACCESS_FLAGS cpuAccessFlags = CPU_ACCESS_WRITE);
 

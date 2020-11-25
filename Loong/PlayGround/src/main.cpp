@@ -138,14 +138,24 @@ public:
         guiWindow_->SubscribeOnPositionChange(this, &LoongEditor::OnGuiWindowSizeOrPos);
 
         auto btn = guiWindow_->GetChildByNameAs<Gui::LoongGuiButton>("Button1");
-        btn->SetLabel("A Gui Button");
-        btn->SubscribeOnClicked(this, &LoongEditor::OnButtonClicked);
+        btn->SetLabel("Create RenderPass");
+        btn->SubscribeOnClicked(this, &LoongEditor::OnCreateRenderPass);
     }
 
-    void OnButtonClicked(Gui::LoongGuiWidget* btn)
+    void OnCreateRenderPass(Gui::LoongGuiWidget* btn)
     {
         static int sCount = 1;
         btn->SetLabel(Foundation::Format("You clicked me for {} times", sCount++));
+
+        auto text = guiWindow_->GetChildByNameAs<Gui::LoongGuiText>("MessageDisplay");
+        auto renderPass = RHI::LoongRHIManager::LoadRenderPass("/RenderPasses/SampleRenderPass.xml");
+        if (renderPass) {
+            text->SetLabel("Create Render Pass succeed");
+            text->SetUseCustomColor(false);
+        } else {
+            text->SetLabel("Create Render Pass failed");
+            text->SetUseCustomColor(true);
+        }
     }
 
     void OnGuiWindowSizeOrPos(Gui::LoongGuiWindow* win, const Math::Vector2& size)

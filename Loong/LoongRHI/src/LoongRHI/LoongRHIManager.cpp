@@ -445,6 +445,7 @@ private:
         { "RGBA8_UNORM_SRGB", TEX_FORMAT_RGBA8_UNORM_SRGB },
         { "D32_FLOAT", TEX_FORMAT_D32_FLOAT },
         { "D24_UNORM_S8_UINT", TEX_FORMAT_D24_UNORM_S8_UINT },
+        { "R32_FLOAT", TEX_FORMAT_R32_FLOAT },
     };
     std::unordered_map<std::string, RHI::COMPARISON_FUNCTION> comparisonFunc_ {
         { "LESS", COMPARISON_FUNC_LESS },
@@ -496,6 +497,86 @@ private:
         { "AMPLIFICATION", SHADER_TYPE_AMPLIFICATION },
         { "MESH", SHADER_TYPE_MESH },
     };
+    std::unordered_map<std::string, RHI::RESOURCE_STATE> resourceState_ {
+        { "UNDEFINED", RESOURCE_STATE_UNDEFINED },
+        { "VERTEX_BUFFER", RESOURCE_STATE_VERTEX_BUFFER },
+        { "CONSTANT_BUFFER", RESOURCE_STATE_CONSTANT_BUFFER },
+        { "INDEX_BUFFER", RESOURCE_STATE_INDEX_BUFFER },
+        { "RENDER_TARGET", RESOURCE_STATE_RENDER_TARGET },
+        { "UNORDERED_ACCESS", RESOURCE_STATE_UNORDERED_ACCESS },
+        { "DEPTH_WRITE", RESOURCE_STATE_DEPTH_WRITE },
+        { "DEPTH_READ", RESOURCE_STATE_DEPTH_READ },
+        { "SHADER_RESOURCE", RESOURCE_STATE_SHADER_RESOURCE },
+        { "STREAM_OUT", RESOURCE_STATE_STREAM_OUT },
+        { "INDIRECT_ARGUMENT", RESOURCE_STATE_INDIRECT_ARGUMENT },
+        { "COPY_DEST", RESOURCE_STATE_COPY_DEST },
+        { "COPY_SOURCE", RESOURCE_STATE_COPY_SOURCE },
+        { "RESOLVE_DEST", RESOURCE_STATE_RESOLVE_DEST },
+        { "RESOLVE_SOURCE", RESOURCE_STATE_RESOLVE_SOURCE },
+        { "INPUT_ATTACHMENT", RESOURCE_STATE_INPUT_ATTACHMENT },
+        { "PRESENT", RESOURCE_STATE_PRESENT },
+        { "MAX_BIT", RESOURCE_STATE_MAX_BIT },
+        { "GENERIC_READ", RESOURCE_STATE_GENERIC_READ },
+    };
+    std::unordered_map<std::string, RHI::ATTACHMENT_LOAD_OP> loadOp_ {
+        { "LOAD", ATTACHMENT_LOAD_OP_LOAD },
+        { "CLEAR", ATTACHMENT_LOAD_OP_CLEAR },
+        { "DISCARD", ATTACHMENT_LOAD_OP_DISCARD },
+    };
+    std::unordered_map<std::string, RHI::ATTACHMENT_STORE_OP> storeOp_ {
+        { "STORE", ATTACHMENT_STORE_OP_STORE },
+        { "DISCARD", ATTACHMENT_STORE_OP_DISCARD },
+    };
+    std::unordered_map<std::string, RHI::PIPELINE_STAGE_FLAGS> pipelineStageFlag_ {
+        { "TOP_OF_PIPE", PIPELINE_STAGE_FLAG_TOP_OF_PIPE },
+        { "DRAW_INDIRECT", PIPELINE_STAGE_FLAG_DRAW_INDIRECT },
+        { "VERTEX_INPUT", PIPELINE_STAGE_FLAG_VERTEX_INPUT },
+        { "VERTEX_SHADER", PIPELINE_STAGE_FLAG_VERTEX_SHADER },
+        { "HULL_SHADER", PIPELINE_STAGE_FLAG_HULL_SHADER },
+        { "DOMAIN_SHADER", PIPELINE_STAGE_FLAG_DOMAIN_SHADER },
+        { "GEOMETRY_SHADER", PIPELINE_STAGE_FLAG_GEOMETRY_SHADER },
+        { "PIXEL_SHADER", PIPELINE_STAGE_FLAG_PIXEL_SHADER },
+        { "EARLY_FRAGMENT_TESTS", PIPELINE_STAGE_FLAG_EARLY_FRAGMENT_TESTS },
+        { "LATE_FRAGMENT_TESTS", PIPELINE_STAGE_FLAG_LATE_FRAGMENT_TESTS },
+        { "RENDER_TARGET", PIPELINE_STAGE_FLAG_RENDER_TARGET },
+        { "COMPUTE_SHADER", PIPELINE_STAGE_FLAG_COMPUTE_SHADER },
+        { "TRANSFER", PIPELINE_STAGE_FLAG_TRANSFER },
+        { "BOTTOM_OF_PIPE", PIPELINE_STAGE_FLAG_BOTTOM_OF_PIPE },
+        { "HOST", PIPELINE_STAGE_FLAG_HOST },
+        { "CONDITIONAL_RENDERING", PIPELINE_STAGE_FLAG_CONDITIONAL_RENDERING },
+        { "SHADING_RATE_TEXTURE", PIPELINE_STAGE_FLAG_SHADING_RATE_TEXTURE },
+        { "RAY_TRACING_SHADER", PIPELINE_STAGE_FLAG_RAY_TRACING_SHADER },
+        { "ACCELERATION_STRUCTURE_BUILD", PIPELINE_STAGE_FLAG_ACCELERATION_STRUCTURE_BUILD },
+        { "TASK_SHADER", PIPELINE_STAGE_FLAG_TASK_SHADER },
+        { "MESH_SHADER", PIPELINE_STAGE_FLAG_MESH_SHADER },
+        { "FRAGMENT_DENSITY_PROCESS", PIPELINE_STAGE_FLAG_FRAGMENT_DENSITY_PROCESS },
+        { "DEFAULT", PIPELINE_STAGE_FLAG_DEFAULT },
+    };
+    std::unordered_map<std::string, RHI::ACCESS_FLAGS> accessFlags_ {
+        { "INDIRECT_COMMAND_READ", ACCESS_FLAG_INDIRECT_COMMAND_READ },
+        { "INDEX_READ", ACCESS_FLAG_INDEX_READ },
+        { "VERTEX_READ", ACCESS_FLAG_VERTEX_READ },
+        { "UNIFORM_READ", ACCESS_FLAG_UNIFORM_READ },
+        { "INPUT_ATTACHMENT_READ", ACCESS_FLAG_INPUT_ATTACHMENT_READ },
+        { "SHADER_READ", ACCESS_FLAG_SHADER_READ },
+        { "SHADER_WRITE", ACCESS_FLAG_SHADER_WRITE },
+        { "RENDER_TARGET_READ", ACCESS_FLAG_RENDER_TARGET_READ },
+        { "RENDER_TARGET_WRITE", ACCESS_FLAG_RENDER_TARGET_WRITE },
+        { "DEPTH_STENCIL_READ", ACCESS_FLAG_DEPTH_STENCIL_READ },
+        { "DEPTH_STENCIL_WRITE", ACCESS_FLAG_DEPTH_STENCIL_WRITE },
+        { "COPY_SRC", ACCESS_FLAG_COPY_SRC },
+        { "COPY_DST", ACCESS_FLAG_COPY_DST },
+        { "HOST_READ", ACCESS_FLAG_HOST_READ },
+        { "HOST_WRITE", ACCESS_FLAG_HOST_WRITE },
+        { "MEMORY_READ", ACCESS_FLAG_MEMORY_READ },
+        { "MEMORY_WRITE", ACCESS_FLAG_MEMORY_WRITE },
+        { "CONDITIONAL_RENDERING_READ", ACCESS_FLAG_CONDITIONAL_RENDERING_READ },
+        { "SHADING_RATE_TEXTURE_READ", ACCESS_FLAG_SHADING_RATE_TEXTURE_READ },
+        { "ACCELERATION_STRUCTURE_READ", ACCESS_FLAG_ACCELERATION_STRUCTURE_READ },
+        { "ACCELERATION_STRUCTURE_WRITE", ACCESS_FLAG_ACCELERATION_STRUCTURE_WRITE },
+        { "FRAGMENT_DENSITY_MAP_READ", ACCESS_FLAG_FRAGMENT_DENSITY_MAP_READ },
+        { "DEFAULT", ACCESS_FLAG_DEFAULT },
+    };
 
 public:
     static const PsoEnumMap& Get()
@@ -523,36 +604,49 @@ public:
     DEFINE_GET_FUNC(GetFilterType, filterType_, FILTER_TYPE_UNKNOWN)
     DEFINE_GET_FUNC(GetAddressMode, addressMode_, TEXTURE_ADDRESS_UNKNOWN)
     DEFINE_GET_FUNC(GetShaderType, shaderType_, SHADER_TYPE_UNKNOWN)
+    DEFINE_GET_FUNC(GetResourceState, resourceState_, RESOURCE_STATE_UNKNOWN)
+    DEFINE_GET_FUNC(GetLoadOp, loadOp_, ATTACHMENT_LOAD_OP(-1))
+    DEFINE_GET_FUNC(GetStoreOp, storeOp_, ATTACHMENT_STORE_OP(-1))
+    DEFINE_GET_FUNC(GetPipelineStageFlag, pipelineStageFlag_, PIPELINE_STAGE_FLAG_UNDEFINED)
+    DEFINE_GET_FUNC(GetAccessFlag, accessFlags_, ACCESS_FLAG_NONE)
 };
 
-#define CHECK_ENUM_VALUE(var, node, getFunc, attrName, invalidValue)                                                                   \
-    auto var = invalidValue;                                                                                                           \
-    {                                                                                                                                  \
-        const auto* val = node.attribute(attrName).value();                                                                            \
-        var = PsoEnumMap::getFunc(val);                                                                                                \
-        if (var == invalidValue) {                                                                                                     \
-            LOONG_ERROR("Load PSO '{}' failed: Unknown '" attrName "' value '{}' for node '{}'", vfsPath, attrName, val, node.path()); \
-            return {};                                                                                                                 \
-        }                                                                                                                              \
-    }                                                                                                                                  \
-    do {                                                                                                                               \
+#define CHECK_OPTIONAL_ENUM_VALUE(var, node, getFunc, attrName, invalidValue) \
+    std::optional<decltype(invalidValue)> var;                                \
+    do {                                                                      \
+        const auto* val = node.attribute(attrName).value();                   \
+        auto enumValue = PsoEnumMap::getFunc(val);                            \
+        if (enumValue != invalidValue) {                                      \
+            var = enumValue;                                                  \
+        }                                                                     \
     } while (false)
+
+#define CHECK_REQUIRED_ENUM_VALUE(var, node, getFunc, attrName, invalidValue)                                                                  \
+    auto var = invalidValue;                                                                                                                   \
+    do {                                                                                                                                       \
+        const auto* val = node.attribute(attrName).value();                                                                                    \
+        var = PsoEnumMap::getFunc(val);                                                                                                        \
+        if (var == invalidValue) {                                                                                                             \
+            LOONG_ERROR("Load PSO '{}' failed: Unknown reqired attribute '" attrName "' value '{}' for node '{}'", vfsPath, val, node.path()); \
+            return {};                                                                                                                         \
+        }                                                                                                                                      \
+    } while (false)
+
+using SU = Foundation::LoongStringUtils;
 
 #define CHECK_TRUE_FALSE(var, node, attrName)                                                                                         \
     bool var = false;                                                                                                                 \
-    {                                                                                                                                 \
+    do {                                                                                                                              \
         const char* val = node.attribute(attrName).value();                                                                           \
-        var = strcasecmp(val, "true") == 0;                                                                                           \
-        if (!var && strcasecmp(val, "false") != 0) {                                                                                  \
+        var = SU::EqualsIgnoreCase(val, "true");                                                                                      \
+        if (!var && SU::EqualsIgnoreCase(val, "false")) {                                                                             \
             LOONG_ERROR("Node {}'s attribute {}'s value is neither 'true' nor 'false', use false by default", node.path(), attrName); \
         }                                                                                                                             \
-    }                                                                                                                                 \
-    do {                                                                                                                              \
     } while (false)
 
 #define CHECK_INT_VALUE(var, node, attrName)                                                                                                                  \
     int var = 0;                                                                                                                                              \
-    {                                                                                                                                                         \
+    do {                                                                                                                                                      \
         const char* val = node.attribute(attrName).value();                                                                                                   \
         char* endPtr = nullptr;                                                                                                                               \
         var = strtol(val, &endPtr, 10);                                                                                                                       \
@@ -560,7 +654,7 @@ public:
             LOONG_ERROR("Load PSO '{}' failed: attribute '" attrName "' value '{}' for node '{}' should be an integer", vfsPath, attrName, val, node.path()); \
             return {};                                                                                                                                        \
         }                                                                                                                                                     \
-    }
+    } while (false)
 
 static RHI::RefCntAutoPtr<RHI::IPipelineState> CreateGraphicsPipeline(const std::string& vfsPath, pugi::xml_node node, RHI::IRenderDevice& device)
 {
@@ -570,17 +664,17 @@ static RHI::RefCntAutoPtr<RHI::IPipelineState> CreateGraphicsPipeline(const std:
     psoDesc.Name = node.attribute("name").value();
     psoDesc.PipelineType = RHI::PIPELINE_TYPE_GRAPHICS;
 
-    CHECK_ENUM_VALUE(primitiveTopology, node, GetTopology, "primitiveTopology", PRIMITIVE_TOPOLOGY_UNDEFINED);
+    CHECK_REQUIRED_ENUM_VALUE(primitiveTopology, node, GetTopology, "primitiveTopology", PRIMITIVE_TOPOLOGY_UNDEFINED);
     psoCreateInfo.GraphicsPipeline.PrimitiveTopology = primitiveTopology;
 
-    CHECK_ENUM_VALUE(cullMode, node, GetCullMode, "cullMode", CULL_MODE_UNDEFINED);
+    CHECK_REQUIRED_ENUM_VALUE(cullMode, node, GetCullMode, "cullMode", CULL_MODE_UNDEFINED);
     psoCreateInfo.GraphicsPipeline.RasterizerDesc.CullMode = cullMode;
 
     // <RenderTarget> tags
     if (auto renderTargets = node.children("RenderTarget"); true) {
         int numRenderTarget = 0;
         for (auto& renderTarget : renderTargets) {
-            CHECK_ENUM_VALUE(textureFormat, renderTarget, GetTextureFormat, "format", TEX_FORMAT_UNKNOWN);
+            CHECK_REQUIRED_ENUM_VALUE(textureFormat, renderTarget, GetTextureFormat, "format", TEX_FORMAT_UNKNOWN);
             psoCreateInfo.GraphicsPipeline.RTVFormats[numRenderTarget] = textureFormat;
             ++numRenderTarget;
         }
@@ -588,7 +682,7 @@ static RHI::RefCntAutoPtr<RHI::IPipelineState> CreateGraphicsPipeline(const std:
             LOONG_ERROR("Load PSO '{}' failed: too many 'RenderTarget's", vfsPath);
             return {};
         }
-        psoCreateInfo.GraphicsPipeline.NumRenderTargets = numRenderTarget;
+        psoCreateInfo.GraphicsPipeline.NumRenderTargets = (uint8_t)numRenderTarget;
     }
 
     // <DepthStencil> tag
@@ -596,7 +690,7 @@ static RHI::RefCntAutoPtr<RHI::IPipelineState> CreateGraphicsPipeline(const std:
         LOONG_ERROR("Load PSO '{}' failed: exactly one 'DepthStencil' tag is needed under 'GraphicsPipeline'", vfsPath);
         return {};
     } else {
-        CHECK_ENUM_VALUE(depthStencilFormat, depthStencil, GetTextureFormat, "format", TEX_FORMAT_UNKNOWN);
+        CHECK_REQUIRED_ENUM_VALUE(depthStencilFormat, depthStencil, GetTextureFormat, "format", TEX_FORMAT_UNKNOWN);
         psoCreateInfo.GraphicsPipeline.DSVFormat = depthStencilFormat;
 
         // <DepthTest> tag
@@ -604,7 +698,7 @@ static RHI::RefCntAutoPtr<RHI::IPipelineState> CreateGraphicsPipeline(const std:
         if (!depthTest.empty()) {
             CHECK_TRUE_FALSE(depthTestEnabled, depthTest, "enabled");
             CHECK_TRUE_FALSE(deptWriteEnabled, depthTest, "write");
-            CHECK_ENUM_VALUE(cmpFunc, depthTest, GetComparisonFunc, "func", COMPARISON_FUNC_UNKNOWN);
+            CHECK_REQUIRED_ENUM_VALUE(cmpFunc, depthTest, GetComparisonFunc, "func", COMPARISON_FUNC_UNKNOWN);
             psoCreateInfo.GraphicsPipeline.DepthStencilDesc.DepthEnable = depthTestEnabled;
             psoCreateInfo.GraphicsPipeline.DepthStencilDesc.DepthWriteEnable = deptWriteEnabled;
             psoCreateInfo.GraphicsPipeline.DepthStencilDesc.DepthFunc = cmpFunc;
@@ -615,9 +709,9 @@ static RHI::RefCntAutoPtr<RHI::IPipelineState> CreateGraphicsPipeline(const std:
             CHECK_TRUE_FALSE(enabled, stencilTest, "enabled");
             CHECK_INT_VALUE(readMask, stencilTest, "readMask");
             CHECK_INT_VALUE(writeMask, stencilTest, "writeMask");
-            psoCreateInfo.GraphicsPipeline.DepthStencilDesc.StencilEnable = enabled;
-            psoCreateInfo.GraphicsPipeline.DepthStencilDesc.StencilReadMask = readMask;
-            psoCreateInfo.GraphicsPipeline.DepthStencilDesc.StencilWriteMask = writeMask;
+            psoCreateInfo.GraphicsPipeline.DepthStencilDesc.StencilEnable = (uint8_t)enabled;
+            psoCreateInfo.GraphicsPipeline.DepthStencilDesc.StencilReadMask = (uint8_t)readMask;
+            psoCreateInfo.GraphicsPipeline.DepthStencilDesc.StencilWriteMask = (uint8_t)writeMask;
         }
     }
 
@@ -723,7 +817,7 @@ static RHI::RefCntAutoPtr<RHI::IPipelineState> CreateGraphicsPipeline(const std:
             CHECK_INT_VALUE(index, eleNode, "index");
             CHECK_INT_VALUE(slot, eleNode, "slot");
             CHECK_INT_VALUE(numComp, eleNode, "numComp");
-            CHECK_ENUM_VALUE(valueType, eleNode, GetValueType, "valueType", VT_UNDEFINED);
+            CHECK_REQUIRED_ENUM_VALUE(valueType, eleNode, GetValueType, "valueType", VT_UNDEFINED);
             CHECK_TRUE_FALSE(normalized, eleNode, "normalized");
             inputLayoutElements.emplace_back((uint32_t)index, (uint32_t)slot, (uint32_t)numComp, valueType, normalized);
         }
@@ -738,14 +832,14 @@ static RHI::RefCntAutoPtr<RHI::IPipelineState> CreateGraphicsPipeline(const std:
     std::vector<RHI::ImmutableSamplerDesc> shaderSamplers;
     if (auto elementNodes = node.child("ResourceLayout"); true) {
         for (auto eleNode : elementNodes) {
-            CHECK_ENUM_VALUE(shaderType, eleNode, GetShaderType, "shaderType", SHADER_TYPE_UNKNOWN);
-            CHECK_ENUM_VALUE(type, eleNode, GetShaderResourceVarType, "type", SHADER_RESOURCE_VARIABLE_TYPE_NUM_TYPES);
-            CHECK_ENUM_VALUE(minFilter, eleNode, GetFilterType, "minFilter", FILTER_TYPE_UNKNOWN);
-            CHECK_ENUM_VALUE(magFilter, eleNode, GetFilterType, "magFilter", FILTER_TYPE_UNKNOWN);
-            CHECK_ENUM_VALUE(mipFilter, eleNode, GetFilterType, "mipFilter", FILTER_TYPE_UNKNOWN);
-            CHECK_ENUM_VALUE(addrU, eleNode, GetAddressMode, "addrU", TEXTURE_ADDRESS_UNKNOWN);
-            CHECK_ENUM_VALUE(addrV, eleNode, GetAddressMode, "addrW", TEXTURE_ADDRESS_UNKNOWN);
-            CHECK_ENUM_VALUE(addrW, eleNode, GetAddressMode, "addrW", TEXTURE_ADDRESS_UNKNOWN);
+            CHECK_REQUIRED_ENUM_VALUE(shaderType, eleNode, GetShaderType, "shaderType", SHADER_TYPE_UNKNOWN);
+            CHECK_REQUIRED_ENUM_VALUE(type, eleNode, GetShaderResourceVarType, "type", SHADER_RESOURCE_VARIABLE_TYPE_NUM_TYPES);
+            CHECK_REQUIRED_ENUM_VALUE(minFilter, eleNode, GetFilterType, "minFilter", FILTER_TYPE_UNKNOWN);
+            CHECK_REQUIRED_ENUM_VALUE(magFilter, eleNode, GetFilterType, "magFilter", FILTER_TYPE_UNKNOWN);
+            CHECK_REQUIRED_ENUM_VALUE(mipFilter, eleNode, GetFilterType, "mipFilter", FILTER_TYPE_UNKNOWN);
+            CHECK_REQUIRED_ENUM_VALUE(addrU, eleNode, GetAddressMode, "addrU", TEXTURE_ADDRESS_UNKNOWN);
+            CHECK_REQUIRED_ENUM_VALUE(addrV, eleNode, GetAddressMode, "addrW", TEXTURE_ADDRESS_UNKNOWN);
+            CHECK_REQUIRED_ENUM_VALUE(addrW, eleNode, GetAddressMode, "addrW", TEXTURE_ADDRESS_UNKNOWN);
 
             const char* name = eleNode.attribute("name").value();
             if (strcmp(name, "") == 0) {
@@ -781,13 +875,13 @@ RHI::RefCntAutoPtr<RHI::IPipelineState> LoongRHIManager::LoadPSO(const std::stri
     pugi::xml_document doc;
     pugi::xml_parse_result result = doc.load_buffer(buffer.data(), buffer.size());
     if (!result) {
-        LOONG_ERROR("Load PSO failed: '{}' failed: parse xml failed", vfsPath);
+        LOONG_ERROR("Load PSO '{}' failed: parse xml failed", vfsPath);
         return {};
     }
 
     auto node = doc.root().first_child();
     if (node.empty()) {
-        LOONG_ERROR("Load PSO failed: '{}' failed: empty PSO file", vfsPath);
+        LOONG_ERROR("Load PSO '{}' failed: empty PSO file", vfsPath);
         return {};
     }
     constexpr const char* kGraphicsPipeline = "GraphicsPipeline";
@@ -795,8 +889,148 @@ RHI::RefCntAutoPtr<RHI::IPipelineState> LoongRHIManager::LoadPSO(const std::stri
         auto& device = *gRhiImpl.device_;
         return CreateGraphicsPipeline(vfsPath, node, device);
     }
-    LOONG_ERROR("Load PSO failed: '{}' failed: pipeline object of which the type is not '{}' is not supported yet", vfsPath, kGraphicsPipeline);
+    LOONG_ERROR("Load PSO '{}' failed: pipeline object of which the type is not '{}' is not supported yet", vfsPath, kGraphicsPipeline);
     return {};
+}
+
+RHI::RefCntAutoPtr<RHI::IRenderPass> LoongRHIManager::LoadRenderPass(const std::string& vfsPath)
+{
+    bool succeed;
+    auto buffer = FS::LoongFileSystem::LoadFileContent(vfsPath, succeed);
+    if (!succeed) {
+        LOONG_ERROR("Load RenderPass '{}' failed: load file failed", vfsPath);
+        return {};
+    }
+
+    pugi::xml_document doc;
+    pugi::xml_parse_result result = doc.load_buffer(buffer.data(), buffer.size());
+    if (!result) {
+        LOONG_ERROR("Load RenderPass '{}' failed: parse xml failed", vfsPath);
+        return {};
+    }
+
+    auto node = doc.root().first_child();
+    if (node.empty()) {
+        LOONG_ERROR("Load RenderPass '{}' failed: empty RenderPass file", vfsPath);
+        return {};
+    }
+
+    constexpr const char* kRenderPass = "RenderPass";
+    if (!SU::Equals(node.name(), kRenderPass)) {
+        LOONG_ERROR("Load RenderPass '{}' failed: empty RenderPass file, the root node should be 'RenderPass'", vfsPath);
+        return {};
+    }
+
+    uint32_t numAttachments = 0;
+    const constexpr int kMaxAttachmentCount = 32;
+    RenderPassAttachmentDesc attachments[kMaxAttachmentCount];
+    for (auto attach : node.children("Attachment")) {
+        if (numAttachments > kMaxAttachmentCount) {
+            LOONG_ERROR("Load RenderPass '{}' failed: too many attachments", vfsPath);
+            return {};
+        }
+
+        CHECK_REQUIRED_ENUM_VALUE(format, attach, GetTextureFormat, "format", TEX_FORMAT_UNKNOWN);
+        CHECK_REQUIRED_ENUM_VALUE(initialState, attach, GetResourceState, "initialState", RESOURCE_STATE_UNKNOWN);
+        CHECK_REQUIRED_ENUM_VALUE(finalState, attach, GetResourceState, "finalState", RESOURCE_STATE_UNKNOWN);
+        CHECK_REQUIRED_ENUM_VALUE(loadOp, attach, GetLoadOp, "loadOp", ATTACHMENT_LOAD_OP(-1));
+        CHECK_REQUIRED_ENUM_VALUE(storeOp, attach, GetStoreOp, "storeOp", ATTACHMENT_STORE_OP(-1));
+        CHECK_OPTIONAL_ENUM_VALUE(stencilLoadOp, attach, GetLoadOp, "stencilLoadOp", ATTACHMENT_LOAD_OP(-1));
+        CHECK_OPTIONAL_ENUM_VALUE(stencilStoreOp, attach, GetStoreOp, "stencilStoreOp", ATTACHMENT_STORE_OP(-1));
+
+        attachments[numAttachments].Format = format;
+        attachments[numAttachments].InitialState = initialState;
+        attachments[numAttachments].FinalState = finalState;
+        attachments[numAttachments].LoadOp = loadOp;
+        attachments[numAttachments].StoreOp = storeOp;
+        if (stencilLoadOp.has_value()) {
+            attachments[numAttachments].StencilLoadOp = stencilLoadOp.value();
+        }
+        if (stencilStoreOp.has_value()) {
+            attachments[numAttachments].StencilStoreOp = stencilStoreOp.value();
+        }
+        ++numAttachments;
+    }
+
+    uint32_t numSubPasses = 0;
+    const constexpr uint32_t kMaxSubPassCount = 16;
+    SubpassDesc subPasses[kMaxSubPassCount];
+    std::vector<AttachmentReference> subPassRenderTargetReferences[kMaxSubPassCount];
+    AttachmentReference subPassDepthStencilReferences[kMaxSubPassCount];
+    std::vector<AttachmentReference> subPassInputReferences[kMaxSubPassCount];
+    for (auto subPass : node.children("SubPass")) {
+        if (numSubPasses > kMaxSubPassCount) {
+            LOONG_ERROR("Load RenderPass '{}' failed: too many SubPasses", vfsPath);
+            return {};
+        }
+
+        auto& renderTargetReference = subPassRenderTargetReferences[numSubPasses];
+        for (auto renderTarget : subPass.children("RenderTarget")) {
+            CHECK_INT_VALUE(index, renderTarget, "index");
+            CHECK_REQUIRED_ENUM_VALUE(state, renderTarget, GetResourceState, "state", RESOURCE_STATE_UNKNOWN);
+            renderTargetReference.push_back({ (uint32_t)index, state });
+        }
+        auto& depthStencilReference = subPassDepthStencilReferences[numSubPasses];
+        if (auto depthStencil = subPass.child("DepthStencil"); !depthStencil.empty()) {
+            CHECK_INT_VALUE(index, depthStencil, "index");
+            CHECK_REQUIRED_ENUM_VALUE(state, depthStencil, GetResourceState, "state", RESOURCE_STATE_UNKNOWN);
+            depthStencilReference = { (uint32_t)index, state };
+        }
+        auto& inputReference = subPassInputReferences[numSubPasses];
+        for (auto input : subPass.children("Input")) {
+            CHECK_INT_VALUE(index, input, "index");
+            CHECK_REQUIRED_ENUM_VALUE(state, input, GetResourceState, "state", RESOURCE_STATE_UNKNOWN);
+            inputReference.push_back({ (uint32_t)index, state });
+        }
+
+        subPasses[numSubPasses].RenderTargetAttachmentCount = (uint32_t)renderTargetReference.size();
+        subPasses[numSubPasses].pRenderTargetAttachments = renderTargetReference.data();
+        subPasses[numSubPasses].pDepthStencilAttachment = &depthStencilReference;
+        subPasses[numSubPasses].InputAttachmentCount = (uint32_t)inputReference.size();
+        subPasses[numSubPasses].pInputAttachments = inputReference.data();
+        ++numSubPasses;
+    }
+
+    uint32_t numDependencies = 0;
+    const constexpr uint32_t kMaxDependencies = 32;
+    SubpassDependencyDesc dependencies[kMaxDependencies];
+    for (auto dependency : node.children("Dependency")) {
+        if (numDependencies >= kMaxDependencies) {
+            LOONG_ERROR("Load RenderPass '{}' failed: too many dependencies", vfsPath);
+            return {};
+        }
+        CHECK_INT_VALUE(srcIndex, dependency, "src");
+        CHECK_REQUIRED_ENUM_VALUE(srcStageMask, dependency, GetPipelineStageFlag, "srcStageMask", PIPELINE_STAGE_FLAG_UNDEFINED);
+        CHECK_REQUIRED_ENUM_VALUE(srcAccessMask, dependency, GetAccessFlag, "srcAccessMask", ACCESS_FLAG_NONE);
+        CHECK_INT_VALUE(dstIndex, dependency, "dst");
+        CHECK_REQUIRED_ENUM_VALUE(dstStageMask, dependency, GetPipelineStageFlag, "dstStageMask", PIPELINE_STAGE_FLAG_UNDEFINED);
+        CHECK_REQUIRED_ENUM_VALUE(dstAccessMask, dependency, GetAccessFlag, "dstAccessMask", ACCESS_FLAG_NONE);
+
+        dependencies[numDependencies].SrcSubpass = (uint32_t)srcIndex;
+        dependencies[numDependencies].SrcStageMask = srcStageMask;
+        dependencies[numDependencies].SrcAccessMask = srcAccessMask;
+        dependencies[numDependencies].DstSubpass = (uint32_t)dstIndex;
+        dependencies[numDependencies].DstStageMask = dstStageMask;
+        dependencies[numDependencies].DstAccessMask = dstAccessMask;
+        ++numDependencies;
+    }
+
+    RenderPassDesc RPDesc;
+    RPDesc.Name = node.attribute("name").value();
+    RPDesc.AttachmentCount = numAttachments;
+    RPDesc.pAttachments = attachments;
+    RPDesc.SubpassCount = numSubPasses;
+    RPDesc.pSubpasses = subPasses;
+    RPDesc.DependencyCount = numDependencies;
+    RPDesc.pDependencies = dependencies;
+
+    RHI::RefCntAutoPtr<RHI::IRenderPass> pRenderPass;
+    gRhiImpl.device_->CreateRenderPass(RPDesc, &pRenderPass);
+    if (pRenderPass == nullptr) {
+        LOONG_ERROR("Load RenderPass '{}' failed: create device object failed", vfsPath);
+        return {};
+    }
+    return pRenderPass;
 }
 
 RefCntAutoPtr<IBuffer> LoongRHIManager::CreateUniformBuffer(const char* bufferName, uint32_t size, const void* initialData, USAGE usage, BIND_FLAGS bindFlags, CPU_ACCESS_FLAGS cpuAccessFlags)

@@ -6,5 +6,6 @@
         scrollable="false">
     <Text name="Text1" label="Text1" nowrap="false" useCustomColor="true" color="0.5,1.0,0.1,1.0"/>
     <Button name="Button1" label="PushMe" size="0,0" useCustomColor="true" color="1.0,0.0,1.0,1.0"/>
+    <Text name="MessageDisplay" label="Text1" nowrap="false" color="1.0,0.1,0.1,1.0"/>
     <Image texture="/Textures/fire.jpg"/>
 </Window>
